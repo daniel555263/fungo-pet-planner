@@ -35,10 +35,10 @@
       60% { transform: translateY(-4px); }
     }
 
-    @keyframes pawWalkS {
-      0% { opacity: 0.3; transform: scale(0.9) rotate(-10deg); }
-      50% { opacity: 0.6; transform: scale(1.1) rotate(5deg); }
-      100% { opacity: 0.4; transform: scale(0.95) rotate(-15deg); }
+    @keyframes pawWalk {
+      0% { opacity: 0.2; transform: scale(0.8) rotate(-15deg); }
+      50% { opacity: 0.6; transform: scale(1) rotate(-10deg); }
+      100% { opacity: 0.3; transform: scale(0.9) rotate(-20deg); }
     }
 
     .fade-in { animation: fadeIn 0.3s ease-out; }
@@ -62,7 +62,6 @@
       backdrop-filter: blur(20px);
       display: flex;
       align-items: center;
-      justify-content: space-between;
       padding: 0 20px;
       z-index: 100;
       border-bottom: 1px solid rgba(0, 0, 0, 0.1);
@@ -70,56 +69,43 @@
 
     .content {
       padding-top: 60px;
-      padding-bottom: 20px;
+      padding-bottom: 90px;
       min-height: 100vh;
     }
 
-    .logo-section {
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 84px;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(20px);
+      border-top: 1px solid rgba(0, 0, 0, 0.1);
       display: flex;
+      justify-content: space-around;
       align-items: center;
-      gap: 6px;
+      padding-bottom: 20px;
     }
 
-    .logo-text {
-      font-size: 20px;
-      font-weight: 700;
-      letter-spacing: -0.5px;
-    }
-
-    .logo-fun {
-      color: #333;
-    }
-
-    .logo-go {
-      color: #4285F4;
-    }
-
-    .logo-dot {
-      width: 6px;
-      height: 6px;
-      background: #FF6B35;
-      border-radius: 50%;
-      margin-top: 2px;
-    }
-
-    .add-btn {
-      width: 32px;
-      height: 32px;
-      background: #FF6B35;
-      border-radius: 50%;
+    .nav-item {
       display: flex;
+      flex-direction: column;
       align-items: center;
-      justify-content: center;
-      color: white;
-      font-size: 18px;
+      gap: 4px;
+      color: #999;
+      font-size: 12px;
       cursor: pointer;
-      transition: transform 0.2s;
-      border: none;
-      box-shadow: 0 2px 8px rgba(255, 107, 53, 0.2);
+      transition: color 0.2s;
+      padding: 8px;
     }
 
-    .add-btn:active {
-      transform: scale(0.95);
+    .nav-item.active {
+      color: #FF6B35;
+    }
+
+    .nav-icon {
+      font-size: 24px;
     }
 
     /* 首页样式 */
@@ -127,78 +113,132 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 40px 20px;
+      padding: 20px;
       text-align: center;
-      min-height: calc(100vh - 80px);
+      min-height: calc(100vh - 150px);
       justify-content: center;
     }
 
-    .welcome-hero {
-      margin-bottom: 40px;
+    .logo-section {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 30px;
     }
 
-    .hero-title {
-      font-size: 28px;
+    .logo-text {
+      font-size: 36px;
       font-weight: 700;
-      color: #333;
-      margin-bottom: 12px;
-      letter-spacing: -0.5px;
+      color: #FF6B35;
+      letter-spacing: -1px;
     }
 
-    .hero-subtitle {
+    .logo-ball {
+      width: 12px;
+      height: 12px;
+      background: #FF6B35;
+      border-radius: 50%;
+    }
+
+    .icon-row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 30px;
+    }
+
+    .icon-circle {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+    }
+
+    .welcome-title {
+      font-size: 28px;
+      font-weight: 600;
+      margin-bottom: 16px;
+      color: #333;
+    }
+
+    .welcome-desc {
       font-size: 16px;
       color: #666;
-      line-height: 1.5;
+      line-height: 1.6;
+      max-width: 320px;
       margin-bottom: 40px;
-      max-width: 280px;
     }
 
     .paw-trail-container {
       position: relative;
-      width: 300px;
-      height: 140px;
-      margin: 20px auto 40px;
+      width: 280px;
+      height: 120px;
+      margin: 20px auto;
     }
 
     .paw-print {
       position: absolute;
-      font-size: 14px;
-      animation: pawWalkS 4s infinite;
-      color: #ccc;
+      font-size: 16px;
+      animation: pawWalk 3s infinite;
     }
 
-    /* S型路径 */
-    .paw-print:nth-child(1) { left: 40px; top: 100px; animation-delay: 0s; }
-    .paw-print:nth-child(2) { left: 80px; top: 80px; animation-delay: 0.4s; }
-    .paw-print:nth-child(3) { left: 120px; top: 50px; animation-delay: 0.8s; }
-    .paw-print:nth-child(4) { left: 160px; top: 40px; animation-delay: 1.2s; }
-    .paw-print:nth-child(5) { left: 200px; top: 60px; animation-delay: 1.6s; }
-    .paw-print:nth-child(6) { left: 240px; top: 90px; animation-delay: 2s; }
+    .paw-print:nth-child(1) { left: 20px; top: 80px; animation-delay: 0s; }
+    .paw-print:nth-child(2) { left: 60px; top: 60px; animation-delay: 0.3s; }
+    .paw-print:nth-child(3) { left: 100px; top: 40px; animation-delay: 0.6s; }
+    .paw-print:nth-child(4) { left: 140px; top: 30px; animation-delay: 0.9s; }
+    .paw-print:nth-child(5) { left: 180px; top: 40px; animation-delay: 1.2s; }
+    .paw-print:nth-child(6) { left: 220px; top: 60px; animation-delay: 1.5s; }
 
     .paw-end {
       position: absolute;
-      right: 30px;
+      right: 20px;
       top: 20px;
       font-size: 24px;
       animation: bounce 2s infinite;
-      animation-delay: 2.4s;
+      animation-delay: 1.8s;
     }
 
     .create-trip-btn {
-      background: linear-gradient(135deg, #4285F4 0%, #34A853 100%);
+      background: linear-gradient(135deg, #FF6B35 0%, #F7931E 100%);
       color: white;
       border: none;
       border-radius: 24px;
-      padding: 16px 32px;
-      font-size: 16px;
+      padding: 16px 48px;
+      font-size: 18px;
       font-weight: 600;
       cursor: pointer;
       transition: transform 0.2s, box-shadow 0.2s;
-      box-shadow: 0 4px 16px rgba(66, 133, 244, 0.3);
+      box-shadow: 0 4px 20px rgba(255, 107, 53, 0.3);
     }
 
     .create-trip-btn:active {
       transform: scale(0.98);
+    }
+
+    .add-btn {
+      position: absolute;
+      top: 15px;
+      right: 20px;
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, #FF6B35 0%, #F7931E 100%);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 20px;
+      cursor: pointer;
+      z-index: 101;
+      transition: transform 0.2s;
+      border: none;
+      box-shadow: 0 2px 10px rgba(255, 107, 53, 0.3);
+    }
+
+    .add-btn:active {
+      transform: scale(0.95);
     }
 
     /* 行程卡片 */
@@ -206,11 +246,10 @@
       margin: 16px;
       border-radius: 16px;
       overflow: hidden;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
       cursor: pointer;
       transition: transform 0.2s;
       background: white;
-      border: 1px solid rgba(0,0,0,0.08);
     }
 
     .trip-card:active {
@@ -219,7 +258,7 @@
 
     .trip-card-image {
       width: 100%;
-      height: 160px;
+      height: 180px;
       background-size: cover;
       background-position: center;
       position: relative;
@@ -261,14 +300,13 @@
 
     .trip-tag {
       padding: 4px 8px;
-      background: #f8f9fa;
+      background: #FFF3E0;
       border-radius: 12px;
       font-size: 12px;
       display: flex;
       align-items: center;
       gap: 4px;
-      color: #666;
-      border: 1px solid #e8e9ea;
+      color: #FF6B35;
     }
 
     .trip-info-title {
@@ -289,7 +327,7 @@
 
     .see-plan-btn {
       width: 100%;
-      background: linear-gradient(135deg, #4285F4 0%, #34A853 100%);
+      background: linear-gradient(135deg, #FF6B35 0%, #F7931E 100%);
       color: white;
       border: none;
       border-radius: 20px;
@@ -320,7 +358,7 @@
       border: none;
       padding: 0;
       margin-right: 16px;
-      color: #333;
+      color: #FF6B35;
     }
 
     .progress-bar {
@@ -333,7 +371,7 @@
 
     .progress-fill {
       height: 100%;
-      background: linear-gradient(90deg, #4285F4 0%, #34A853 100%);
+      background: linear-gradient(90deg, #FF6B35 0%, #F7931E 100%);
       border-radius: 2px;
       transition: width 0.3s;
     }
@@ -343,7 +381,7 @@
       top: -24px;
       right: 0;
       font-size: 14px;
-      color: #4285F4;
+      color: #FF6B35;
       font-weight: 600;
     }
 
@@ -353,20 +391,20 @@
     }
 
     .step-icon {
-      width: 48px;
-      height: 48px;
-      background: linear-gradient(135deg, #4285F4 0%, #34A853 100%);
+      width: 56px;
+      height: 56px;
+      background: linear-gradient(135deg, #FF6B35 0%, #F7931E 100%);
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 24px;
-      margin-bottom: 16px;
-      box-shadow: 0 4px 16px rgba(66, 133, 244, 0.3);
+      font-size: 28px;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 20px rgba(255, 107, 53, 0.3);
     }
 
     .step-title {
-      font-size: 22px;
+      font-size: 24px;
       font-weight: 600;
       margin-bottom: 8px;
       color: #333;
@@ -380,7 +418,7 @@
     }
 
     .location-hint {
-      background: #f8f9fa;
+      background: linear-gradient(135deg, #E8F5E8 0%, #F0F8FF 100%);
       padding: 12px 16px;
       border-radius: 12px;
       margin-bottom: 20px;
@@ -388,8 +426,8 @@
       align-items: center;
       gap: 8px;
       font-size: 14px;
-      color: #666;
-      border: 1px solid #e8e9ea;
+      color: #2E7D32;
+      border: 1px solid rgba(46, 125, 50, 0.2);
     }
 
     .search-input {
@@ -404,7 +442,7 @@
     }
 
     .search-input:focus {
-      border-color: #4285F4;
+      border-color: #FF6B35;
     }
 
     .section-title {
@@ -441,8 +479,8 @@
     }
 
     .city-item.selected {
-      background: #e3f2fd;
-      border-color: #4285F4;
+      background: linear-gradient(135deg, #FFF3E0 0%, #FFE0B2 100%);
+      border-color: #FF6B35;
     }
 
     .city-flag {
@@ -460,12 +498,6 @@
     .city-country {
       font-size: 12px;
       color: #666;
-    }
-
-    .city-weather {
-      font-size: 11px;
-      color: #4285F4;
-      margin-top: 2px;
     }
 
     .duration-counter {
@@ -506,7 +538,7 @@
       font-weight: 600;
       min-width: 100px;
       text-align: center;
-      color: #4285F4;
+      color: #FF6B35;
     }
 
     .calendar-container {
@@ -514,7 +546,6 @@
       border-radius: 16px;
       padding: 16px;
       box-shadow: 0 2px 12px rgba(0,0,0,0.08);
-      border: 1px solid rgba(0,0,0,0.08);
     }
 
     .calendar-header {
@@ -538,7 +569,7 @@
     .calendar-nav-btn {
       background: none;
       border: none;
-      color: #4285F4;
+      color: #FF6B35;
       font-size: 20px;
       cursor: pointer;
       padding: 4px;
@@ -578,81 +609,115 @@
     }
 
     .calendar-day.selected {
-      background: linear-gradient(135deg, #4285F4 0%, #34A853 100%);
+      background: linear-gradient(135deg, #FF6B35 0%, #F7931E 100%);
       color: white;
     }
 
     .calendar-day.in-range {
-      background: #e3f2fd;
-      color: #4285F4;
+      background: #FFF3E0;
+      color: #FF6B35;
     }
 
     .calendar-day.today {
-      color: #4285F4;
+      color: #FF6B35;
       font-weight: 600;
-      border: 1px solid #4285F4;
+      border: 1px solid #FF6B35;
     }
 
-    /* 宠物信息样式 */
-    .pet-card {
-      padding: 16px;
+    .travel-group-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin: 24px 0;
+    }
+
+    .travel-group-item {
+      padding: 20px 16px;
       background: #f8f9fa;
       border-radius: 12px;
-      margin-bottom: 12px;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      border: 1px solid #e8e9ea;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      border: 2px solid transparent;
     }
 
-    .pet-avatar {
-      width: 48px;
-      height: 48px;
-      background: linear-gradient(135deg, #FF6B35 0%, #FF8A50 100%);
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 20px;
+    .travel-group-item.selected {
+      background: linear-gradient(135deg, #FFF3E0 0%, #FFE0B2 100%);
+      border-color: #FF6B35;
     }
 
-    .pet-info {
-      flex: 1;
+    .travel-group-icon {
+      font-size: 40px;
+      margin-bottom: 8px;
+      color: #FF6B35;
     }
 
-    .pet-name {
+    .travel-group-label {
       font-size: 16px;
-      font-weight: 600;
-      margin-bottom: 2px;
+      font-weight: 500;
       color: #333;
     }
 
-    .pet-details {
-      font-size: 14px;
-      color: #666;
+    .interest-slider {
+      margin-bottom: 24px;
     }
 
-    .add-pet-btn {
-      width: 100%;
-      padding: 16px;
-      background: transparent;
-      border: 2px dashed #ccc;
-      border-radius: 12px;
-      color: #666;
-      font-size: 16px;
-      font-weight: 500;
-      cursor: pointer;
+    .interest-header {
       display: flex;
       align-items: center;
-      justify-content: center;
-      gap: 8px;
-      transition: all 0.2s;
+      gap: 12px;
+      margin-bottom: 8px;
     }
 
-    .add-pet-btn:hover {
-      border-color: #4285F4;
-      color: #4285F4;
-      background: rgba(66, 133, 244, 0.05);
+    .interest-icon {
+      font-size: 20px;
+    }
+
+    .interest-label {
+      font-size: 16px;
+      font-weight: 500;
+      color: #333;
+    }
+
+    .interest-value {
+      margin-left: auto;
+      font-size: 14px;
+      color: #FF6B35;
+      font-weight: 500;
+    }
+
+    .slider-track {
+      height: 4px;
+      background: #e0e0e0;
+      border-radius: 2px;
+      position: relative;
+      cursor: pointer;
+    }
+
+    .slider-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #FF6B35 0%, #F7931E 100%);
+      border-radius: 2px;
+      position: relative;
+      transition: width 0.2s;
+    }
+
+    .slider-thumb {
+      position: absolute;
+      top: 50%;
+      right: -8px;
+      transform: translateY(-50%);
+      width: 16px;
+      height: 16px;
+      background: #FF6B35;
+      border-radius: 50%;
+      border: 3px solid white;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+      cursor: grab;
+    }
+
+    .slider-thumb:active {
+      cursor: grabbing;
     }
 
     .next-btn {
@@ -660,7 +725,7 @@
       bottom: 30px;
       left: 20px;
       right: 20px;
-      background: linear-gradient(135deg, #4285F4 0%, #34A853 100%);
+      background: linear-gradient(135deg, #FF6B35 0%, #F7931E 100%);
       color: white;
       border: none;
       border-radius: 24px;
@@ -669,7 +734,7 @@
       font-weight: 600;
       cursor: pointer;
       transition: all 0.2s;
-      box-shadow: 0 4px 16px rgba(66, 133, 244, 0.3);
+      box-shadow: 0 4px 20px rgba(255, 107, 53, 0.3);
     }
 
     .next-btn:disabled {
@@ -731,7 +796,7 @@
     .modal-btn {
       background: none;
       border: none;
-      color: #4285F4;
+      color: #FF6B35;
       font-size: 16px;
       font-weight: 500;
       cursor: pointer;
@@ -741,49 +806,64 @@
       color: #999;
     }
 
-    .pet-form {
+    /* 宠物信息卡片 */
+    .pet-card {
+      padding: 16px;
+      background: linear-gradient(135deg, #FFF8E1 0%, #FFFDE7 100%);
+      border-radius: 12px;
+      margin-bottom: 12px;
       display: flex;
-      flex-direction: column;
-      gap: 16px;
+      align-items: center;
+      gap: 12px;
+      border: 1px solid rgba(255, 193, 7, 0.3);
     }
 
-    .form-group {
+    .pet-avatar {
+      width: 50px;
+      height: 50px;
+      background: linear-gradient(135deg, #FFB74D 0%, #FF9800 100%);
+      border-radius: 50%;
       display: flex;
-      flex-direction: column;
-      gap: 6px;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
     }
 
-    .form-label {
-      font-size: 14px;
-      font-weight: 500;
+    .pet-info {
+      flex: 1;
+    }
+
+    .pet-name {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 2px;
       color: #333;
     }
 
-    .form-input {
-      padding: 12px 16px;
-      border: 2px solid #f0f0f0;
+    .pet-details {
+      font-size: 14px;
+      color: #666;
+    }
+
+    .add-pet-btn {
+      width: 100%;
+      padding: 16px;
+      background: transparent;
+      border: 2px dashed #FF6B35;
       border-radius: 12px;
+      color: #FF6B35;
       font-size: 16px;
-      outline: none;
-      transition: border-color 0.2s;
+      font-weight: 500;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.2s;
     }
 
-    .form-input:focus {
-      border-color: #4285F4;
-    }
-
-    .form-select {
-      padding: 12px 16px;
-      border: 2px solid #f0f0f0;
-      border-radius: 12px;
-      font-size: 16px;
-      outline: none;
-      transition: border-color 0.2s;
-      background: white;
-    }
-
-    .form-select:focus {
-      border-color: #4285F4;
+    .add-pet-btn:hover {
+      background: rgba(255, 107, 53, 0.05);
     }
   </style>
 </head>
@@ -795,25 +875,41 @@
 
     // 数据配置
     const CONFIG = {
-      // 深圳区域（减少到3个+1个自定义）
+      // 深圳区域
       shenzhenDistricts: [
         { id: 'futian', name: '福田区', flag: '🏢' },
         { id: 'nanshan', name: '南山区', flag: '🌊' },
         { id: 'luohu', name: '罗湖区', flag: '🏔️' },
-        { id: 'custom', name: '自定义', flag: '📍' }
+        { id: 'longgang', name: '龙岗区', flag: '🏘️' },
+        { id: 'bao-an', name: '宝安区', flag: '✈️' },
+        { id: 'yantian', name: '盐田区', flag: '🏖️' }
       ],
-      // 周边城市（自驾游逻辑）
-      nearbyCities: [
-        { id: 'dongguan', name: '东莞', country: '广东', flag: '🏭', weather: '26°C 多云', distance: '60km' },
-        { id: 'guangzhou', name: '广州', country: '广东', flag: '🌸', weather: '24°C 晴', distance: '120km' },
-        { id: 'foshan', name: '佛山', country: '广东', flag: '🏛️', weather: '25°C 阴', distance: '150km' },
-        { id: 'zhuhai', name: '珠海', country: '广东', flag: '🏖️', weather: '27°C 晴', distance: '180km' },
-        { id: 'huizhou', name: '惠州', country: '广东', flag: '⛰️', weather: '23°C 小雨', distance: '90km' },
-        { id: 'zhongshan', name: '中山', country: '广东', flag: '🌳', weather: '26°C 多云', distance: '160km' }
+      // 热门城市
+      cities: [
+        { id: 'beijing', name: '北京', country: '中国', flag: '🏛️' },
+        { id: 'shanghai', name: '上海', country: '中国', flag: '🏙️' },
+        { id: 'guangzhou', name: '广州', country: '中国', flag: '🌺' },
+        { id: 'hangzhou', name: '杭州', country: '中国', flag: '🏞️' },
+        { id: 'chengdu', name: '成都', country: '中国', flag: '🐼' },
+        { id: 'xiamen', name: '厦门', country: '中国', flag: '🏝️' },
+        { id: 'qingdao', name: '青岛', country: '中国', flag: '🍺' },
+        { id: 'dali', name: '大理', country: '中国', flag: '⛰️' }
       ],
-      dogBreeds: [
-        '金毛', '拉布拉多', '边境牧羊犬', '泰迪', '比熊', '柯基', '哈士奇',
-        '萨摩耶', '博美', '吉娃娃', '法斗', '英斗', '德牧', '阿拉斯加', '其他'
+      travelGroups: [
+        { id: 'solo', label: '独自出行', icon: '🚶' },
+        { id: 'couple', label: '情侣出行', icon: '💑' },
+        { id: 'family', label: '家庭出行', icon: '👨‍👩‍👧‍👦' },
+        { id: 'friends', label: '朋友出行', icon: '👥' }
+      ],
+      petInterests: [
+        { id: 'pet-friendly-restaurants', label: '宠物友好餐厅', icon: '🍽️' },
+        { id: 'large-lawns', label: '大草坪', icon: '🌿' },
+        { id: 'dog-parks', label: '狗狗乐园', icon: '🐕‍🦺' },
+        { id: 'pet-hotels', label: '宠物友好酒店', icon: '🏨' },
+        { id: 'pet-beaches', label: '宠物海滩', icon: '🏖️' },
+        { id: 'hiking-trails', label: '徒步步道', icon: '🥾' },
+        { id: 'pet-cafes', label: '宠物咖啡厅', icon: '☕' },
+        { id: 'outdoor-markets', label: '户外市集', icon: '🎪' }
       ]
     };
 
@@ -823,19 +919,36 @@
       const [trips, setTrips] = useState([]);
       const [isCreating, setIsCreating] = useState(false);
       const [currentStep, setCurrentStep] = useState(1);
-      const [pets, setPets] = useState([
-        { id: 1, name: '小白', age: 3, breed: '金毛', weight: 25 }
-      ]);
       
       // 表单数据
       const [formData, setFormData] = useState({
         destination: '',
-        isLocal: false,
         duration: 3,
         startDate: null,
         endDate: null,
-        selectedPets: [1]
+        travelGroup: '',
+        interests: {
+          'pet-friendly-restaurants': 80,
+          'large-lawns': 90,
+          'dog-parks': 100,
+          'pet-hotels': 85,
+          'pet-beaches': 70,
+          'hiking-trails': 60,
+          'pet-cafes': 75,
+          'outdoor-markets': 50
+        }
       });
+
+      // 获取用户位置
+      useEffect(() => {
+        if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition((position) => {
+            // 默认设置为深圳
+            console.log('用户位置:', position.coords);
+            // 可以根据位置自动设置默认城市
+          });
+        }
+      }, []);
 
       // 处理创建行程
       const handleCreateTrip = () => {
@@ -845,9 +958,7 @@
 
       // 处理步骤导航
       const handleNextStep = () => {
-        const maxSteps = formData.isLocal ? 2 : 4; // 本地只需要2步，外地需要4步
-        
-        if (currentStep < maxSteps) {
+        if (currentStep < 5) { // 减少为5步
           setCurrentStep(currentStep + 1);
         } else {
           // 完成创建
@@ -861,11 +972,20 @@
           setCurrentStep(1);
           setFormData({
             destination: '',
-            isLocal: false,
             duration: 3,
             startDate: null,
             endDate: null,
-            selectedPets: [1]
+            travelGroup: '',
+            interests: {
+              'pet-friendly-restaurants': 80,
+              'large-lawns': 90,
+              'dog-parks': 100,
+              'pet-hotels': 85,
+              'pet-beaches': 70,
+              'hiking-trails': 60,
+              'pet-cafes': 75,
+              'outdoor-markets': 50
+            }
           });
         }
       };
@@ -887,17 +1007,52 @@
             setFormData={setFormData}
             onNext={handleNextStep}
             onBack={handleBackStep}
-            pets={pets}
-            setPets={setPets}
           />;
         }
 
-        return <TripsView trips={trips} onCreateTrip={handleCreateTrip} />;
+        switch (currentView) {
+          case 'trips':
+            return <TripsView trips={trips} onCreateTrip={handleCreateTrip} />;
+          case 'inbox':
+            return <InboxView />;
+          case 'profile':
+            return <ProfileView />;
+          default:
+            return <TripsView trips={trips} onCreateTrip={handleCreateTrip} />;
+        }
       };
 
       return (
         <div className="container">
+          {/* 主内容 */}
           {renderMainView()}
+          
+          {/* 底部导航 */}
+          {!isCreating && (
+            <div className="bottom-nav">
+              <div 
+                className={`nav-item ${currentView === 'trips' ? 'active' : ''}`}
+                onClick={() => setCurrentView('trips')}
+              >
+                <span className="nav-icon">🎒</span>
+                <span>行程</span>
+              </div>
+              <div 
+                className={`nav-item ${currentView === 'inbox' ? 'active' : ''}`}
+                onClick={() => setCurrentView('inbox')}
+              >
+                <span className="nav-icon">📮</span>
+                <span>消息</span>
+              </div>
+              <div 
+                className={`nav-item ${currentView === 'profile' ? 'active' : ''}`}
+                onClick={() => setCurrentView('profile')}
+              >
+                <span className="nav-icon">👤</span>
+                <span>我的</span>
+              </div>
+            </div>
+          )}
         </div>
       );
     };
@@ -909,14 +1064,57 @@
           <>
             <div className="header">
               <div className="logo-section">
-                <div className="logo-text">
-                  <span className="logo-fun">Fun</span><span className="logo-go">Go</span>
-                </div>
-                <div className="logo-dot"></div>
+                <h1 className="logo-text">FunGo</h1>
+                <div className="logo-ball bounce-ball"></div>
               </div>
               <button className="add-btn" onClick={onCreateTrip}>+</button>
             </div>
             <div className="content">
+              <div className="welcome-container fade-in">
+                <div className="icon-row">
+                  <div className="icon-circle" style={{ background: '#FF6B35' }}>✈️</div>
+                  <div className="icon-circle" style={{ background: '#4CAF50' }}>🚌</div>
+                  <div className="icon-circle" style={{ background: '#2196F3' }}>🎒</div>
+                  <div className="icon-circle" style={{ background: '#FF9800' }}>📍</div>
+                  <div className="icon-circle" style={{ background: '#9C27B0' }}>🍽️</div>
+                  <div className="icon-circle" style={{ background: '#00BCD4' }}>📸</div>
+                </div>
+                
+                <h2 className="welcome-title">欢迎使用 FunGo</h2>
+                <p className="welcome-desc">
+                  我们很高兴帮助您规划完美的宠物友好旅行。
+                  创建您的第一个旅行计划，它将出现在这里供您轻松访问和管理。
+                </p>
+                
+                <div className="paw-trail-container">
+                  <span className="paw-print">🐾</span>
+                  <span className="paw-print">🐾</span>
+                  <span className="paw-print">🐾</span>
+                  <span className="paw-print">🐾</span>
+                  <span className="paw-print">🐾</span>
+                  <span className="paw-print">🐾</span>
+                  <div className="paw-end">🐕</div>
+                </div>
+                
+                <button className="create-trip-btn" onClick={onCreateTrip}>
+                  创建您的第一次旅行
+                </button>
+              </div>
+            </div>
+          </>
+        );
+      }
+
+      return (
+        <>
+          <div className="header">
+            <div className="logo-section">
+              <h1 className="logo-text">FunGo</h1>
+              <div className="logo-ball bounce-ball"></div>
+            </div>
+            <button className="add-btn" onClick={onCreateTrip}>+</button>
+          </div>
+          <div className="content">
             {trips.map(trip => (
               <TripCard key={trip.id} trip={trip} />
             ))}
@@ -940,8 +1138,8 @@
         if (district) {
           return { name: district.name, country: '深圳', flag: district.flag };
         }
-        // 再查找周边城市
-        const city = CONFIG.nearbyCities.find(c => c.id === trip.destination);
+        // 再查找其他城市
+        const city = CONFIG.cities.find(c => c.id === trip.destination);
         return city || { name: '未知', country: '未知', flag: '📍' };
       };
 
@@ -972,8 +1170,8 @@
                 <span>宠物友好</span>
               </div>
               <div className="trip-tag">
-                <span>🚗</span>
-                <span>自驾游</span>
+                <span>👥</span>
+                <span>{CONFIG.travelGroups.find(g => g.id === trip.travelGroup)?.label || '未知'}</span>
               </div>
             </div>
             
@@ -981,11 +1179,9 @@
             <div className="trip-info-detail">
               <span>📅</span> {formatDate(trip.startDate)}, 2025
             </div>
-            {!trip.isLocal && (
-              <div className="trip-info-detail">
-                <span>⏱️</span> {trip.duration} 天行程
-              </div>
-            )}
+            <div className="trip-info-detail">
+              <span>⏱️</span> {trip.duration} 天行程
+            </div>
             
             <button className="see-plan-btn">查看行程</button>
           </div>
@@ -994,8 +1190,8 @@
     };
 
     // 创建行程组件
-    const TripCreator = ({ step, formData, setFormData, onNext, onBack, pets, setPets }) => {
-      const totalSteps = formData.isLocal ? 2 : 4;
+    const TripCreator = ({ step, formData, setFormData, onNext, onBack }) => {
+      const totalSteps = 5; // 更新为5步
       const progress = (step / totalSteps) * 100;
 
       const renderStepContent = () => {
@@ -1003,15 +1199,13 @@
           case 1:
             return <DestinationStep formData={formData} setFormData={setFormData} />;
           case 2:
-            if (formData.isLocal) {
-              return <PetSelectionStep formData={formData} setFormData={setFormData} pets={pets} setPets={setPets} />;
-            } else {
-              return <DurationStep formData={formData} setFormData={setFormData} />;
-            }
+            return <DurationStep formData={formData} setFormData={setFormData} />;
           case 3:
             return <DateStep formData={formData} setFormData={setFormData} />;
           case 4:
-            return <PetSelectionStep formData={formData} setFormData={setFormData} pets={pets} setPets={setPets} />;
+            return <TravelGroupStep formData={formData} setFormData={setFormData} />;
+          case 5:
+            return <InterestsStep formData={formData} setFormData={setFormData} />;
           default:
             return null;
         }
@@ -1022,15 +1216,13 @@
           case 1:
             return !!formData.destination;
           case 2:
-            if (formData.isLocal) {
-              return formData.selectedPets.length > 0;
-            } else {
-              return formData.duration > 0;
-            }
+            return formData.duration > 0;
           case 3:
             return !!formData.startDate;
           case 4:
-            return formData.selectedPets.length > 0;
+            return !!formData.travelGroup;
+          case 5:
+            return true;
           default:
             return false;
         }
@@ -1069,19 +1261,14 @@
       const [showModal, setShowModal] = useState(false);
 
       const handleDestinationSelect = (destinationId) => {
-        const isLocal = CONFIG.shenzhenDistricts.some(d => d.id === destinationId);
-        setFormData({ 
-          ...formData, 
-          destination: destinationId,
-          isLocal: isLocal
-        });
+        setFormData({ ...formData, destination: destinationId });
         setShowModal(false);
       };
 
       const getSelectedDestination = () => {
         const district = CONFIG.shenzhenDistricts.find(d => d.id === formData.destination);
         if (district) return district.name;
-        const city = CONFIG.nearbyCities.find(c => c.id === formData.destination);
+        const city = CONFIG.cities.find(c => c.id === formData.destination);
         return city ? city.name : '';
       };
 
@@ -1111,7 +1298,7 @@
           <div className="city-section">
             <h3 className="section-title">热门区域</h3>
             <div className="district-grid">
-              {CONFIG.shenzhenDistricts.map(district => (
+              {CONFIG.shenzhenDistricts.slice(0, 6).map(district => (
                 <div 
                   key={district.id}
                   className={`city-item ${formData.destination === district.id ? 'selected' : ''}`}
@@ -1126,9 +1313,9 @@
           </div>
 
           <div className="city-section">
-            <h3 className="section-title">周边城市（自驾推荐）</h3>
+            <h3 className="section-title">热门城市</h3>
             <div className="city-grid">
-              {CONFIG.nearbyCities.map(city => (
+              {CONFIG.cities.slice(0, 6).map(city => (
                 <div 
                   key={city.id}
                   className={`city-item ${formData.destination === city.id ? 'selected' : ''}`}
@@ -1136,8 +1323,7 @@
                 >
                   <div className="city-flag">{city.flag}</div>
                   <div className="city-name">{city.name}</div>
-                  <div className="city-country">{city.distance}</div>
-                  <div className="city-weather">{city.weather}</div>
+                  <div className="city-country">{city.country}</div>
                 </div>
               ))}
             </div>
@@ -1158,7 +1344,7 @@
 
     // 目的地搜索模态框
     const DestinationModal = ({ searchQuery, setSearchQuery, onSelect, onClose, selectedId }) => {
-      const allDestinations = [...CONFIG.shenzhenDistricts, ...CONFIG.nearbyCities];
+      const allDestinations = [...CONFIG.shenzhenDistricts, ...CONFIG.cities];
       const filteredDestinations = allDestinations.filter(dest => 
         dest.name.toLowerCase().includes(searchQuery.toLowerCase())
       );
@@ -1194,10 +1380,10 @@
                     cursor: 'pointer',
                     borderRadius: '8px',
                     transition: 'background 0.2s',
-                    background: selectedId === dest.id ? '#e3f2fd' : 'transparent'
+                    background: selectedId === dest.id ? '#FFF3E0' : 'transparent'
                   }}
                   onMouseEnter={(e) => e.currentTarget.style.background = '#f8f9fa'}
-                  onMouseLeave={(e) => e.currentTarget.style.background = selectedId === dest.id ? '#e3f2fd' : 'transparent'}
+                  onMouseLeave={(e) => e.currentTarget.style.background = selectedId === dest.id ? '#FFF3E0' : 'transparent'}
                 >
                   <span style={{ fontSize: '18px' }}>{dest.flag}</span>
                   <div>
@@ -1214,7 +1400,7 @@
       );
     };
 
-    // Step 2: 旅行天数（仅外地需要）
+    // Step 2: 旅行天数
     const DurationStep = ({ formData, setFormData }) => {
       const handleIncrease = () => {
         setFormData({ ...formData, duration: formData.duration + 1 });
@@ -1256,7 +1442,7 @@
       );
     };
 
-    // Step 3: 选择日期（仅外地需要）
+    // Step 3: 选择日期
     const DateStep = ({ formData, setFormData }) => {
       const [currentMonth, setCurrentMonth] = useState(new Date());
       const [selectedRange, setSelectedRange] = useState({
@@ -1398,29 +1584,48 @@
       );
     };
 
-    // 宠物选择步骤
-    const PetSelectionStep = ({ formData, setFormData, pets, setPets }) => {
-      const [showAddPetModal, setShowAddPetModal] = useState(false);
+    // Step 4: 旅行同伴
+    const TravelGroupStep = ({ formData, setFormData }) => {
+      return (
+        <div className="fade-in">
+          <div className="step-icon">
+            <span style={{ color: 'white' }}>👥</span>
+          </div>
+          <h2 className="step-title">旅行同伴</h2>
+          <p className="step-desc">请选择您的出行方式</p>
+          
+          <div className="travel-group-grid">
+            {CONFIG.travelGroups.map(group => (
+              <div 
+                key={group.id}
+                className={`travel-group-item ${formData.travelGroup === group.id ? 'selected' : ''}`}
+                onClick={() => setFormData({ ...formData, travelGroup: group.id })}
+              >
+                <div className="travel-group-icon">{group.icon}</div>
+                <div className="travel-group-label">{group.label}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    };
 
-      const handlePetToggle = (petId) => {
-        const selectedPets = formData.selectedPets.includes(petId)
-          ? formData.selectedPets.filter(id => id !== petId)
-          : [...formData.selectedPets, petId];
-        
-        setFormData({ ...formData, selectedPets });
+    // Step 5: 宠物兴趣偏好
+    const InterestsStep = ({ formData, setFormData }) => {
+      const handleSliderChange = (interestId, value) => {
+        setFormData({
+          ...formData,
+          interests: {
+            ...formData.interests,
+            [interestId]: value
+          }
+        });
       };
 
-      const handleAddPet = (petData) => {
-        const newPet = {
-          id: Date.now(),
-          ...petData
-        };
-        setPets([...pets, newPet]);
-        setFormData({ 
-          ...formData, 
-          selectedPets: [...formData.selectedPets, newPet.id] 
-        });
-        setShowAddPetModal(false);
+      const getInterestLevel = (value) => {
+        if (value < 30) return '不感兴趣';
+        if (value < 70) return '有兴趣';
+        return '非常感兴趣';
       };
 
       return (
@@ -1428,174 +1633,165 @@
           <div className="step-icon">
             <span style={{ color: 'white' }}>🐕</span>
           </div>
-          <h2 className="step-title">同行伙伴</h2>
-          <p className="step-desc">选择陪您一起旅行的毛孩子</p>
+          <h2 className="step-title">宠物偏好设置</h2>
+          <p className="step-desc">请调节滑块来表示您对各类宠物友好场所的兴趣程度</p>
           
-          <div style={{ marginBottom: '20px' }}>
-            {pets.map(pet => (
-              <div 
-                key={pet.id}
-                className={`pet-card ${formData.selectedPets.includes(pet.id) ? 'selected' : ''}`}
-                onClick={() => handlePetToggle(pet.id)}
-                style={{
-                  cursor: 'pointer',
-                  border: formData.selectedPets.includes(pet.id) ? '2px solid #4285F4' : '1px solid #e8e9ea',
-                  background: formData.selectedPets.includes(pet.id) ? '#e3f2fd' : '#f8f9fa'
-                }}
-              >
-                <div className="pet-avatar">🐕</div>
-                <div className="pet-info">
-                  <div className="pet-name">{pet.name}</div>
-                  <div className="pet-details">
-                    {pet.age}岁 · {pet.breed} · {pet.weight}kg
-                  </div>
-                </div>
-                {formData.selectedPets.includes(pet.id) && (
-                  <div style={{ color: '#4285F4', fontSize: '20px' }}>✓</div>
-                )}
-              </div>
+          <div style={{ marginTop: '24px' }}>
+            {CONFIG.petInterests.map(interest => (
+              <InterestSlider 
+                key={interest.id}
+                interest={interest}
+                value={formData.interests[interest.id]}
+                onChange={(value) => handleSliderChange(interest.id, value)}
+                getLevel={getInterestLevel}
+              />
             ))}
           </div>
-          
-          <button 
-            className="add-pet-btn" 
-            onClick={() => setShowAddPetModal(true)}
-          >
-            <span>+</span>
-            <span>添加新伙伴</span>
-          </button>
-
-          {showAddPetModal && (
-            <AddPetModal 
-              onAdd={handleAddPet}
-              onClose={() => setShowAddPetModal(false)}
-            />
-          )}
         </div>
       );
     };
 
-    // 添加宠物模态框
-    const AddPetModal = ({ onAdd, onClose }) => {
-      const [petData, setPetData] = useState({
-        name: '',
-        age: '',
-        breed: '',
-        weight: ''
-      });
+    // 兴趣滑块组件
+    const InterestSlider = ({ interest, value, onChange, getLevel }) => {
+      const [isDragging, setIsDragging] = useState(false);
+      const sliderRef = React.useRef(null);
 
-      const handleSubmit = () => {
-        if (petData.name && petData.age && petData.breed && petData.weight) {
-          onAdd({
-            ...petData,
-            age: parseInt(petData.age),
-            weight: parseFloat(petData.weight)
-          });
-        }
+      const handleMouseDown = (e) => {
+        setIsDragging(true);
+        handleMove(e);
       };
 
+      const handleMouseMove = (e) => {
+        if (!isDragging) return;
+        handleMove(e);
+      };
+
+      const handleMouseUp = () => {
+        setIsDragging(false);
+      };
+
+      const handleMove = (e) => {
+        if (!sliderRef.current) return;
+        const rect = sliderRef.current.getBoundingClientRect();
+        const x = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
+        const percentage = Math.round((x / rect.width) * 100);
+        onChange(percentage);
+      };
+
+      const handleTouchStart = (e) => {
+        setIsDragging(true);
+        handleTouchMove(e);
+      };
+
+      const handleTouchMove = (e) => {
+        if (!isDragging) return;
+        e.preventDefault();
+        const touch = e.touches[0];
+        if (!sliderRef.current) return;
+        const rect = sliderRef.current.getBoundingClientRect();
+        const x = Math.max(0, Math.min(touch.clientX - rect.left, rect.width));
+        const percentage = Math.round((x / rect.width) * 100);
+        onChange(percentage);
+      };
+
+      const handleTouchEnd = () => {
+        setIsDragging(false);
+      };
+
+      React.useEffect(() => {
+        if (isDragging) {
+          document.addEventListener('mousemove', handleMouseMove);
+          document.addEventListener('mouseup', handleMouseUp);
+          document.addEventListener('touchmove', handleTouchMove, { passive: false });
+          document.addEventListener('touchend', handleTouchEnd);
+          
+          return () => {
+            document.removeEventListener('mousemove', handleMouseMove);
+            document.removeEventListener('mouseup', handleMouseUp);
+            document.removeEventListener('touchmove', handleTouchMove);
+            document.removeEventListener('touchend', handleTouchEnd);
+          };
+        }
+      }, [isDragging]);
+
       return (
-        <div className="modal" onClick={(e) => e.target === e.currentTarget && onClose()}>
-          <div className="modal-content">
-            <div className="modal-header">
-              <button className="modal-btn cancel" onClick={onClose}>取消</button>
-              <div className="modal-title">添加新伙伴</div>
-              <button className="modal-btn" onClick={handleSubmit}>完成</button>
-            </div>
-            
-            <div className="pet-form">
-              <div className="form-group">
-                <label className="form-label">姓名</label>
-                <input 
-                  className="form-input"
-                  type="text"
-                  placeholder="请输入宠物姓名"
-                  value={petData.name}
-                  onChange={(e) => setPetData({...petData, name: e.target.value})}
-                />
-              </div>
-              
-              <div className="form-group">
-                <label className="form-label">年龄</label>
-                <input 
-                  className="form-input"
-                  type="number"
-                  placeholder="请输入年龄"
-                  value={petData.age}
-                  onChange={(e) => setPetData({...petData, age: e.target.value})}
-                />
-              </div>
-              
-              <div className="form-group">
-                <label className="form-label">品种</label>
-                <select 
-                  className="form-select"
-                  value={petData.breed}
-                  onChange={(e) => setPetData({...petData, breed: e.target.value})}
-                >
-                  <option value="">请选择品种</option>
-                  {CONFIG.dogBreeds.map(breed => (
-                    <option key={breed} value={breed}>{breed}</option>
-                  ))}
-                </select>
-              </div>
-              
-              <div className="form-group">
-                <label className="form-label">体重 (kg)</label>
-                <input 
-                  className="form-input"
-                  type="number"
-                  step="0.1"
-                  placeholder="请输入体重"
-                  value={petData.weight}
-                  onChange={(e) => setPetData({...petData, weight: e.target.value})}
-                />
-              </div>
+        <div className="interest-slider">
+          <div className="interest-header">
+            <span className="interest-icon">{interest.icon}</span>
+            <span className="interest-label">{interest.label}</span>
+            <span className="interest-value">{getLevel(value)}</span>
+          </div>
+          <div 
+            className="slider-track" 
+            ref={sliderRef}
+            onMouseDown={handleMouseDown}
+            onTouchStart={handleTouchStart}
+          >
+            <div className="slider-fill" style={{ width: `${value}%` }}>
+              <div className="slider-thumb" />
             </div>
           </div>
         </div>
+      );
+    };
+
+    // 消息视图
+    const InboxView = () => {
+      return (
+        <>
+          <div className="header">
+            <h1 style={{ fontSize: '24px', fontWeight: '600' }}>消息</h1>
+          </div>
+          <div className="content">
+            <div style={{ padding: '60px 20px', textAlign: 'center' }}>
+              <div style={{ fontSize: '48px', marginBottom: '16px' }}>📬</div>
+              <h2 style={{ fontSize: '20px', fontWeight: '600', marginBottom: '8px' }}>
+                暂无新消息
+              </h2>
+              <p style={{ color: '#666', fontSize: '16px' }}>
+                您的旅行更新将会出现在这里
+              </p>
+            </div>
+          </div>
+        </>
+      );
+    };
+
+    // 个人资料视图
+    const ProfileView = () => {
+      return (
+        <>
+          <div className="header">
+            <h1 style={{ fontSize: '24px', fontWeight: '600' }}>我的</h1>
+          </div>
+          <div className="content">
+            <div style={{ padding: '60px 20px', textAlign: 'center' }}>
+              <div style={{
+                width: '80px',
+                height: '80px',
+                background: 'linear-gradient(135deg, #FF6B35 0%, #F7931E 100%)',
+                borderRadius: '50%',
+                margin: '0 auto 20px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '36px'
+              }}>
+                🐾
+              </div>
+              <h2 style={{ fontSize: '20px', fontWeight: '600', marginBottom: '8px' }}>
+                宠物旅行者
+              </h2>
+              <p style={{ color: '#666', fontSize: '16px' }}>
+                管理您的个人资料和偏好设置
+              </p>
+            </div>
+          </div>
+        </>
       );
     };
 
     ReactDOM.render(<App />, document.getElementById('root'));
   </script>
 </body>
-</html>  <div className="welcome-container fade-in">
-                <div className="welcome-hero">
-                  <h1 className="hero-title">和毛孩子一起探索世界</h1>
-                  <p className="hero-subtitle">
-                    专为宠物友好的自驾旅行而设计，让每一次出行都成为美好回忆
-                  </p>
-                </div>
-                
-                <div className="paw-trail-container">
-                  <span className="paw-print">🐾</span>
-                  <span className="paw-print">🐾</span>
-                  <span className="paw-print">🐾</span>
-                  <span className="paw-print">🐾</span>
-                  <span className="paw-print">🐾</span>
-                  <span className="paw-print">🐾</span>
-                  <div className="paw-end">🐕</div>
-                </div>
-                
-                <button className="create-trip-btn" onClick={onCreateTrip}>
-                  开始规划旅行
-                </button>
-              </div>
-            </div>
-          </>
-        );
-      }
-
-      return (
-        <>
-          <div className="header">
-            <div className="logo-section">
-              <div className="logo-text">
-                <span className="logo-fun">Fun</span><span className="logo-go">Go</span>
-              </div>
-              <div className="logo-dot"></div>
-            </div>
-            <button className="add-btn" onClick={onCreateTrip}>+</button>
-          </div>
-          <div className="content">
+</html>
