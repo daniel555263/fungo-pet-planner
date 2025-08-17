@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>宠物旅行规划器</title>
+  <title>FunGo - 宠物旅行规划器</title>
   <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -15,6 +15,7 @@
       background: #fff;
       min-height: 100vh;
       color: #000;
+      overflow-x: hidden;
     }
 
     /* 动画 */
@@ -28,8 +29,21 @@
       to { transform: rotate(360deg); }
     }
 
+    @keyframes bounce {
+      0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+      40% { transform: translateY(-8px); }
+      60% { transform: translateY(-4px); }
+    }
+
+    @keyframes pawWalk {
+      0% { opacity: 0.2; transform: scale(0.8) rotate(-15deg); }
+      50% { opacity: 0.6; transform: scale(1) rotate(-10deg); }
+      100% { opacity: 0.3; transform: scale(0.9) rotate(-20deg); }
+    }
+
     .fade-in { animation: fadeIn 0.3s ease-out; }
     .loading-spin { animation: rotate 1s linear infinite; }
+    .bounce-ball { animation: bounce 2s infinite; }
 
     /* 通用样式 */
     .container {
@@ -44,31 +58,18 @@
       left: 0;
       right: 0;
       height: 60px;
-      background: #fff;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(20px);
       display: flex;
       align-items: center;
       padding: 0 20px;
       z-index: 100;
-    }
-
-    .status-bar {
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 44px;
-      background: #fff;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 0 20px;
-      font-size: 14px;
-      font-weight: 600;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.1);
     }
 
     .content {
-      padding-top: 104px;
-      padding-bottom: 100px;
+      padding-top: 60px;
+      padding-bottom: 90px;
       min-height: 100vh;
     }
 
@@ -78,8 +79,9 @@
       left: 0;
       right: 0;
       height: 84px;
-      background: #fff;
-      border-top: 1px solid #f0f0f0;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(20px);
+      border-top: 1px solid rgba(0, 0, 0, 0.1);
       display: flex;
       justify-content: space-around;
       align-items: center;
@@ -95,10 +97,11 @@
       font-size: 12px;
       cursor: pointer;
       transition: color 0.2s;
+      padding: 8px;
     }
 
     .nav-item.active {
-      color: #007AFF;
+      color: #FF6B35;
     }
 
     .nav-icon {
@@ -110,14 +113,37 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 40px 20px;
+      padding: 20px;
       text-align: center;
+      min-height: calc(100vh - 150px);
+      justify-content: center;
+    }
+
+    .logo-section {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 30px;
+    }
+
+    .logo-text {
+      font-size: 36px;
+      font-weight: 700;
+      color: #FF6B35;
+      letter-spacing: -1px;
+    }
+
+    .logo-ball {
+      width: 12px;
+      height: 12px;
+      background: #FF6B35;
+      border-radius: 50%;
     }
 
     .icon-row {
       display: flex;
-      gap: 0;
-      margin: 40px 0;
+      gap: 8px;
+      margin-bottom: 30px;
     }
 
     .icon-circle {
@@ -131,35 +157,51 @@
     }
 
     .welcome-title {
-      font-size: 32px;
+      font-size: 28px;
       font-weight: 600;
-      margin-bottom: 20px;
+      margin-bottom: 16px;
+      color: #333;
     }
 
     .welcome-desc {
       font-size: 16px;
       color: #666;
       line-height: 1.6;
-      max-width: 360px;
-      margin-bottom: 60px;
+      max-width: 320px;
+      margin-bottom: 40px;
     }
 
-    .paw-trail {
+    .paw-trail-container {
       position: relative;
-      height: 200px;
-      width: 100%;
-      margin: 20px 0;
+      width: 280px;
+      height: 120px;
+      margin: 20px auto;
     }
 
     .paw-print {
       position: absolute;
+      font-size: 16px;
+      animation: pawWalk 3s infinite;
+    }
+
+    .paw-print:nth-child(1) { left: 20px; top: 80px; animation-delay: 0s; }
+    .paw-print:nth-child(2) { left: 60px; top: 60px; animation-delay: 0.3s; }
+    .paw-print:nth-child(3) { left: 100px; top: 40px; animation-delay: 0.6s; }
+    .paw-print:nth-child(4) { left: 140px; top: 30px; animation-delay: 0.9s; }
+    .paw-print:nth-child(5) { left: 180px; top: 40px; animation-delay: 1.2s; }
+    .paw-print:nth-child(6) { left: 220px; top: 60px; animation-delay: 1.5s; }
+
+    .paw-end {
+      position: absolute;
+      right: 20px;
+      top: 20px;
       font-size: 24px;
-      opacity: 0.3;
-      transform: rotate(-20deg);
+      animation: bounce 2s infinite;
+      animation-delay: 1.8s;
     }
 
     .create-trip-btn {
-      background: #007AFF;
+      background: linear-gradient(135deg, #FF6B35 0%, #F7931E 100%);
       color: white;
       border: none;
       border-radius: 24px;
@@ -167,7 +209,8 @@
       font-size: 18px;
       font-weight: 600;
       cursor: pointer;
-      transition: transform 0.2s;
+      transition: transform 0.2s, box-shadow 0.2s;
+      box-shadow: 0 4px 20px rgba(255, 107, 53, 0.3);
     }
 
     .create-trip-btn:active {
@@ -175,22 +218,23 @@
     }
 
     .add-btn {
-      position: fixed;
-      top: 54px;
+      position: absolute;
+      top: 15px;
       right: 20px;
-      width: 44px;
-      height: 44px;
-      background: #007AFF;
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, #FF6B35 0%, #F7931E 100%);
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
       color: white;
-      font-size: 28px;
+      font-size: 20px;
       cursor: pointer;
       z-index: 101;
       transition: transform 0.2s;
       border: none;
+      box-shadow: 0 2px 10px rgba(255, 107, 53, 0.3);
     }
 
     .add-btn:active {
@@ -199,12 +243,13 @@
 
     /* 行程卡片 */
     .trip-card {
-      margin: 20px;
+      margin: 16px;
       border-radius: 16px;
       overflow: hidden;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
       cursor: pointer;
       transition: transform 0.2s;
+      background: white;
     }
 
     .trip-card:active {
@@ -213,7 +258,7 @@
 
     .trip-card-image {
       width: 100%;
-      height: 200px;
+      height: 180px;
       background-size: cover;
       background-position: center;
       position: relative;
@@ -223,7 +268,7 @@
       position: absolute;
       inset: 0;
       background: linear-gradient(to bottom, transparent, rgba(0,0,0,0.6));
-      padding: 20px;
+      padding: 16px;
       display: flex;
       flex-direction: column;
       justify-content: flex-end;
@@ -232,44 +277,43 @@
     .trip-date {
       color: white;
       font-size: 14px;
-      margin-bottom: 8px;
+      margin-bottom: 4px;
+      opacity: 0.9;
     }
 
     .trip-destination {
       color: white;
-      font-size: 24px;
+      font-size: 20px;
       font-weight: 600;
     }
 
     .trip-card-content {
-      padding: 20px;
+      padding: 16px;
       background: white;
     }
 
     .trip-tags {
       display: flex;
       gap: 8px;
-      margin-bottom: 16px;
+      margin-bottom: 12px;
     }
 
     .trip-tag {
-      padding: 6px 12px;
-      background: #f0f0f0;
-      border-radius: 20px;
+      padding: 4px 8px;
+      background: #FFF3E0;
+      border-radius: 12px;
       font-size: 12px;
       display: flex;
       align-items: center;
       gap: 4px;
-    }
-
-    .trip-info {
-      margin-bottom: 16px;
+      color: #FF6B35;
     }
 
     .trip-info-title {
-      font-size: 18px;
+      font-size: 16px;
       font-weight: 600;
-      margin-bottom: 4px;
+      margin-bottom: 8px;
+      color: #333;
     }
 
     .trip-info-detail {
@@ -277,26 +321,34 @@
       color: #666;
       display: flex;
       align-items: center;
-      gap: 4px;
+      gap: 6px;
+      margin-bottom: 4px;
     }
 
     .see-plan-btn {
       width: 100%;
-      background: #007AFF;
+      background: linear-gradient(135deg, #FF6B35 0%, #F7931E 100%);
       color: white;
       border: none;
-      border-radius: 24px;
-      padding: 14px;
+      border-radius: 20px;
+      padding: 12px;
       font-size: 16px;
       font-weight: 600;
       cursor: pointer;
+      margin-top: 12px;
     }
 
     /* 表单样式 */
     .form-header {
-      padding: 20px;
-      background: white;
-      border-bottom: 1px solid #f0f0f0;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      padding: 16px 20px;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+      z-index: 100;
     }
 
     .back-btn {
@@ -306,70 +358,120 @@
       border: none;
       padding: 0;
       margin-right: 16px;
+      color: #FF6B35;
     }
 
     .progress-bar {
       height: 4px;
       background: #f0f0f0;
       border-radius: 2px;
-      margin: 20px 0;
+      margin: 16px 0 8px 0;
       position: relative;
     }
 
     .progress-fill {
       height: 100%;
-      background: #007AFF;
+      background: linear-gradient(90deg, #FF6B35 0%, #F7931E 100%);
       border-radius: 2px;
       transition: width 0.3s;
     }
 
     .step-indicator {
       position: absolute;
-      top: -20px;
+      top: -24px;
       right: 0;
       font-size: 14px;
-      color: #007AFF;
+      color: #FF6B35;
+      font-weight: 600;
     }
 
     .form-content {
-      padding: 20px;
+      padding: 100px 20px 120px 20px;
+      min-height: 100vh;
     }
 
     .step-icon {
       width: 56px;
       height: 56px;
-      background: #007AFF;
+      background: linear-gradient(135deg, #FF6B35 0%, #F7931E 100%);
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
       font-size: 28px;
       margin-bottom: 20px;
+      box-shadow: 0 4px 20px rgba(255, 107, 53, 0.3);
     }
 
     .step-title {
-      font-size: 28px;
+      font-size: 24px;
       font-weight: 600;
-      margin-bottom: 12px;
+      margin-bottom: 8px;
+      color: #333;
     }
 
     .step-desc {
       font-size: 16px;
       color: #666;
-      margin-bottom: 32px;
+      margin-bottom: 24px;
       line-height: 1.5;
+    }
+
+    .location-hint {
+      background: linear-gradient(135deg, #E8F5E8 0%, #F0F8FF 100%);
+      padding: 12px 16px;
+      border-radius: 12px;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+      color: #2E7D32;
+      border: 1px solid rgba(46, 125, 50, 0.2);
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 14px 16px;
+      border: 2px solid #f0f0f0;
+      border-radius: 12px;
+      font-size: 16px;
+      margin-bottom: 20px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .search-input:focus {
+      border-color: #FF6B35;
+    }
+
+    .section-title {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 12px;
+      color: #333;
+    }
+
+    .city-section {
+      margin-bottom: 24px;
+    }
+
+    .district-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+      margin-bottom: 16px;
     }
 
     .city-grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
-      gap: 12px;
-      margin-bottom: 24px;
+      gap: 8px;
     }
 
     .city-item {
-      padding: 16px;
-      background: #f8f8f8;
+      padding: 12px;
+      background: #f8f9fa;
       border-radius: 12px;
       cursor: pointer;
       transition: all 0.2s;
@@ -377,45 +479,32 @@
     }
 
     .city-item.selected {
-      background: #E8F3FF;
-      border-color: #007AFF;
+      background: linear-gradient(135deg, #FFF3E0 0%, #FFE0B2 100%);
+      border-color: #FF6B35;
     }
 
     .city-flag {
-      font-size: 24px;
-      margin-bottom: 8px;
+      font-size: 20px;
+      margin-bottom: 6px;
     }
 
     .city-name {
-      font-size: 16px;
+      font-size: 14px;
       font-weight: 600;
-      margin-bottom: 4px;
+      margin-bottom: 2px;
+      color: #333;
     }
 
     .city-country {
       font-size: 12px;
-      color: #999;
-    }
-
-    .search-input {
-      width: 100%;
-      padding: 14px 16px;
-      border: 1px solid #e0e0e0;
-      border-radius: 12px;
-      font-size: 16px;
-      margin-bottom: 20px;
-      outline: none;
-    }
-
-    .search-input:focus {
-      border-color: #007AFF;
+      color: #666;
     }
 
     .duration-counter {
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 48px;
+      gap: 32px;
       margin: 40px 0;
     }
 
@@ -425,13 +514,18 @@
       border-radius: 50%;
       border: 2px solid #e0e0e0;
       background: white;
-      font-size: 24px;
+      font-size: 20px;
       cursor: pointer;
       transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #333;
     }
 
     .counter-btn:active {
       background: #f0f0f0;
+      transform: scale(0.95);
     }
 
     .counter-btn:disabled {
@@ -440,54 +534,59 @@
     }
 
     .counter-value {
-      font-size: 48px;
+      font-size: 36px;
       font-weight: 600;
-      min-width: 120px;
+      min-width: 100px;
       text-align: center;
+      color: #FF6B35;
     }
 
     .calendar-container {
       background: white;
       border-radius: 16px;
-      padding: 20px;
+      padding: 16px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.08);
     }
 
     .calendar-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 20px;
+      margin-bottom: 16px;
     }
 
     .calendar-title {
       font-size: 18px;
       font-weight: 600;
+      color: #333;
     }
 
     .calendar-nav {
       display: flex;
-      gap: 20px;
+      gap: 16px;
     }
 
     .calendar-nav-btn {
       background: none;
       border: none;
-      color: #007AFF;
-      font-size: 24px;
+      color: #FF6B35;
+      font-size: 20px;
       cursor: pointer;
+      padding: 4px;
     }
 
     .calendar-grid {
       display: grid;
       grid-template-columns: repeat(7, 1fr);
-      gap: 4px;
+      gap: 2px;
     }
 
     .calendar-day-header {
       text-align: center;
       font-size: 12px;
-      color: #999;
-      padding: 8px;
+      color: #666;
+      padding: 8px 4px;
+      font-weight: 500;
     }
 
     .calendar-day {
@@ -495,7 +594,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 16px;
+      font-size: 14px;
       cursor: pointer;
       border-radius: 8px;
       transition: all 0.2s;
@@ -510,29 +609,31 @@
     }
 
     .calendar-day.selected {
-      background: #FF9500;
+      background: linear-gradient(135deg, #FF6B35 0%, #F7931E 100%);
       color: white;
     }
 
     .calendar-day.in-range {
       background: #FFF3E0;
+      color: #FF6B35;
     }
 
     .calendar-day.today {
-      color: #007AFF;
+      color: #FF6B35;
       font-weight: 600;
+      border: 1px solid #FF6B35;
     }
 
     .travel-group-grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
-      gap: 16px;
-      margin: 32px 0;
+      gap: 12px;
+      margin: 24px 0;
     }
 
     .travel-group-item {
-      padding: 24px;
-      background: #f8f8f8;
+      padding: 20px 16px;
+      background: #f8f9fa;
       border-radius: 12px;
       text-align: center;
       cursor: pointer;
@@ -541,45 +642,48 @@
     }
 
     .travel-group-item.selected {
-      background: #E8F3FF;
-      border-color: #007AFF;
+      background: linear-gradient(135deg, #FFF3E0 0%, #FFE0B2 100%);
+      border-color: #FF6B35;
     }
 
     .travel-group-icon {
-      font-size: 48px;
-      margin-bottom: 12px;
-      color: #FF9500;
+      font-size: 40px;
+      margin-bottom: 8px;
+      color: #FF6B35;
     }
 
     .travel-group-label {
       font-size: 16px;
       font-weight: 500;
+      color: #333;
     }
 
     .interest-slider {
-      margin-bottom: 32px;
+      margin-bottom: 24px;
     }
 
     .interest-header {
       display: flex;
       align-items: center;
       gap: 12px;
-      margin-bottom: 12px;
+      margin-bottom: 8px;
     }
 
     .interest-icon {
-      font-size: 24px;
+      font-size: 20px;
     }
 
     .interest-label {
-      font-size: 18px;
+      font-size: 16px;
       font-weight: 500;
+      color: #333;
     }
 
     .interest-value {
       margin-left: auto;
       font-size: 14px;
-      color: #999;
+      color: #FF6B35;
+      font-weight: 500;
     }
 
     .slider-track {
@@ -592,7 +696,7 @@
 
     .slider-fill {
       height: 100%;
-      background: #007AFF;
+      background: linear-gradient(90deg, #FF6B35 0%, #F7931E 100%);
       border-radius: 2px;
       position: relative;
       transition: width 0.2s;
@@ -601,14 +705,14 @@
     .slider-thumb {
       position: absolute;
       top: 50%;
-      right: -10px;
+      right: -8px;
       transform: translateY(-50%);
-      width: 20px;
-      height: 20px;
-      background: #007AFF;
+      width: 16px;
+      height: 16px;
+      background: #FF6B35;
       border-radius: 50%;
       border: 3px solid white;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
       cursor: grab;
     }
 
@@ -618,10 +722,10 @@
 
     .next-btn {
       position: fixed;
-      bottom: 100px;
+      bottom: 30px;
       left: 20px;
       right: 20px;
-      background: #007AFF;
+      background: linear-gradient(135deg, #FF6B35 0%, #F7931E 100%);
       color: white;
       border: none;
       border-radius: 24px;
@@ -630,11 +734,13 @@
       font-weight: 600;
       cursor: pointer;
       transition: all 0.2s;
+      box-shadow: 0 4px 20px rgba(255, 107, 53, 0.3);
     }
 
     .next-btn:disabled {
       background: #ccc;
       cursor: not-allowed;
+      box-shadow: none;
     }
 
     .next-btn:not(:disabled):active {
@@ -671,14 +777,15 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 20px;
-      padding-bottom: 16px;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
       border-bottom: 1px solid #f0f0f0;
     }
 
     .modal-title {
-      font-size: 20px;
+      font-size: 18px;
       font-weight: 600;
+      color: #333;
     }
 
     .modal-actions {
@@ -689,7 +796,7 @@
     .modal-btn {
       background: none;
       border: none;
-      color: #007AFF;
+      color: #FF6B35;
       font-size: 16px;
       font-weight: 500;
       cursor: pointer;
@@ -697,6 +804,66 @@
 
     .modal-btn.cancel {
       color: #999;
+    }
+
+    /* 宠物信息卡片 */
+    .pet-card {
+      padding: 16px;
+      background: linear-gradient(135deg, #FFF8E1 0%, #FFFDE7 100%);
+      border-radius: 12px;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      border: 1px solid rgba(255, 193, 7, 0.3);
+    }
+
+    .pet-avatar {
+      width: 50px;
+      height: 50px;
+      background: linear-gradient(135deg, #FFB74D 0%, #FF9800 100%);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+    }
+
+    .pet-info {
+      flex: 1;
+    }
+
+    .pet-name {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 2px;
+      color: #333;
+    }
+
+    .pet-details {
+      font-size: 14px;
+      color: #666;
+    }
+
+    .add-pet-btn {
+      width: 100%;
+      padding: 16px;
+      background: transparent;
+      border: 2px dashed #FF6B35;
+      border-radius: 12px;
+      color: #FF6B35;
+      font-size: 16px;
+      font-weight: 500;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.2s;
+    }
+
+    .add-pet-btn:hover {
+      background: rgba(255, 107, 53, 0.05);
     }
   </style>
 </head>
@@ -708,38 +875,47 @@
 
     // 数据配置
     const CONFIG = {
+      // 深圳区域
+      shenzhenDistricts: [
+        { id: 'futian', name: '福田区', flag: '🏢' },
+        { id: 'nanshan', name: '南山区', flag: '🌊' },
+        { id: 'luohu', name: '罗湖区', flag: '🏔️' },
+        { id: 'longgang', name: '龙岗区', flag: '🏘️' },
+        { id: 'bao-an', name: '宝安区', flag: '✈️' },
+        { id: 'yantian', name: '盐田区', flag: '🏖️' }
+      ],
+      // 热门城市
       cities: [
-        { id: 'abu-dhabi', name: 'Abu Dhabi', country: 'United Arab Emirates', flag: '🇦🇪' },
-        { id: 'amsterdam', name: 'Amsterdam', country: 'The Netherlands', flag: '🇳🇱' },
-        { id: 'ankara', name: 'Ankara', country: 'Turkey', flag: '🇹🇷' },
-        { id: 'antalya', name: 'Antalya', country: 'Turkey', flag: '🇹🇷' },
-        { id: 'athens', name: 'Athens', country: 'Greece', flag: '🇬🇷' },
-        { id: 'baku', name: 'Baku', country: 'Azerbaijan', flag: '🇦🇿' },
-        { id: 'bangkok', name: 'Bangkok', country: 'Thailand', flag: '🇹🇭' },
-        { id: 'barcelona', name: 'Barcelona', country: 'Spain', flag: '🇪🇸' }
+        { id: 'beijing', name: '北京', country: '中国', flag: '🏛️' },
+        { id: 'shanghai', name: '上海', country: '中国', flag: '🏙️' },
+        { id: 'guangzhou', name: '广州', country: '中国', flag: '🌺' },
+        { id: 'hangzhou', name: '杭州', country: '中国', flag: '🏞️' },
+        { id: 'chengdu', name: '成都', country: '中国', flag: '🐼' },
+        { id: 'xiamen', name: '厦门', country: '中国', flag: '🏝️' },
+        { id: 'qingdao', name: '青岛', country: '中国', flag: '🍺' },
+        { id: 'dali', name: '大理', country: '中国', flag: '⛰️' }
       ],
       travelGroups: [
-        { id: 'solo', label: 'Solo', icon: '🚶' },
-        { id: 'couple', label: 'Couple', icon: '👫' },
-        { id: 'family', label: 'Family', icon: '👨‍👩‍👧‍👦' },
-        { id: 'friends', label: 'Friends', icon: '👥' }
+        { id: 'solo', label: '独自出行', icon: '🚶' },
+        { id: 'couple', label: '情侣出行', icon: '💑' },
+        { id: 'family', label: '家庭出行', icon: '👨‍👩‍👧‍👦' },
+        { id: 'friends', label: '朋友出行', icon: '👥' }
       ],
-      interests: [
-        { id: 'historical', label: 'Historical', icon: '🏛️' },
-        { id: 'art-culture', label: 'Art & Culture', icon: '🎨' },
-        { id: 'nature', label: 'Nature', icon: '⛰️' },
-        { id: 'entertainment', label: 'Entertainment', icon: '🗑️' },
-        { id: 'shopping', label: 'Shopping', icon: '🛍️' },
-        { id: 'sports', label: 'Sports', icon: '⚽' },
-        { id: 'adventure', label: 'Adventure', icon: '🥾' },
-        { id: 'relaxing', label: 'Relaxing', icon: '🏖️' },
-        { id: 'pet-friendly', label: 'Pet Friendly', icon: '🐕' }
+      petInterests: [
+        { id: 'pet-friendly-restaurants', label: '宠物友好餐厅', icon: '🍽️' },
+        { id: 'large-lawns', label: '大草坪', icon: '🌿' },
+        { id: 'dog-parks', label: '狗狗乐园', icon: '🐕‍🦺' },
+        { id: 'pet-hotels', label: '宠物友好酒店', icon: '🏨' },
+        { id: 'pet-beaches', label: '宠物海滩', icon: '🏖️' },
+        { id: 'hiking-trails', label: '徒步步道', icon: '🥾' },
+        { id: 'pet-cafes', label: '宠物咖啡厅', icon: '☕' },
+        { id: 'outdoor-markets', label: '户外市集', icon: '🎪' }
       ]
     };
 
     const App = () => {
       // 核心状态
-      const [currentView, setCurrentView] = useState('trips'); // trips, inbox, profile
+      const [currentView, setCurrentView] = useState('trips');
       const [trips, setTrips] = useState([]);
       const [isCreating, setIsCreating] = useState(false);
       const [currentStep, setCurrentStep] = useState(1);
@@ -747,20 +923,19 @@
       // 表单数据
       const [formData, setFormData] = useState({
         destination: '',
-        duration: 1,
+        duration: 3,
         startDate: null,
         endDate: null,
         travelGroup: '',
         interests: {
-          'historical': 50,
-          'art-culture': 50,
-          'nature': 50,
-          'entertainment': 50,
-          'shopping': 50,
-          'sports': 50,
-          'adventure': 50,
-          'relaxing': 50,
-          'pet-friendly': 100 // 默认拉满
+          'pet-friendly-restaurants': 80,
+          'large-lawns': 90,
+          'dog-parks': 100,
+          'pet-hotels': 85,
+          'pet-beaches': 70,
+          'hiking-trails': 60,
+          'pet-cafes': 75,
+          'outdoor-markets': 50
         }
       });
 
@@ -768,8 +943,9 @@
       useEffect(() => {
         if (navigator.geolocation) {
           navigator.geolocation.getCurrentPosition((position) => {
-            // 这里可以根据位置设置默认城市
-            console.log('User location:', position.coords);
+            // 默认设置为深圳
+            console.log('用户位置:', position.coords);
+            // 可以根据位置自动设置默认城市
           });
         }
       }, []);
@@ -782,7 +958,7 @@
 
       // 处理步骤导航
       const handleNextStep = () => {
-        if (currentStep < 6) {
+        if (currentStep < 5) { // 减少为5步
           setCurrentStep(currentStep + 1);
         } else {
           // 完成创建
@@ -796,20 +972,19 @@
           setCurrentStep(1);
           setFormData({
             destination: '',
-            duration: 1,
+            duration: 3,
             startDate: null,
             endDate: null,
             travelGroup: '',
             interests: {
-              'historical': 50,
-              'art-culture': 50,
-              'nature': 50,
-              'entertainment': 50,
-              'shopping': 50,
-              'sports': 50,
-              'adventure': 50,
-              'relaxing': 50,
-              'pet-friendly': 100
+              'pet-friendly-restaurants': 80,
+              'large-lawns': 90,
+              'dog-parks': 100,
+              'pet-hotels': 85,
+              'pet-beaches': 70,
+              'hiking-trails': 60,
+              'pet-cafes': 75,
+              'outdoor-markets': 50
             }
           });
         }
@@ -849,12 +1024,6 @@
 
       return (
         <div className="container">
-          {/* 状态栏 */}
-          <div className="status-bar">
-            <span>02:21 🚌</span>
-            <span>📶 📶 🔋</span>
-          </div>
-          
           {/* 主内容 */}
           {renderMainView()}
           
@@ -866,21 +1035,21 @@
                 onClick={() => setCurrentView('trips')}
               >
                 <span className="nav-icon">🎒</span>
-                <span>Trips</span>
+                <span>行程</span>
               </div>
               <div 
                 className={`nav-item ${currentView === 'inbox' ? 'active' : ''}`}
                 onClick={() => setCurrentView('inbox')}
               >
-                <span className="nav-icon">🔔</span>
-                <span>Inbox</span>
+                <span className="nav-icon">📮</span>
+                <span>消息</span>
               </div>
               <div 
                 className={`nav-item ${currentView === 'profile' ? 'active' : ''}`}
                 onClick={() => setCurrentView('profile')}
               >
                 <span className="nav-icon">👤</span>
-                <span>Profile</span>
+                <span>我的</span>
               </div>
             </div>
           )}
@@ -894,38 +1063,41 @@
         return (
           <>
             <div className="header">
-              <h1 style={{ fontSize: '24px', fontWeight: '600' }}>Trips</h1>
+              <div className="logo-section">
+                <h1 className="logo-text">FunGo</h1>
+                <div className="logo-ball bounce-ball"></div>
+              </div>
               <button className="add-btn" onClick={onCreateTrip}>+</button>
             </div>
             <div className="content">
               <div className="welcome-container fade-in">
                 <div className="icon-row">
-                  <div className="icon-circle" style={{ background: '#007AFF' }}>✈️</div>
-                  <div className="icon-circle" style={{ background: '#FF9500' }}>🚌</div>
-                  <div className="icon-circle" style={{ background: '#FF3B30' }}>🎒</div>
-                  <div className="icon-circle" style={{ background: '#34C759' }}>🏔️</div>
-                  <div className="icon-circle" style={{ background: '#FF9500' }}>🍽️</div>
-                  <div className="icon-circle" style={{ background: '#5AC8FA' }}>📸</div>
+                  <div className="icon-circle" style={{ background: '#FF6B35' }}>✈️</div>
+                  <div className="icon-circle" style={{ background: '#4CAF50' }}>🚌</div>
+                  <div className="icon-circle" style={{ background: '#2196F3' }}>🎒</div>
+                  <div className="icon-circle" style={{ background: '#FF9800' }}>📍</div>
+                  <div className="icon-circle" style={{ background: '#9C27B0' }}>🍽️</div>
+                  <div className="icon-circle" style={{ background: '#00BCD4' }}>📸</div>
                 </div>
                 
-                <h2 className="welcome-title">Welcome</h2>
+                <h2 className="welcome-title">欢迎使用 FunGo</h2>
                 <p className="welcome-desc">
-                  We're excited to help you plan your dream vacations 
-                  and unforgettable adventures. Once you create your 
-                  first travel plan, it will appear here for easy access 
-                  and organization.
+                  我们很高兴帮助您规划完美的宠物友好旅行。
+                  创建您的第一个旅行计划，它将出现在这里供您轻松访问和管理。
                 </p>
                 
-                <div className="paw-trail">
-                  <span className="paw-print" style={{ left: '20%', top: '20%' }}>🐾</span>
-                  <span className="paw-print" style={{ left: '35%', top: '35%' }}>🐾</span>
-                  <span className="paw-print" style={{ left: '50%', top: '50%' }}>🐾</span>
-                  <span className="paw-print" style={{ left: '65%', top: '65%' }}>🐾</span>
-                  <span className="paw-print" style={{ left: '80%', top: '80%' }}>✈️</span>
+                <div className="paw-trail-container">
+                  <span className="paw-print">🐾</span>
+                  <span className="paw-print">🐾</span>
+                  <span className="paw-print">🐾</span>
+                  <span className="paw-print">🐾</span>
+                  <span className="paw-print">🐾</span>
+                  <span className="paw-print">🐾</span>
+                  <div className="paw-end">🐕</div>
                 </div>
                 
                 <button className="create-trip-btn" onClick={onCreateTrip}>
-                  Create Your First Trip
+                  创建您的第一次旅行
                 </button>
               </div>
             </div>
@@ -936,7 +1108,10 @@
       return (
         <>
           <div className="header">
-            <h1 style={{ fontSize: '24px', fontWeight: '600' }}>Trips</h1>
+            <div className="logo-section">
+              <h1 className="logo-text">FunGo</h1>
+              <div className="logo-ball bounce-ball"></div>
+            </div>
             <button className="add-btn" onClick={onCreateTrip}>+</button>
           </div>
           <div className="content">
@@ -953,18 +1128,29 @@
       const formatDate = (date) => {
         if (!date) return '';
         const d = new Date(date);
-        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        const months = ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'];
         return `${d.getDate()} ${months[d.getMonth()]}`;
       };
 
-      const cityInfo = CONFIG.cities.find(c => c.id === trip.destination) || CONFIG.cities[0];
+      const getDestinationInfo = () => {
+        // 先查找深圳区域
+        const district = CONFIG.shenzhenDistricts.find(d => d.id === trip.destination);
+        if (district) {
+          return { name: district.name, country: '深圳', flag: district.flag };
+        }
+        // 再查找其他城市
+        const city = CONFIG.cities.find(c => c.id === trip.destination);
+        return city || { name: '未知', country: '未知', flag: '📍' };
+      };
+
+      const destinationInfo = getDestinationInfo();
 
       return (
         <div className="trip-card fade-in">
           <div 
             className="trip-card-image"
             style={{ 
-              backgroundImage: `url('https://source.unsplash.com/800x400/?${cityInfo.name},travel')`
+              backgroundImage: `url('https://source.unsplash.com/800x400/?${destinationInfo.name},travel,dog')`
             }}
           >
             <div className="trip-card-overlay">
@@ -972,45 +1158,32 @@
                 {formatDate(trip.startDate)} - {formatDate(trip.endDate)}
               </div>
               <div className="trip-destination">
-                {cityInfo.name}, {cityInfo.country}
+                {destinationInfo.name}
               </div>
-            </div>
-            <div style={{ position: 'absolute', top: '16px', right: '16px' }}>
-              <button style={{ 
-                background: 'rgba(255,255,255,0.2)', 
-                border: 'none', 
-                color: 'white', 
-                fontSize: '20px', 
-                padding: '8px',
-                borderRadius: '8px',
-                cursor: 'pointer'
-              }}>
-                •••
-              </button>
             </div>
           </div>
           
           <div className="trip-card-content">
             <div className="trip-tags">
               <div className="trip-tag">
-                <span>CH</span>
+                <span>🐕</span>
+                <span>宠物友好</span>
               </div>
               <div className="trip-tag">
                 <span>👥</span>
+                <span>{CONFIG.travelGroups.find(g => g.id === trip.travelGroup)?.label || '未知'}</span>
               </div>
             </div>
             
-            <div className="trip-info">
-              <div className="trip-info-title">{cityInfo.name}, {cityInfo.country}</div>
-              <div className="trip-info-detail">
-                <span>📅</span> {formatDate(trip.startDate)}, 2025
-              </div>
-              <div className="trip-info-detail">
-                <span>🚌</span> {trip.travelGroup || 'solo'}
-              </div>
+            <div className="trip-info-title">{destinationInfo.name}</div>
+            <div className="trip-info-detail">
+              <span>📅</span> {formatDate(trip.startDate)}, 2025
+            </div>
+            <div className="trip-info-detail">
+              <span>⏱️</span> {trip.duration} 天行程
             </div>
             
-            <button className="see-plan-btn">See Your Plan</button>
+            <button className="see-plan-btn">查看行程</button>
           </div>
         </div>
       );
@@ -1018,7 +1191,7 @@
 
     // 创建行程组件
     const TripCreator = ({ step, formData, setFormData, onNext, onBack }) => {
-      const totalSteps = 6;
+      const totalSteps = 5; // 更新为5步
       const progress = (step / totalSteps) * 100;
 
       const renderStepContent = () => {
@@ -1033,8 +1206,6 @@
             return <TravelGroupStep formData={formData} setFormData={setFormData} />;
           case 5:
             return <InterestsStep formData={formData} setFormData={setFormData} />;
-          case 6:
-            return <PetInfoStep formData={formData} setFormData={setFormData} />;
           default:
             return null;
         }
@@ -1051,9 +1222,7 @@
           case 4:
             return !!formData.travelGroup;
           case 5:
-            return true; // 兴趣总是有效的
-          case 6:
-            return true; // 宠物信息可选
+            return true;
           default:
             return false;
         }
@@ -1067,7 +1236,7 @@
             </div>
             <div className="progress-bar">
               <div className="progress-fill" style={{ width: `${progress}%` }}></div>
-              <span className="step-indicator">Step {step}/{totalSteps}</span>
+              <span className="step-indicator">第 {step}/{totalSteps} 步</span>
             </div>
           </div>
           
@@ -1080,7 +1249,7 @@
             onClick={onNext}
             disabled={!isStepValid()}
           >
-            {step === totalSteps ? 'Complete' : 'Next'}
+            {step === totalSteps ? '完成创建' : '下一步'}
           </button>
         </>
       );
@@ -1091,95 +1260,118 @@
       const [searchQuery, setSearchQuery] = useState('');
       const [showModal, setShowModal] = useState(false);
 
-      const filteredCities = CONFIG.cities.filter(city => 
-        city.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        city.country.toLowerCase().includes(searchQuery.toLowerCase())
-      );
-
-      const handleCitySelect = (cityId) => {
-        setFormData({ ...formData, destination: cityId });
+      const handleDestinationSelect = (destinationId) => {
+        setFormData({ ...formData, destination: destinationId });
         setShowModal(false);
+      };
+
+      const getSelectedDestination = () => {
+        const district = CONFIG.shenzhenDistricts.find(d => d.id === formData.destination);
+        if (district) return district.name;
+        const city = CONFIG.cities.find(c => c.id === formData.destination);
+        return city ? city.name : '';
       };
 
       return (
         <div className="fade-in">
-          <div className="step-icon" style={{ background: '#FF9500' }}>
+          <div className="step-icon">
             <span style={{ color: 'white' }}>📍</span>
           </div>
-          <h2 className="step-title">Destination</h2>
-          <p className="step-desc">Where would you like to travel?</p>
+          <h2 className="step-title">选择目的地</h2>
+          <p className="step-desc">您想去哪里旅行呢？</p>
+          
+          <div className="location-hint">
+            <span>📍</span>
+            <span>已为您定位到深圳，为您推荐附近热门区域</span>
+          </div>
           
           <div onClick={() => setShowModal(true)}>
             <input 
               type="text"
               className="search-input"
-              placeholder="Search..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder={getSelectedDestination() || "搜索目的地..."}
+              value={getSelectedDestination()}
               readOnly
             />
           </div>
           
-          <h3 style={{ fontSize: '18px', fontWeight: '600', marginBottom: '16px' }}>
-            Most Popular Cities
-          </h3>
-          
-          <div className="city-grid">
-            {CONFIG.cities.slice(0, 6).map(city => (
-              <div 
-                key={city.id}
-                className={`city-item ${formData.destination === city.id ? 'selected' : ''}`}
-                onClick={() => handleCitySelect(city.id)}
-              >
-                <div className="city-flag">{city.flag}</div>
-                <div className="city-name">{city.name}</div>
-                <div className="city-country">{city.country}</div>
-              </div>
-            ))}
+          <div className="city-section">
+            <h3 className="section-title">热门区域</h3>
+            <div className="district-grid">
+              {CONFIG.shenzhenDistricts.slice(0, 6).map(district => (
+                <div 
+                  key={district.id}
+                  className={`city-item ${formData.destination === district.id ? 'selected' : ''}`}
+                  onClick={() => handleDestinationSelect(district.id)}
+                >
+                  <div className="city-flag">{district.flag}</div>
+                  <div className="city-name">{district.name}</div>
+                  <div className="city-country">深圳</div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="city-section">
+            <h3 className="section-title">热门城市</h3>
+            <div className="city-grid">
+              {CONFIG.cities.slice(0, 6).map(city => (
+                <div 
+                  key={city.id}
+                  className={`city-item ${formData.destination === city.id ? 'selected' : ''}`}
+                  onClick={() => handleDestinationSelect(city.id)}
+                >
+                  <div className="city-flag">{city.flag}</div>
+                  <div className="city-name">{city.name}</div>
+                  <div className="city-country">{city.country}</div>
+                </div>
+              ))}
+            </div>
           </div>
 
           {showModal && (
-            <CitySearchModal 
+            <DestinationModal 
               searchQuery={searchQuery}
               setSearchQuery={setSearchQuery}
-              cities={filteredCities}
-              onSelect={handleCitySelect}
+              onSelect={handleDestinationSelect}
               onClose={() => setShowModal(false)}
+              selectedId={formData.destination}
             />
           )}
         </div>
       );
     };
 
-    // 城市搜索模态框
-    const CitySearchModal = ({ searchQuery, setSearchQuery, cities, onSelect, onClose }) => {
+    // 目的地搜索模态框
+    const DestinationModal = ({ searchQuery, setSearchQuery, onSelect, onClose, selectedId }) => {
+      const allDestinations = [...CONFIG.shenzhenDistricts, ...CONFIG.cities];
+      const filteredDestinations = allDestinations.filter(dest => 
+        dest.name.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+
       return (
         <div className="modal" onClick={(e) => e.target === e.currentTarget && onClose()}>
           <div className="modal-content">
             <div className="modal-header">
-              <button className="modal-btn cancel" onClick={onClose}>Cancel</button>
-              <div className="modal-title">Select City</div>
-              <button className="modal-btn" onClick={onClose}>Done</button>
+              <button className="modal-btn cancel" onClick={onClose}>取消</button>
+              <div className="modal-title">选择目的地</div>
+              <button className="modal-btn" onClick={onClose}>确定</button>
             </div>
             
             <input 
               type="text"
               className="search-input"
-              placeholder="Search..."
+              placeholder="搜索目的地..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               autoFocus
             />
             
-            <h3 style={{ fontSize: '16px', fontWeight: '600', marginBottom: '12px' }}>
-              Most Popular Cities
-            </h3>
-            
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              {cities.map(city => (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+              {filteredDestinations.map(dest => (
                 <div 
-                  key={city.id}
-                  onClick={() => onSelect(city.id)}
+                  key={dest.id}
+                  onClick={() => onSelect(dest.id)}
                   style={{
                     padding: '12px',
                     display: 'flex',
@@ -1187,13 +1379,19 @@
                     gap: '12px',
                     cursor: 'pointer',
                     borderRadius: '8px',
-                    transition: 'background 0.2s'
+                    transition: 'background 0.2s',
+                    background: selectedId === dest.id ? '#FFF3E0' : 'transparent'
                   }}
-                  onMouseEnter={(e) => e.currentTarget.style.background = '#f0f0f0'}
-                  onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                  onMouseEnter={(e) => e.currentTarget.style.background = '#f8f9fa'}
+                  onMouseLeave={(e) => e.currentTarget.style.background = selectedId === dest.id ? '#FFF3E0' : 'transparent'}
                 >
-                  <span style={{ fontSize: '20px' }}>{city.flag}</span>
-                  <span style={{ fontSize: '16px' }}>{city.name}, {city.country}</span>
+                  <span style={{ fontSize: '18px' }}>{dest.flag}</span>
+                  <div>
+                    <div style={{ fontSize: '16px', fontWeight: '500', color: '#333' }}>{dest.name}</div>
+                    <div style={{ fontSize: '14px', color: '#666' }}>
+                      {CONFIG.shenzhenDistricts.includes(dest) ? '深圳' : dest.country}
+                    </div>
+                  </div>
                 </div>
               ))}
             </div>
@@ -1216,11 +1414,11 @@
 
       return (
         <div className="fade-in">
-          <div className="step-icon" style={{ background: '#FF9500' }}>
+          <div className="step-icon">
             <span style={{ color: 'white' }}>📅</span>
           </div>
-          <h2 className="step-title">Travel Duration</h2>
-          <p className="step-desc">Enter the number of days for your trip.</p>
+          <h2 className="step-title">旅行天数</h2>
+          <p className="step-desc">您计划旅行几天呢？</p>
           
           <div className="duration-counter">
             <button 
@@ -1231,7 +1429,7 @@
               −
             </button>
             <div className="counter-value">
-              {formData.duration} {formData.duration === 1 ? 'day' : 'days'}
+              {formData.duration} 天
             </div>
             <button 
               className="counter-btn" 
@@ -1280,7 +1478,7 @@
         }
         
         // 下个月的日期
-        const remainingDays = 42 - days.length; // 6 weeks * 7 days
+        const remainingDays = 42 - days.length;
         for (let i = 1; i <= remainingDays; i++) {
           days.push({
             date: new Date(year, month + 1, i),
@@ -1322,9 +1520,9 @@
       };
 
       const formatMonthYear = (date) => {
-        const months = ['January', 'February', 'March', 'April', 'May', 'June', 
-                       'July', 'August', 'September', 'October', 'November', 'December'];
-        return `${months[date.getMonth()]} ${date.getFullYear()}`;
+        const months = ['1月', '2月', '3月', '4月', '5月', '6月', 
+                       '7月', '8月', '9月', '10月', '11月', '12月'];
+        return `${date.getFullYear()}年 ${months[date.getMonth()]}`;
       };
 
       const days = getDaysInMonth(currentMonth);
@@ -1332,11 +1530,11 @@
 
       return (
         <div className="fade-in">
-          <div className="step-icon" style={{ background: '#FF3B30' }}>
+          <div className="step-icon">
             <span style={{ color: 'white' }}>📅</span>
           </div>
-          <h2 className="step-title">Start Date</h2>
-          <p className="step-desc">Choose the start date for your trip using the calendar.</p>
+          <h2 className="step-title">选择出发日期</h2>
+          <p className="step-desc">请选择您的出发日期</p>
           
           <div className="calendar-container">
             <div className="calendar-header">
@@ -1356,7 +1554,7 @@
             </div>
             
             <div className="calendar-grid">
-              {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
+              {['日', '一', '二', '三', '四', '五', '六'].map(day => (
                 <div key={day} className="calendar-day-header">{day}</div>
               ))}
               
@@ -1364,12 +1562,17 @@
                 const isToday = day.date.toDateString() === today.toDateString();
                 const isSelected = isStartDate(day.date) || isEndDate(day.date);
                 const inRange = isInRange(day.date);
+                const isPast = day.date < today && !isToday;
                 
                 return (
                   <div 
                     key={index}
                     className={`calendar-day ${day.isOtherMonth ? 'other-month' : ''} ${isSelected ? 'selected' : ''} ${inRange && !isSelected ? 'in-range' : ''} ${isToday ? 'today' : ''}`}
-                    onClick={() => !day.isOtherMonth && handleDateClick(day.date)}
+                    onClick={() => !day.isOtherMonth && !isPast && handleDateClick(day.date)}
+                    style={{ 
+                      opacity: isPast ? 0.3 : 1,
+                      cursor: isPast || day.isOtherMonth ? 'not-allowed' : 'pointer'
+                    }}
                   >
                     {day.date.getDate()}
                   </div>
@@ -1385,11 +1588,11 @@
     const TravelGroupStep = ({ formData, setFormData }) => {
       return (
         <div className="fade-in">
-          <div className="step-icon" style={{ background: '#5AC8FA' }}>
+          <div className="step-icon">
             <span style={{ color: 'white' }}>👥</span>
           </div>
-          <h2 className="step-title">Travel Companions</h2>
-          <p className="step-desc">Select your travel group type</p>
+          <h2 className="step-title">旅行同伴</h2>
+          <p className="step-desc">请选择您的出行方式</p>
           
           <div className="travel-group-grid">
             {CONFIG.travelGroups.map(group => (
@@ -1407,7 +1610,7 @@
       );
     };
 
-    // Step 5: 兴趣偏好
+    // Step 5: 宠物兴趣偏好
     const InterestsStep = ({ formData, setFormData }) => {
       const handleSliderChange = (interestId, value) => {
         setFormData({
@@ -1420,21 +1623,21 @@
       };
 
       const getInterestLevel = (value) => {
-        if (value < 33) return 'Not Interested';
-        if (value < 66) return 'Interested';
-        return 'Very Interested';
+        if (value < 30) return '不感兴趣';
+        if (value < 70) return '有兴趣';
+        return '非常感兴趣';
       };
 
       return (
         <div className="fade-in">
-          <div className="step-icon" style={{ background: '#AF52DE' }}>
-            <span style={{ color: 'white' }}>🎯</span>
+          <div className="step-icon">
+            <span style={{ color: 'white' }}>🐕</span>
           </div>
-          <h2 className="step-title">Your Interests</h2>
-          <p className="step-desc">Adjust the sliders for each category to indicate your level of interest.</p>
+          <h2 className="step-title">宠物偏好设置</h2>
+          <p className="step-desc">请调节滑块来表示您对各类宠物友好场所的兴趣程度</p>
           
-          <div style={{ marginTop: '32px' }}>
-            {CONFIG.interests.map(interest => (
+          <div style={{ marginTop: '24px' }}>
+            {CONFIG.petInterests.map(interest => (
               <InterestSlider 
                 key={interest.id}
                 interest={interest}
@@ -1470,23 +1673,43 @@
       const handleMove = (e) => {
         if (!sliderRef.current) return;
         const rect = sliderRef.current.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const percentage = Math.max(0, Math.min(100, (x / rect.width) * 100));
-        onChange(Math.round(percentage));
+        const x = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
+        const percentage = Math.round((x / rect.width) * 100);
+        onChange(percentage);
+      };
+
+      const handleTouchStart = (e) => {
+        setIsDragging(true);
+        handleTouchMove(e);
+      };
+
+      const handleTouchMove = (e) => {
+        if (!isDragging) return;
+        e.preventDefault();
+        const touch = e.touches[0];
+        if (!sliderRef.current) return;
+        const rect = sliderRef.current.getBoundingClientRect();
+        const x = Math.max(0, Math.min(touch.clientX - rect.left, rect.width));
+        const percentage = Math.round((x / rect.width) * 100);
+        onChange(percentage);
+      };
+
+      const handleTouchEnd = () => {
+        setIsDragging(false);
       };
 
       React.useEffect(() => {
         if (isDragging) {
           document.addEventListener('mousemove', handleMouseMove);
           document.addEventListener('mouseup', handleMouseUp);
-          document.addEventListener('touchmove', handleMouseMove);
-          document.addEventListener('touchend', handleMouseUp);
+          document.addEventListener('touchmove', handleTouchMove, { passive: false });
+          document.addEventListener('touchend', handleTouchEnd);
           
           return () => {
             document.removeEventListener('mousemove', handleMouseMove);
             document.removeEventListener('mouseup', handleMouseUp);
-            document.removeEventListener('touchmove', handleMouseMove);
-            document.removeEventListener('touchend', handleMouseUp);
+            document.removeEventListener('touchmove', handleTouchMove);
+            document.removeEventListener('touchend', handleTouchEnd);
           };
         }
       }, [isDragging]);
@@ -1502,7 +1725,7 @@
             className="slider-track" 
             ref={sliderRef}
             onMouseDown={handleMouseDown}
-            onTouchStart={handleMouseDown}
+            onTouchStart={handleTouchStart}
           >
             <div className="slider-fill" style={{ width: `${value}%` }}>
               <div className="slider-thumb" />
@@ -1512,104 +1735,21 @@
       );
     };
 
-    // Step 6: 宠物信息
-    const PetInfoStep = ({ formData, setFormData }) => {
-      const [pets, setPets] = useState([
-        { id: 1, name: '旺财', breed: '金毛', size: '大型犬', age: '3岁' }
-      ]);
-      const [showAddPet, setShowAddPet] = useState(false);
-
-      return (
-        <div className="fade-in">
-          <div className="step-icon" style={{ background: '#34C759' }}>
-            <span style={{ color: 'white' }}>🐕</span>
-          </div>
-          <h2 className="step-title">Pet Information</h2>
-          <p className="step-desc">Tell us about your furry travel companions</p>
-          
-          <div style={{ marginTop: '32px' }}>
-            {pets.map(pet => (
-              <div key={pet.id} style={{
-                padding: '16px',
-                background: '#f8f8f8',
-                borderRadius: '12px',
-                marginBottom: '12px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '16px'
-              }}>
-                <div style={{
-                  width: '60px',
-                  height: '60px',
-                  background: '#FFE5B4',
-                  borderRadius: '50%',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: '28px'
-                }}>
-                  🐕
-                </div>
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontSize: '18px', fontWeight: '600', marginBottom: '4px' }}>
-                    {pet.name}
-                  </div>
-                  <div style={{ fontSize: '14px', color: '#666' }}>
-                    {pet.breed} • {pet.size} • {pet.age}
-                  </div>
-                </div>
-                <button style={{
-                  background: 'none',
-                  border: 'none',
-                  fontSize: '20px',
-                  color: '#999',
-                  cursor: 'pointer'
-                }}>
-                  ✏️
-                </button>
-              </div>
-            ))}
-            
-            <button 
-              onClick={() => setShowAddPet(true)}
-              style={{
-                width: '100%',
-                padding: '16px',
-                background: 'transparent',
-                border: '2px dashed #007AFF',
-                borderRadius: '12px',
-                color: '#007AFF',
-                fontSize: '16px',
-                fontWeight: '500',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '8px'
-              }}
-            >
-              <span>+</span> Add Another Pet
-            </button>
-          </div>
-        </div>
-      );
-    };
-
-    // 收件箱视图
+    // 消息视图
     const InboxView = () => {
       return (
         <>
           <div className="header">
-            <h1 style={{ fontSize: '24px', fontWeight: '600' }}>Inbox</h1>
+            <h1 style={{ fontSize: '24px', fontWeight: '600' }}>消息</h1>
           </div>
           <div className="content">
-            <div style={{ padding: '40px', textAlign: 'center' }}>
+            <div style={{ padding: '60px 20px', textAlign: 'center' }}>
               <div style={{ fontSize: '48px', marginBottom: '16px' }}>📬</div>
               <h2 style={{ fontSize: '20px', fontWeight: '600', marginBottom: '8px' }}>
-                No new messages
+                暂无新消息
               </h2>
-              <p style={{ color: '#666' }}>
-                Your travel updates will appear here
+              <p style={{ color: '#666', fontSize: '16px' }}>
+                您的旅行更新将会出现在这里
               </p>
             </div>
           </div>
@@ -1622,28 +1762,28 @@
       return (
         <>
           <div className="header">
-            <h1 style={{ fontSize: '24px', fontWeight: '600' }}>Profile</h1>
+            <h1 style={{ fontSize: '24px', fontWeight: '600' }}>我的</h1>
           </div>
           <div className="content">
-            <div style={{ padding: '40px', textAlign: 'center' }}>
+            <div style={{ padding: '60px 20px', textAlign: 'center' }}>
               <div style={{
-                width: '100px',
-                height: '100px',
-                background: '#f0f0f0',
+                width: '80px',
+                height: '80px',
+                background: 'linear-gradient(135deg, #FF6B35 0%, #F7931E 100%)',
                 borderRadius: '50%',
                 margin: '0 auto 20px',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                fontSize: '48px'
+                fontSize: '36px'
               }}>
-                👤
+                🐾
               </div>
               <h2 style={{ fontSize: '20px', fontWeight: '600', marginBottom: '8px' }}>
-                Pet Traveler
+                宠物旅行者
               </h2>
-              <p style={{ color: '#666' }}>
-                Manage your profile and preferences
+              <p style={{ color: '#666', fontSize: '16px' }}>
+                管理您的个人资料和偏好设置
               </p>
             </div>
           </div>
@@ -1653,3 +1793,5 @@
 
     ReactDOM.render(<App />, document.getElementById('root'));
   </script>
+</body>
+</html>
