@@ -10,18 +10,30 @@
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { 
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
-      background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 50%, #e2e8f0 100%);
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", sans-serif; 
+      background: #f8f9fb;
       min-height: 100vh;
+      color: #1d1d1f;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
-    @keyframes bounce { 0%, 20%, 50%, 80%, 100% { transform: translateY(0); } 40% { transform: translateY(-5px); } 60% { transform: translateY(-3px); } }
-    @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-    @keyframes pulse { 0%, 100% { opacity: 0.8; } 50% { opacity: 1; } }
+    @keyframes bounce { 0%, 20%, 50%, 80%, 100% { transform: translateY(0); } 40% { transform: translateY(-3px); } 60% { transform: translateY(-1px); } }
+    @keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes pulse { 0%, 100% { opacity: 0.6; } 50% { opacity: 1; } }
+    @keyframes shimmer { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
     .spin { animation: spin 1s linear infinite; }
     .bounce { animation: bounce 2s infinite; }
-    .fade-in { animation: fadeInUp 0.5s ease-out; }
+    .fade-in { animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1); }
     .pulse { animation: pulse 2s ease-in-out infinite; }
+    .shimmer::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+      animation: shimmer 2s infinite;
+    }
   </style>
 </head>
 <body>
@@ -155,83 +167,81 @@
         }, 1500);
       };
 
-      // 样式对象 - 优化后的设计系统
+      // Apple风格样式系统
       const styles = {
         container: { 
-          background: 'linear-gradient(180deg, #f8fafc 0%, #f1f5f9 40%, #e2e8f0 100%)', 
-          minHeight: '100vh', 
-          paddingBottom: '100px' 
+          background: '#f8f9fb', 
+          minHeight: '100vh',
+          paddingBottom: '120px'
         },
         header: { 
-          background: 'linear-gradient(180deg, rgba(255,255,255,0.95) 0%, rgba(248,250,252,0.95) 100%)', 
-          backdropFilter: 'blur(20px)',
-          WebkitBackdropFilter: 'blur(20px)',
-          padding: '20px 16px 16px', 
-          boxShadow: '0 1px 3px rgba(0,0,0,0.05), 0 4px 16px rgba(0,0,0,0.04)', 
+          background: 'rgba(255, 255, 255, 0.8)', 
+          backdropFilter: 'saturate(180%) blur(20px)',
+          WebkitBackdropFilter: 'saturate(180%) blur(20px)',
+          padding: '16px 20px', 
+          borderBottom: '0.5px solid rgba(0,0,0,0.05)',
           position: 'sticky', 
           top: 0, 
-          zIndex: 10,
-          borderBottom: '1px solid rgba(226, 232, 240, 0.3)'
+          zIndex: 10
         },
         logo: { 
-          fontSize: '28px', 
-          fontWeight: '800', 
+          fontSize: '32px', 
+          fontWeight: '700', 
           textAlign: 'center',
-          letterSpacing: '-0.5px'
+          letterSpacing: '-1px',
+          marginBottom: '4px'
         },
         subtitle: {
-          fontSize: '13px', 
-          color: '#64748b', 
+          fontSize: '15px', 
+          color: '#86868b', 
           textAlign: 'center', 
-          marginTop: '6px',
-          fontWeight: '500'
+          fontWeight: '400'
+        },
+        content: {
+          padding: '24px 20px 0'
+        },
+        section: {
+          marginBottom: '32px'
+        },
+        sectionTitle: {
+          fontSize: '22px',
+          fontWeight: '600',
+          color: '#1d1d1f',
+          marginBottom: '16px',
+          letterSpacing: '-0.4px'
         },
         card: { 
-          background: 'linear-gradient(145deg, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.7) 100%)', 
-          backdropFilter: 'blur(10px)',
-          WebkitBackdropFilter: 'blur(10px)',
+          background: 'white',
           borderRadius: '16px', 
-          padding: '20px', 
-          marginBottom: '16px',
-          boxShadow: '0 1px 3px rgba(0,0,0,0.05), 0 4px 16px rgba(0,0,0,0.04)',
-          border: '1px solid rgba(255,255,255,0.2)'
+          padding: '0',
+          marginBottom: '24px',
+          border: '0.5px solid rgba(0,0,0,0.04)',
+          overflow: 'hidden'
         },
-        stepHeader: { 
-          display: 'flex', 
-          alignItems: 'center', 
-          gap: '12px', 
-          marginBottom: '20px' 
+        cardHeader: {
+          padding: '24px 24px 20px',
+          borderBottom: '0.5px solid rgba(0,0,0,0.05)'
         },
-        stepNumber: { 
-          background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)', 
-          color: 'white', 
-          width: '28px', 
-          height: '28px', 
-          borderRadius: '50%', 
-          display: 'flex', 
-          alignItems: 'center', 
-          justifyContent: 'center', 
-          fontSize: '13px', 
-          fontWeight: '700',
-          boxShadow: '0 2px 8px rgba(59, 130, 246, 0.3)'
-        },
-        stepTitle: {
-          fontSize: '17px', 
-          fontWeight: '600',
-          color: '#1e293b'
+        cardContent: {
+          padding: '24px'
         },
         button: { 
-          padding: '16px', 
-          background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)', 
+          padding: '16px 24px', 
+          background: '#007aff', 
           color: 'white', 
           border: 'none', 
           borderRadius: '12px', 
-          fontSize: '16px', 
+          fontSize: '17px', 
           fontWeight: '600', 
           width: '100%',
-          boxShadow: '0 4px 16px rgba(59, 130, 246, 0.3)',
-          transition: 'all 0.2s ease',
-          cursor: 'pointer'
+          transition: 'all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+          cursor: 'pointer',
+          fontFamily: 'inherit'
+        },
+        buttonSecondary: {
+          background: '#f2f2f7',
+          color: '#007aff',
+          border: '0.5px solid rgba(0,0,0,0.04)'
         },
         grid2: { 
           display: 'grid', 
@@ -241,61 +251,39 @@
         grid3: { 
           display: 'grid', 
           gridTemplateColumns: 'repeat(3, 1fr)', 
-          gap: '10px' 
+          gap: '12px' 
         },
-        // 位置相关样式
-        locationCard: {
-          padding: '18px', 
-          background: 'linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 50%, #f0f9ff 100%)', 
-          border: '2px solid #3b82f6', 
-          borderRadius: '14px', 
-          marginBottom: '20px',
-          position: 'relative',
-          overflow: 'hidden'
-        },
-        locationText: {
-          position: 'relative',
-          zIndex: 2
-        },
-        locationBg: {
-          position: 'absolute', 
-          top: '-30%', 
-          right: '-15%', 
-          width: '80px', 
-          height: '80px', 
-          background: 'radial-gradient(circle, rgba(59, 130, 246, 0.15) 0%, transparent 70%)',
-          borderRadius: '50%'
-        },
-        // 模态框样式
         modal: { 
           position: 'fixed', 
           top: 0, 
           left: 0, 
           right: 0, 
           bottom: 0, 
-          background: 'rgba(0,0,0,0.6)', 
+          background: 'rgba(0,0,0,0.4)', 
           display: 'flex', 
-          alignItems: 'flex-end', 
-          zIndex: 100,
-          backdropFilter: 'blur(4px)',
-          WebkitBackdropFilter: 'blur(4px)'
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '20px',
+          zIndex: 1000,
+          backdropFilter: 'blur(8px)',
+          WebkitBackdropFilter: 'blur(8px)'
         },
         modalContent: { 
-          background: 'linear-gradient(180deg, white 0%, #f8fafc 100%)', 
-          borderRadius: '24px 24px 0 0', 
-          padding: '24px 20px 32px', 
+          background: 'white', 
+          borderRadius: '20px', 
+          padding: '32px 24px', 
           width: '100%',
-          boxShadow: '0 -8px 32px rgba(0,0,0,0.15)',
+          maxWidth: '400px',
           maxHeight: '80vh',
           overflowY: 'auto'
         },
         input: { 
           width: '100%', 
-          padding: '14px 16px', 
-          border: '2px solid #e2e8f0', 
+          padding: '16px 20px', 
+          border: '0.5px solid #d1d1d6', 
           borderRadius: '12px', 
-          fontSize: '15px', 
-          marginBottom: '12px', 
+          fontSize: '17px', 
+          marginBottom: '16px', 
           outline: 'none',
           transition: 'all 0.2s ease',
           fontFamily: 'inherit',
@@ -306,43 +294,93 @@
           bottom: 0, 
           left: 0, 
           right: 0, 
-          padding: '16px', 
-          background: 'linear-gradient(180deg, rgba(255,255,255,0.95) 0%, rgba(248,250,252,0.98) 100%)',
-          backdropFilter: 'blur(20px)',
-          WebkitBackdropFilter: 'blur(20px)',
-          boxShadow: '0 -1px 3px rgba(0,0,0,0.05), 0 -4px 16px rgba(0,0,0,0.04)',
-          borderTop: '1px solid rgba(226, 232, 240, 0.3)'
+          padding: '20px', 
+          background: 'rgba(255, 255, 255, 0.8)',
+          backdropFilter: 'saturate(180%) blur(20px)',
+          WebkitBackdropFilter: 'saturate(180%) blur(20px)',
+          borderTop: '0.5px solid rgba(0,0,0,0.05)'
         }
       };
 
-      // 组件：选择项
-      const SelectableItem = ({ 
+      // Apple风格选择组件
+      const SelectableCard = ({ 
         selected, 
         onClick, 
         children, 
-        variant = 'default',
+        size = 'medium',
         disabled = false 
       }) => (
         <div 
           onClick={disabled ? undefined : onClick}
           style={{
-            padding: variant === 'large' ? '18px 16px' : '14px 12px',
+            padding: size === 'large' ? '20px' : size === 'small' ? '16px' : '18px',
             borderRadius: '12px',
             cursor: disabled ? 'not-allowed' : 'pointer',
-            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-            border: '2px solid',
-            borderColor: selected ? '#3b82f6' : 'rgba(226, 232, 240, 0.8)',
-            background: selected 
-              ? 'linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%)' 
-              : 'linear-gradient(145deg, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.6) 100%)',
-            transform: selected ? 'translateY(-1px)' : 'translateY(0)',
-            boxShadow: selected 
-              ? '0 6px 20px rgba(59, 130, 246, 0.15)' 
-              : '0 2px 8px rgba(0,0,0,0.04)',
+            transition: 'all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+            border: '0.5px solid',
+            borderColor: selected ? '#007aff' : 'rgba(0,0,0,0.08)',
+            background: selected ? '#007aff' : 'white',
+            color: selected ? 'white' : '#1d1d1f',
+            transform: selected ? 'scale(0.98)' : 'scale(1)',
             opacity: disabled ? 0.5 : 1
           }}
         >
           {children}
+        </div>
+      );
+
+      // 位置卡片组件
+      const LocationCard = () => (
+        <div 
+          onClick={() => setShowCitySelect(true)}
+          style={{
+            background: 'white',
+            borderRadius: '16px',
+            padding: '20px',
+            marginBottom: '24px',
+            border: '0.5px solid rgba(0,0,0,0.04)',
+            cursor: 'pointer',
+            transition: 'all 0.2s ease',
+            position: 'relative',
+            overflow: 'hidden'
+          }}
+          onMouseOver={(e) => {
+            e.currentTarget.style.transform = 'translateY(-2px)';
+            e.currentTarget.style.boxShadow = '0 8px 25px rgba(0,0,0,0.1)';
+          }}
+          onMouseOut={(e) => {
+            e.currentTarget.style.transform = 'translateY(0)';
+            e.currentTarget.style.boxShadow = 'none';
+          }}
+        >
+          <div style={{ position: 'relative', zIndex: 2 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+              <span style={{ fontSize: '20px' }}>📍</span>
+              <span style={{ fontSize: '20px', fontWeight: '600', color: '#1d1d1f' }}>
+                {selectedCity} · {selectedDistrict}
+              </span>
+              <div style={{ 
+                width: '8px', 
+                height: '8px', 
+                background: '#30d158', 
+                borderRadius: '50%',
+                marginLeft: 'auto'
+              }} className="pulse"></div>
+            </div>
+            <div style={{ fontSize: '15px', color: '#86868b', display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <span>{currentCityData.weather} {currentCityData.temp}</span>
+              <span>适宜出行</span>
+            </div>
+          </div>
+          <div style={{
+            position: 'absolute',
+            top: '-20px',
+            right: '-20px',
+            width: '60px',
+            height: '60px',
+            background: 'linear-gradient(135deg, #007aff20, #007aff10)',
+            borderRadius: '50%'
+          }}></div>
         </div>
       );
 
@@ -352,214 +390,169 @@
             {/* 头部 */}
             <div style={styles.header}>
               <div style={styles.logo}>
-                <span style={{ color: '#1e293b' }}>Fun</span>
-                <span style={{ color: '#3b82f6' }}>Go</span>
-                <span style={{ 
-                  display: 'inline-block', 
-                  width: '8px', 
-                  height: '8px', 
-                  background: 'linear-gradient(135deg, #f97316 0%, #ea580c 100%)', 
-                  borderRadius: '50%', 
-                  marginLeft: '3px', 
-                  verticalAlign: 'super',
-                  boxShadow: '0 2px 4px rgba(249, 115, 22, 0.3)'
-                }} className="bounce"></span>
+                <span style={{ color: '#1d1d1f' }}>Fun</span>
+                <span style={{ color: '#007aff' }}>Go</span>
               </div>
               <div style={styles.subtitle}>
                 和毛孩子一起探索世界
               </div>
             </div>
 
-            <div style={{ padding: '16px' }}>
-              {/* 步骤1：选择出行类型 */}
-              <div style={styles.card}>
-                <div style={styles.stepHeader}>
-                  <span style={styles.stepNumber}>1</span>
-                  <span style={styles.stepTitle}>选择出行类型</span>
-                </div>
+            <div style={styles.content}>
+              {/* 出行类型 */}
+              <div style={styles.section}>
+                <div style={styles.sectionTitle}>出行类型</div>
                 <div style={styles.grid2}>
                   {[
                     { type: 'local', icon: '🏠', label: '本地游', desc: '周边游玩' },
                     { type: 'travel', icon: '✈️', label: '长途游', desc: '跨城旅行' }
                   ].map(item => (
-                    <SelectableItem 
+                    <SelectableCard 
                       key={item.type}
                       selected={tripType === item.type}
                       onClick={() => handleTripTypeChange(item.type)}
-                      variant="large"
+                      size="large"
                     >
                       <div style={{ textAlign: 'center' }}>
-                        <div style={{ fontSize: '28px', marginBottom: '8px' }}>{item.icon}</div>
-                        <div style={{ fontSize: '14px', fontWeight: '600', marginBottom: '4px', color: '#1e293b' }}>
+                        <div style={{ fontSize: '32px', marginBottom: '12px' }}>{item.icon}</div>
+                        <div style={{ fontSize: '17px', fontWeight: '600', marginBottom: '4px' }}>
                           {item.label}
                         </div>
-                        <div style={{ fontSize: '12px', color: '#64748b' }}>{item.desc}</div>
+                        <div style={{ fontSize: '13px', opacity: 0.7 }}>{item.desc}</div>
                       </div>
-                    </SelectableItem>
+                    </SelectableCard>
                   ))}
                 </div>
               </div>
 
-              {/* 步骤2：位置选择 */}
-              <div style={styles.card}>
-                <div style={styles.stepHeader}>
-                  <span style={styles.stepNumber}>2</span>
-                  <span style={styles.stepTitle}>
-                    {tripType === 'local' ? '确认所在位置' : '选择目的地'}
-                  </span>
+              {/* 位置选择 */}
+              <div style={styles.section}>
+                <div style={styles.sectionTitle}>
+                  {tripType === 'local' ? '确认所在位置' : '选择目的地'}
                 </div>
 
                 {tripType === 'local' ? (
                   <div>
-                    <div style={styles.locationCard} onClick={() => setShowCitySelect(true)}>
-                      <div style={styles.locationBg}></div>
-                      <div style={styles.locationText}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-                          <span style={{ fontSize: '16px' }}>📍</span>
-                          <span style={{ fontSize: '16px', fontWeight: '600', color: '#1e293b' }}>
-                            {selectedCity} · {selectedDistrict}
-                          </span>
-                          <span className="pulse" style={{ 
-                            width: '6px', 
-                            height: '6px', 
-                            background: '#10b981', 
-                            borderRadius: '50%',
-                            display: 'inline-block'
-                          }}></span>
-                        </div>
-                        <div style={{ fontSize: '13px', color: '#64748b', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                          <span>{currentCityData.weather} {currentCityData.temp}</span>
-                          <span>适宜出行</span>
-                          <span style={{ color: '#3b82f6', fontSize: '12px' }}>点击切换</span>
-                        </div>
+                    <LocationCard />
+                    
+                    <div style={{ marginBottom: '16px' }}>
+                      <div style={{ fontSize: '17px', fontWeight: '600', marginBottom: '16px', color: '#1d1d1f' }}>
+                        想要什么样的体验？
                       </div>
-                    </div>
-
-                    {/* 兴趣偏好 */}
-                    <div style={{ fontSize: '15px', fontWeight: '600', marginBottom: '16px', color: '#1e293b' }}>
-                      想要什么样的体验？
-                    </div>
-                    <div style={styles.grid3}>
-                      {CONFIG.interests.map(item => (
-                        <SelectableItem 
-                          key={item.id}
-                          selected={preferences.includes(item.label)}
-                          onClick={() => handleToggleInterest(item.label)}
+                      <div style={styles.grid3}>
+                        {CONFIG.interests.map(item => (
+                          <SelectableCard 
+                            key={item.id}
+                            selected={preferences.includes(item.label)}
+                            onClick={() => handleToggleInterest(item.label)}
+                            size="small"
+                          >
+                            <div style={{ textAlign: 'center' }}>
+                              <div style={{ fontSize: '24px', marginBottom: '8px' }}>{item.icon}</div>
+                              <div style={{ fontSize: '12px', fontWeight: '500', lineHeight: '1.2' }}>
+                                {item.label}
+                              </div>
+                            </div>
+                          </SelectableCard>
+                        ))}
+                        
+                        <SelectableCard 
+                          selected={false}
+                          onClick={() => setShowCustomInterest(true)}
+                          size="small"
                         >
                           <div style={{ textAlign: 'center' }}>
-                            <div style={{ fontSize: '20px', marginBottom: '6px' }}>{item.icon}</div>
-                            <div style={{ 
-                              fontSize: '11px', 
-                              fontWeight: '500',
-                              color: preferences.includes(item.label) ? '#1e293b' : '#64748b'
-                            }}>
-                              {item.label}
+                            <div style={{ fontSize: '24px', marginBottom: '8px', color: '#007aff' }}>➕</div>
+                            <div style={{ fontSize: '12px', fontWeight: '500', color: '#007aff', lineHeight: '1.2' }}>
+                              自定义
                             </div>
                           </div>
-                        </SelectableItem>
-                      ))}
-                      
-                      {/* 自定义兴趣按钮 */}
-                      <SelectableItem 
-                        selected={false}
-                        onClick={() => setShowCustomInterest(true)}
-                      >
-                        <div style={{ textAlign: 'center' }}>
-                          <div style={{ fontSize: '20px', marginBottom: '6px', color: '#3b82f6' }}>➕</div>
-                          <div style={{ fontSize: '11px', fontWeight: '500', color: '#3b82f6' }}>
-                            自定义
-                          </div>
-                        </div>
-                      </SelectableItem>
+                        </SelectableCard>
+                      </div>
                     </div>
                   </div>
                 ) : (
                   <div>
-                    {/* 目的地选择 */}
-                    <div style={{ fontSize: '15px', fontWeight: '600', marginBottom: '16px', color: '#1e293b' }}>
-                      热门目的地
-                    </div>
-                    <div style={styles.grid2}>
-                      {CONFIG.cities.major.slice(0, 6).map(city => (
-                        <SelectableItem 
-                          key={city.name}
-                          selected={selectedCity === city.name}
-                          onClick={() => setSelectedCity(city.name)}
-                        >
-                          <div>
-                            <div style={{ fontWeight: '600', fontSize: '15px', marginBottom: '4px', color: '#1e293b' }}>
-                              {city.name}
+                    <div style={{ marginBottom: '24px' }}>
+                      <div style={styles.grid2}>
+                        {CONFIG.cities.major.slice(0, 6).map(city => (
+                          <SelectableCard 
+                            key={city.name}
+                            selected={selectedCity === city.name}
+                            onClick={() => setSelectedCity(city.name)}
+                          >
+                            <div>
+                              <div style={{ fontWeight: '600', fontSize: '17px', marginBottom: '4px' }}>
+                                {city.name}
+                              </div>
+                              <div style={{ fontSize: '13px', opacity: 0.7 }}>
+                                {city.weather} {city.temp}
+                              </div>
                             </div>
-                            <div style={{ fontSize: '12px', color: '#64748b' }}>
-                              {city.weather} {city.temp}
-                            </div>
-                          </div>
-                        </SelectableItem>
-                      ))}
+                          </SelectableCard>
+                        ))}
+                      </div>
                     </div>
 
-                    {/* 出行天数 */}
-                    <div style={{ fontSize: '15px', fontWeight: '600', margin: '24px 0 16px', color: '#1e293b' }}>
-                      预计出行天数
-                    </div>
-                    <div style={styles.grid2}>
-                      {CONFIG.durations.map(item => (
-                        <SelectableItem 
-                          key={item.value}
-                          selected={duration === item.value}
-                          onClick={() => setDuration(item.value)}
-                        >
-                          <div>
-                            <div style={{ fontWeight: '600', fontSize: '15px', marginBottom: '4px', color: '#1e293b' }}>
-                              {item.label}
+                    <div>
+                      <div style={{ fontSize: '17px', fontWeight: '600', marginBottom: '16px', color: '#1d1d1f' }}>
+                        预计出行天数
+                      </div>
+                      <div style={styles.grid2}>
+                        {CONFIG.durations.map(item => (
+                          <SelectableCard 
+                            key={item.value}
+                            selected={duration === item.value}
+                            onClick={() => setDuration(item.value)}
+                          >
+                            <div>
+                              <div style={{ fontWeight: '600', fontSize: '17px', marginBottom: '4px' }}>
+                                {item.label}
+                              </div>
+                              <div style={{ fontSize: '13px', opacity: 0.7 }}>
+                                {item.desc}
+                              </div>
                             </div>
-                            <div style={{ fontSize: '12px', color: '#64748b' }}>
-                              {item.desc}
-                            </div>
-                          </div>
-                        </SelectableItem>
-                      ))}
+                          </SelectableCard>
+                        ))}
+                      </div>
                     </div>
                   </div>
                 )}
               </div>
 
-              {/* 步骤3：宠物信息 */}
-              <div style={styles.card}>
-                <div style={styles.stepHeader}>
-                  <span style={styles.stepNumber}>3</span>
-                  <span style={styles.stepTitle}>确认同行伙伴</span>
-                </div>
+              {/* 宠物信息 */}
+              <div style={styles.section}>
+                <div style={styles.sectionTitle}>同行伙伴</div>
                 
                 {pets.map(pet => (
                   <div key={pet.id} style={{
                     display: 'flex', 
                     alignItems: 'center', 
-                    gap: '14px', 
-                    padding: '16px',
-                    background: 'linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%)', 
-                    borderRadius: '12px', 
+                    gap: '16px', 
+                    padding: '20px',
+                    background: 'white', 
+                    borderRadius: '16px', 
                     marginBottom: '12px',
-                    border: '1px solid rgba(56, 189, 248, 0.2)'
+                    border: '0.5px solid rgba(0,0,0,0.04)'
                   }}>
                     <div style={{
-                      fontSize: '24px', 
-                      width: '48px', 
-                      height: '48px', 
-                      background: 'white', 
+                      fontSize: '28px', 
+                      width: '56px', 
+                      height: '56px', 
+                      background: '#f2f2f7', 
                       borderRadius: '50%', 
                       display: 'flex', 
                       alignItems: 'center', 
-                      justifyContent: 'center',
-                      boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+                      justifyContent: 'center'
                     }}>
                       {pet.emoji}
                     </div>
                     <div style={{ flex: 1 }}>
-                      <div style={{ fontSize: '15px', fontWeight: '600', marginBottom: '2px', color: '#1e293b' }}>
+                      <div style={{ fontSize: '17px', fontWeight: '600', marginBottom: '4px', color: '#1d1d1f' }}>
                         {pet.name}
                       </div>
-                      <div style={{ fontSize: '12px', color: '#64748b' }}>
+                      <div style={{ fontSize: '15px', color: '#86868b' }}>
                         {pet.type} · {pet.weight}
                       </div>
                     </div>
@@ -569,17 +562,15 @@
                         style={{ 
                           background: 'none', 
                           border: 'none', 
-                          color: '#ef4444', 
-                          fontSize: '18px',
+                          color: '#ff3b30', 
+                          fontSize: '20px',
                           cursor: 'pointer',
                           padding: '8px',
                           borderRadius: '8px',
                           transition: 'background 0.2s ease'
                         }}
-                        onMouseOver={(e) => e.target.style.background = 'rgba(239, 68, 68, 0.1)'}
-                        onMouseOut={(e) => e.target.style.background = 'none'}
                       >
-                        ✕
+                        ×
                       </button>
                     )}
                   </div>
@@ -588,26 +579,8 @@
                 <button 
                   onClick={() => setShowAddPet(true)} 
                   style={{
-                    width: '100%', 
-                    padding: '16px', 
-                    background: 'transparent', 
-                    border: '2px dashed #cbd5e1',
-                    borderRadius: '12px', 
-                    color: '#64748b', 
-                    fontSize: '14px', 
-                    fontWeight: '500',
-                    cursor: 'pointer',
-                    transition: 'all 0.2s ease'
-                  }}
-                  onMouseOver={(e) => {
-                    e.target.style.borderColor = '#3b82f6';
-                    e.target.style.color = '#3b82f6';
-                    e.target.style.background = 'rgba(59, 130, 246, 0.05)';
-                  }}
-                  onMouseOut={(e) => {
-                    e.target.style.borderColor = '#cbd5e1';
-                    e.target.style.color = '#64748b';
-                    e.target.style.background = 'transparent';
+                    ...styles.button,
+                    ...styles.buttonSecondary
                   }}
                 >
                   + 添加宠物
@@ -622,26 +595,9 @@
                 disabled={!isFormValid} 
                 style={{
                   ...styles.button,
-                  background: isFormValid 
-                    ? 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)' 
-                    : 'linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%)',
-                  color: isFormValid ? 'white' : '#94a3b8',
-                  cursor: isFormValid ? 'pointer' : 'not-allowed',
-                  boxShadow: isFormValid 
-                    ? '0 4px 16px rgba(59, 130, 246, 0.3)' 
-                    : '0 2px 8px rgba(0,0,0,0.1)'
-                }}
-                onMouseOver={(e) => {
-                  if (isFormValid) {
-                    e.target.style.transform = 'translateY(-1px)';
-                    e.target.style.boxShadow = '0 6px 20px rgba(59, 130, 246, 0.4)';
-                  }
-                }}
-                onMouseOut={(e) => {
-                  e.target.style.transform = 'translateY(0)';
-                  e.target.style.boxShadow = isFormValid 
-                    ? '0 4px 16px rgba(59, 130, 246, 0.3)' 
-                    : '0 2px 8px rgba(0,0,0,0.1)';
+                  background: isFormValid ? '#007aff' : '#d1d1d6',
+                  color: isFormValid ? 'white' : '#86868b',
+                  cursor: isFormValid ? 'pointer' : 'not-allowed'
                 }}
               >
                 {loading ? (
@@ -656,7 +612,7 @@
                     生成中...
                   </div>
                 ) : (
-                  <>✨ 生成旅行方案</>
+                  '生成旅行方案'
                 )}
               </button>
             </div>
@@ -666,20 +622,18 @@
               <div style={styles.modal} onClick={(e) => e.target === e.currentTarget && setShowAddPet(false)}>
                 <div style={styles.modalContent}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-                    <h3 style={{ fontSize: '18px', fontWeight: '700', color: '#1e293b' }}>添加宠物</h3>
+                    <h3 style={{ fontSize: '20px', fontWeight: '600', color: '#1d1d1f' }}>添加宠物</h3>
                     <button 
                       onClick={() => setShowAddPet(false)} 
                       style={{ 
                         background: 'none', 
                         border: 'none', 
-                        fontSize: '20px', 
-                        color: '#64748b',
-                        cursor: 'pointer',
-                        padding: '4px',
-                        borderRadius: '4px'
+                        fontSize: '24px', 
+                        color: '#86868b',
+                        cursor: 'pointer'
                       }}
                     >
-                      ✕
+                      ×
                     </button>
                   </div>
                   <input 
@@ -688,8 +642,6 @@
                     value={newPet.name} 
                     onChange={(e) => setNewPet({...newPet, name: e.target.value})} 
                     style={styles.input}
-                    onFocus={(e) => e.target.style.borderColor = '#3b82f6'}
-                    onBlur={(e) => e.target.style.borderColor = '#e2e8f0'}
                   />
                   <input 
                     type="text" 
@@ -697,8 +649,6 @@
                     value={newPet.type} 
                     onChange={(e) => setNewPet({...newPet, type: e.target.value})} 
                     style={styles.input}
-                    onFocus={(e) => e.target.style.borderColor = '#3b82f6'}
-                    onBlur={(e) => e.target.style.borderColor = '#e2e8f0'}
                   />
                   <input 
                     type="text" 
@@ -706,15 +656,10 @@
                     value={newPet.weight} 
                     onChange={(e) => setNewPet({...newPet, weight: e.target.value})} 
                     style={styles.input}
-                    onFocus={(e) => e.target.style.borderColor = '#3b82f6'}
-                    onBlur={(e) => e.target.style.borderColor = '#e2e8f0'}
                   />
                   <button 
                     onClick={handleAddPet} 
-                    style={{
-                      ...styles.button,
-                      marginTop: '8px'
-                    }}
+                    style={styles.button}
                   >
                     确认添加
                   </button>
@@ -727,20 +672,18 @@
               <div style={styles.modal} onClick={(e) => e.target === e.currentTarget && setShowCustomInterest(false)}>
                 <div style={styles.modalContent}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-                    <h3 style={{ fontSize: '18px', fontWeight: '700', color: '#1e293b' }}>添加自定义体验</h3>
+                    <h3 style={{ fontSize: '20px', fontWeight: '600', color: '#1d1d1f' }}>添加自定义体验</h3>
                     <button 
                       onClick={() => setShowCustomInterest(false)} 
                       style={{ 
                         background: 'none', 
                         border: 'none', 
-                        fontSize: '20px', 
-                        color: '#64748b',
-                        cursor: 'pointer',
-                        padding: '4px',
-                        borderRadius: '4px'
+                        fontSize: '24px', 
+                        color: '#86868b',
+                        cursor: 'pointer'
                       }}
                     >
-                      ✕
+                      ×
                     </button>
                   </div>
                   <input 
@@ -749,16 +692,11 @@
                     value={customInterest} 
                     onChange={(e) => setCustomInterest(e.target.value)} 
                     style={styles.input}
-                    onFocus={(e) => e.target.style.borderColor = '#3b82f6'}
-                    onBlur={(e) => e.target.style.borderColor = '#e2e8f0'}
                     onKeyPress={(e) => e.key === 'Enter' && handleAddCustomInterest()}
                   />
                   <button 
                     onClick={handleAddCustomInterest} 
-                    style={{
-                      ...styles.button,
-                      marginTop: '8px'
-                    }}
+                    style={styles.button}
                   >
                     添加体验
                   </button>
@@ -766,119 +704,4 @@
               </div>
             )}
 
-            {/* 模态框：城市选择 */}
-            {showCitySelect && (
-              <div style={styles.modal} onClick={(e) => e.target === e.currentTarget && setShowCitySelect(false)}>
-                <div style={styles.modalContent}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-                    <h3 style={{ fontSize: '18px', fontWeight: '700', color: '#1e293b' }}>选择所在位置</h3>
-                    <button 
-                      onClick={() => setShowCitySelect(false)} 
-                      style={{ 
-                        background: 'none', 
-                        border: 'none', 
-                        fontSize: '20px', 
-                        color: '#64748b',
-                        cursor: 'pointer',
-                        padding: '4px',
-                        borderRadius: '4px'
-                      }}
-                    >
-                      ✕
-                    </button>
-                  </div>
-                  
-                  <div style={{ maxHeight: '50vh', overflowY: 'auto' }}>
-                    {CONFIG.cities.major.map(city => (
-                      <div key={city.name} style={{ marginBottom: '16px' }}>
-                        <div style={{ fontSize: '16px', fontWeight: '600', marginBottom: '8px', color: '#1e293b' }}>
-                          {city.name} {city.weather} {city.temp}
-                        </div>
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '8px' }}>
-                          {city.districts.map(district => (
-                            <button
-                              key={district}
-                              onClick={() => handleCitySelect(city.name, district)}
-                              style={{
-                                padding: '12px',
-                                background: selectedCity === city.name && selectedDistrict === district 
-                                  ? 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)' 
-                                  : 'white',
-                                color: selectedCity === city.name && selectedDistrict === district ? 'white' : '#1e293b',
-                                border: '1px solid #e2e8f0',
-                                borderRadius: '8px',
-                                fontSize: '14px',
-                                fontWeight: '500',
-                                cursor: 'pointer',
-                                transition: 'all 0.2s ease'
-                              }}
-                              onMouseOver={(e) => {
-                                if (!(selectedCity === city.name && selectedDistrict === district)) {
-                                  e.target.style.background = '#f1f5f9';
-                                }
-                              }}
-                              onMouseOut={(e) => {
-                                if (!(selectedCity === city.name && selectedDistrict === district)) {
-                                  e.target.style.background = 'white';
-                                }
-                              }}
-                            >
-                              {district}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-        );
-      }
-
-      // Results page placeholder
-      if (page === 'results') {
-        return (
-          <div style={styles.container}>
-            <div style={styles.header}>
-              <div style={styles.logo}>
-                <span style={{ color: '#1e293b' }}>Fun</span>
-                <span style={{ color: '#3b82f6' }}>Go</span>
-              </div>
-              <div style={styles.subtitle}>
-                为您生成的旅行方案
-              </div>
-            </div>
-            
-            <div style={{ padding: '16px', textAlign: 'center', marginTop: '100px' }}>
-              <div style={{ fontSize: '48px', marginBottom: '16px' }}>🎉</div>
-              <div style={{ fontSize: '18px', fontWeight: '600', marginBottom: '8px', color: '#1e293b' }}>
-                旅行方案生成成功！
-              </div>
-              <div style={{ fontSize: '14px', color: '#64748b', marginBottom: '24px' }}>
-                基于您的需求，我们为您和{pets[0]?.name}精心规划了行程
-              </div>
-              <button 
-                onClick={() => setPage('planning')} 
-                style={{
-                  ...styles.button,
-                  maxWidth: '200px',
-                  margin: '0 auto'
-                }}
-              >
-                返回修改
-              </button>
-            </div>
-          </div>
-        );
-      }
-
-      return null;
-    };
-
-    const root = ReactDOM.createRoot(document.getElementById('root'));
-    root.render(<App />);
-  </script>
-</body>
-</html>
+            {/* 模态框：城市选择
