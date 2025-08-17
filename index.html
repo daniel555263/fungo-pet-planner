@@ -2,16 +2,28 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>FunGo 宠物旅行规划器</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#0a0a0a">
+  <title>FunGo - AI宠物旅行</title>
   <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    .spin { animation: spin 1s linear infinite; }
+    * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    body { 
+      font-family: -apple-system, "SF Pro Display", sans-serif; 
+      background: #0a0a0a;
+      color: #fff;
+      overscroll-behavior: none;
+      -webkit-font-smoothing: antialiased;
+    }
+    ::-webkit-scrollbar { display: none; }
+    .fade { animation: fadeIn 0.5s ease; }
+    .slide { animation: slideUp 0.3s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } }
+    @keyframes slideUp { from { transform: translateY(100%); } }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+    .pulse { animation: pulse 1.5s infinite; }
   </style>
 </head>
 <body>
@@ -20,251 +32,197 @@
     const { useState } = React;
 
     const App = () => {
-      const [page, setPage] = useState('planning');
-      const [selectedCity, setSelectedCity] = useState('深圳');
-      const [tripType, setTripType] = useState('local');
-      const [pets, setPets] = useState([{ id: 1, name: '旺财', type: '金毛', emoji: '🐕', weight: '25kg' }]);
-      const [preferences, setPreferences] = useState(['海滨休闲']);
-      const [showAddPet, setShowAddPet] = useState(false);
-      const [newPet, setNewPet] = useState({ name: '', type: '', weight: '' });
-      const [trips, setTrips] = useState([]);
-      const [selectedTrip, setSelectedTrip] = useState(null);
+      const [screen, setScreen] = useState('home');
+      const [data, setData] = useState({
+        city: '深圳',
+        type: '',
+        pets: [],
+        tags: []
+      });
+      const [modal, setModal] = useState(null);
+      const [newPet, setNewPet] = useState({ name: '', type: '' });
       const [loading, setLoading] = useState(false);
+      const [selectedPlan, setSelectedPlan] = useState(null);
 
-      const cities = [
-        { name: '北京', weather: '☀️', temp: '24°C' },
-        { name: '上海', weather: '⛅', temp: '26°C' },
-        { name: '杭州', weather: '🌦️', temp: '22°C' },
-        { name: '成都', weather: '☁️', temp: '20°C' }
-      ];
-
-      const interests = [
-        { id: 'beach', label: '玩水嬉戏', icon: '🏖️' },
-        { id: 'run', label: '狗狗奔跑', icon: '🏃' },
-        { id: 'cafe', label: '喝下午茶', icon: '☕' },
-        { id: 'park', label: '公园漫步', icon: '🌳' },
-        { id: 'photo', label: '拍照打卡', icon: '📸' },
-        { id: 'food', label: '美食探店', icon: '🍽️' }
-      ];
-
-      const mockTrips = [
+      const plans = [
         {
           id: 1,
-          title: '深圳湾公园宠物友好半日游',
-          subtitle: '海滨休闲 · 适合大型犬',
-          duration: '3-4小时',
-          distance: '12km',
-          image: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400',
-          highlights: ['沙滩玩水', '海景步道', '宠物友好'],
-          rating: 4.8,
-          reviews: 1240,
-          hot: '小红书推荐',
-          details: {
-            why: ['🌊 9公里海岸线', '🏖️ 宠物活动区', '🚗 停车便利', '💧 饮水设施'],
-            tips: ['下午4点后前往', '带饮用水', '注意防晒', '清洁脚掌'],
-            facilities: ['免费停车', '饮水点', '垃圾袋', '清洁区'],
-            bestTime: '16:00-18:30',
-            crowd: '周末较多'
-          }
+          name: '深圳湾漫步',
+          tag: 'HOT',
+          time: '3h',
+          level: '轻松',
+          img: 'https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=400',
+          feat: ['海岸线', '宠物区', '日落'],
+          score: 4.9,
+          why: ['9km海岸步道', '专属宠物区域', '免费停车场', '饮水设施完善'],
+          tips: ['下午4点后最佳', '带好饮用水', '注意防晒']
         },
         {
           id: 2,
-          title: '莲花山公园城市探索',
-          subtitle: '都市探索 · 适合拍照',
-          duration: '2-3小时',
-          distance: '8km',
-          image: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=400',
-          highlights: ['山顶观景', '城市全景', '拍照打卡'],
-          rating: 4.6,
-          reviews: 856,
-          hot: '深圳必去',
-          details: {
-            why: ['🏔️ 深圳制高点', '🐕 山路平缓', '📸 观景平台', '🌳 空气清新'],
-            tips: ['带水和零食', '注意安全', '早晚光线佳', '工作日人少'],
-            facilities: ['免费入园', '休息亭', '观景台', '饮水点'],
-            bestTime: '08:00-10:00',
-            crowd: '工作日少'
-          }
+          name: '莲花山观景',
+          tag: 'VIEW',
+          time: '2h',
+          level: '适中',
+          img: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400',
+          feat: ['城市全景', '拍照圣地', '山顶草坪'],
+          score: 4.7,
+          why: ['360度城市景观', '适合各体型宠物', '多个观景平台', '空气清新'],
+          tips: ['早晚光线最佳', '带水和零食', '工作日人少']
         }
       ];
 
-      const generateTrips = () => {
-        if (!selectedCity || !tripType || pets.length === 0) return;
+      const tags = [
+        { id: 'sea', name: '海边', icon: '🌊' },
+        { id: 'park', name: '公园', icon: '🌳' },
+        { id: 'cafe', name: '咖啡', icon: '☕' },
+        { id: 'camp', name: '露营', icon: '🏕️' },
+        { id: 'city', name: '城市', icon: '🏙️' },
+        { id: 'photo', name: '拍照', icon: '📸' }
+      ];
+
+      const generatePlans = () => {
         setLoading(true);
         setTimeout(() => {
-          setTrips(mockTrips);
           setLoading(false);
-          setPage('results');
+          setScreen('plans');
         }, 1500);
       };
 
-      const addPet = () => {
-        if (newPet.name && newPet.type && newPet.weight) {
-          setPets([...pets, { ...newPet, id: Date.now(), emoji: '🐕' }]);
-          setNewPet({ name: '', type: '', weight: '' });
-          setShowAddPet(false);
-        }
-      };
-
-      const toggleInterest = (id) => {
-        const label = interests.find(i => i.id === id).label;
-        setPreferences(prev => 
-          prev.includes(label) ? prev.filter(p => p !== label) : [...prev, label]
-        );
-      };
-
       const s = {
-        container: { background: '#f8fafc', minHeight: '100vh', paddingBottom: '80px' },
-        header: { background: 'white', padding: '16px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)', position: 'sticky', top: 0, zIndex: 10 },
-        logo: { fontSize: '24px', fontWeight: '800', textAlign: 'center' },
-        card: { background: 'white', borderRadius: '12px', padding: '16px', marginBottom: '12px' },
-        step: { display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px' },
-        stepNum: { background: '#3b82f6', color: 'white', width: '24px', height: '24px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: '700' },
-        btn: { padding: '12px', background: '#3b82f6', color: 'white', border: 'none', borderRadius: '8px', fontSize: '14px', fontWeight: '600', width: '100%' },
-        btnOutline: { padding: '12px', background: 'white', color: '#3b82f6', border: '2px solid #3b82f6', borderRadius: '8px', fontSize: '14px', fontWeight: '600' },
-        bottom: { position: 'fixed', bottom: 0, left: 0, right: 0, padding: '12px', background: 'white', boxShadow: '0 -2px 10px rgba(0,0,0,0.08)' },
-        modal: { position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'flex-end', zIndex: 100 },
-        modalContent: { background: 'white', borderRadius: '20px 20px 0 0', padding: '20px 16px', width: '100%' },
-        input: { width: '100%', padding: '10px', border: '2px solid #e2e8f0', borderRadius: '8px', fontSize: '14px', marginBottom: '10px', outline: 'none' },
-        grid2: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' },
-        grid3: { display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px' }
+        page: { minHeight: '100vh', background: '#0a0a0a', paddingBottom: '100px' },
+        header: { padding: '20px', background: 'linear-gradient(180deg, #0a0a0a, transparent)' },
+        title: { fontSize: '32px', fontWeight: '800', background: 'linear-gradient(135deg, #60a5fa, #a78bfa)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' },
+        card: { background: 'rgba(255,255,255,0.04)', backdropFilter: 'blur(10px)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '20px', padding: '20px', marginBottom: '12px' },
+        btn: { width: '100%', padding: '16px', background: 'linear-gradient(135deg, #60a5fa, #a78bfa)', color: '#fff', border: 'none', borderRadius: '14px', fontSize: '16px', fontWeight: '600' },
+        btnGhost: { width: '100%', padding: '16px', background: 'transparent', color: '#fff', border: '2px solid rgba(255,255,255,0.1)', borderRadius: '14px', fontSize: '16px' },
+        input: { width: '100%', padding: '14px', background: 'rgba(255,255,255,0.05)', border: '2px solid rgba(255,255,255,0.08)', borderRadius: '12px', color: '#fff', fontSize: '15px', marginBottom: '12px', outline: 'none' },
+        modal: { position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.9)', display: 'flex', alignItems: 'flex-end', zIndex: 999 },
+        modalBox: { width: '100%', background: '#1a1a1a', borderRadius: '24px 24px 0 0', padding: '24px' },
+        tag: { padding: '12px 16px', background: 'rgba(255,255,255,0.05)', border: '2px solid rgba(255,255,255,0.1)', borderRadius: '12px', textAlign: 'center' },
+        tagOn: { background: 'rgba(96,165,250,0.15)', border: '2px solid rgba(96,165,250,0.5)' },
+        fixed: { position: 'fixed', bottom: 0, left: 0, right: 0, padding: '16px', background: '#0a0a0a', borderTop: '1px solid rgba(255,255,255,0.08)' }
       };
 
-      if (page === 'planning') {
+      if (screen === 'home') {
         return (
-          <div style={s.container}>
-            <div style={s.header}>
-              <div style={s.logo}>
-                <span style={{ color: '#1e293b' }}>Fun</span>
-                <span style={{ color: '#3b82f6' }}>Go</span>
-                <span style={{ display: 'inline-block', width: '6px', height: '6px', background: '#f97316', borderRadius: '50%', marginLeft: '2px', verticalAlign: 'super' }}></span>
+          <div style={s.page} className="fade">
+            <div style={{ padding: '60px 20px 40px', textAlign: 'center' }}>
+              <h1 style={s.title}>FunGo</h1>
+              <p style={{ color: 'rgba(255,255,255,0.5)', marginTop: '8px' }}>AI宠物旅行规划</p>
+            </div>
+            
+            <div style={{ padding: '0 20px' }}>
+              <div onClick={() => { setData({...data, type: 'local'}); setScreen('setup'); }} 
+                   style={{ ...s.card, background: 'linear-gradient(135deg, rgba(96,165,250,0.1), rgba(167,139,250,0.1))' }}>
+                <div style={{ fontSize: '28px', marginBottom: '8px' }}>🏠</div>
+                <div style={{ fontSize: '18px', fontWeight: '600' }}>本地探索</div>
+                <div style={{ fontSize: '13px', color: 'rgba(255,255,255,0.5)', marginTop: '4px' }}>发现周边宠物友好地点</div>
               </div>
-              <div style={{ fontSize: '12px', color: '#64748b', textAlign: 'center', marginTop: '4px' }}>
-                和毛孩子一起探索世界
+              
+              <div onClick={() => { setData({...data, type: 'travel'}); setScreen('city'); }} 
+                   style={{ ...s.card, background: 'linear-gradient(135deg, rgba(251,146,60,0.1), rgba(239,68,68,0.1))' }}>
+                <div style={{ fontSize: '28px', marginBottom: '8px' }}>✈️</div>
+                <div style={{ fontSize: '18px', fontWeight: '600' }}>远途旅行</div>
+                <div style={{ fontSize: '13px', color: 'rgba(255,255,255,0.5)', marginTop: '4px' }}>跨城市宠物旅行</div>
               </div>
             </div>
+          </div>
+        );
+      }
 
-            <div style={{ padding: '12px' }}>
-              <div style={s.card}>
-                <div style={s.step}>
-                  <span style={s.stepNum}>1</span>
-                  <span style={{ fontSize: '16px', fontWeight: '600' }}>选择出行类型</span>
+      if (screen === 'city') {
+        const cities = ['北京', '上海', '杭州', '成都'];
+        return (
+          <div style={s.page} className="fade">
+            <div style={s.header}>
+              <button onClick={() => setScreen('home')} style={{ background: 'none', border: 'none', color: '#fff', fontSize: '20px', marginBottom: '16px' }}>←</button>
+              <h2 style={{ fontSize: '24px', fontWeight: '700' }}>选择目的地</h2>
+            </div>
+            
+            <div style={{ padding: '0 20px' }}>
+              {cities.map(city => (
+                <div key={city} onClick={() => { setData({...data, city}); setScreen('setup'); }}
+                     style={{ ...s.card, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ fontSize: '18px' }}>{city}</span>
+                  <span style={{ color: 'rgba(255,255,255,0.3)' }}>→</span>
                 </div>
-                <div style={s.grid2}>
-                  {[
-                    { type: 'local', icon: '🏠', label: '本地游', desc: '周边游玩' },
-                    { type: 'travel', icon: '✈️', label: '长途游', desc: '跨城旅行' }
-                  ].map(item => (
-                    <div key={item.type} onClick={() => setTripType(item.type)} style={{
-                      padding: '14px', background: tripType === item.type ? '#f0f9ff' : 'white',
-                      border: `2px solid ${tripType === item.type ? '#3b82f6' : '#e2e8f0'}`,
-                      borderRadius: '10px', textAlign: 'center', cursor: 'pointer'
-                    }}>
-                      <div style={{ fontSize: '24px', marginBottom: '6px' }}>{item.icon}</div>
-                      <div style={{ fontSize: '13px', fontWeight: '600' }}>{item.label}</div>
-                      <div style={{ fontSize: '11px', color: '#64748b' }}>{item.desc}</div>
+              ))}
+            </div>
+          </div>
+        );
+      }
+
+      if (screen === 'setup') {
+        return (
+          <div style={s.page} className="fade">
+            <div style={s.header}>
+              <button onClick={() => setScreen(data.type === 'travel' ? 'city' : 'home')} 
+                      style={{ background: 'none', border: 'none', color: '#fff', fontSize: '20px', marginBottom: '16px' }}>←</button>
+              <h2 style={{ fontSize: '24px', fontWeight: '700' }}>旅行设置</h2>
+              <p style={{ fontSize: '14px', color: 'rgba(255,255,255,0.5)', marginTop: '4px' }}>{data.city}</p>
+            </div>
+            
+            <div style={{ padding: '0 20px' }}>
+              <div style={{ marginBottom: '24px' }}>
+                <h3 style={{ fontSize: '16px', marginBottom: '12px', color: 'rgba(255,255,255,0.7)' }}>同行宠物</h3>
+                {data.pets.map(pet => (
+                  <div key={pet.id} style={{ ...s.card, display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <div style={{ width: '48px', height: '48px', background: 'linear-gradient(135deg, #60a5fa, #a78bfa)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px' }}>
+                      {pet.type.includes('猫') ? '🐱' : '🐕'}
+                    </div>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontWeight: '600' }}>{pet.name}</div>
+                      <div style={{ fontSize: '13px', color: 'rgba(255,255,255,0.5)' }}>{pet.type}</div>
+                    </div>
+                    <button onClick={() => setData({...data, pets: data.pets.filter(p => p.id !== pet.id)})}
+                            style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.3)', fontSize: '18px' }}>✕</button>
+                  </div>
+                ))}
+                <button onClick={() => setModal('pet')} style={s.btnGhost}>+ 添加宠物</button>
+              </div>
+
+              <div style={{ marginBottom: '24px' }}>
+                <h3 style={{ fontSize: '16px', marginBottom: '12px', color: 'rgba(255,255,255,0.7)' }}>兴趣标签</h3>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px' }}>
+                  {tags.map(tag => (
+                    <div key={tag.id} onClick={() => {
+                           const newTags = data.tags.includes(tag.id) 
+                             ? data.tags.filter(t => t !== tag.id)
+                             : [...data.tags, tag.id];
+                           setData({...data, tags: newTags});
+                         }}
+                         style={{ ...s.tag, ...(data.tags.includes(tag.id) ? s.tagOn : {}) }}>
+                      <div style={{ fontSize: '20px', marginBottom: '4px' }}>{tag.icon}</div>
+                      <div style={{ fontSize: '12px' }}>{tag.name}</div>
                     </div>
                   ))}
                 </div>
               </div>
-
-              <div style={s.card}>
-                <div style={s.step}>
-                  <span style={s.stepNum}>2</span>
-                  <span style={{ fontSize: '16px', fontWeight: '600' }}>
-                    {tripType === 'local' ? '确认所在城市' : '选择目的地'}
-                  </span>
-                </div>
-                {tripType === 'local' ? (
-                  <div>
-                    <div style={{ padding: '12px', background: '#f0f9ff', border: '2px solid #3b82f6', borderRadius: '10px', marginBottom: '12px', textAlign: 'center' }}>
-                      <div style={{ fontSize: '15px', fontWeight: '600' }}>深圳本地游</div>
-                      <div style={{ fontSize: '13px', color: '#64748b' }}>☀️ 28°C 适宜出行</div>
-                    </div>
-                    <div style={{ fontSize: '14px', fontWeight: '600', marginBottom: '10px' }}>想要什么样的体验？</div>
-                    <div style={s.grid3}>
-                      {interests.map(item => (
-                        <div key={item.id} onClick={() => toggleInterest(item.id)} style={{
-                          padding: '10px 6px', background: preferences.includes(item.label) ? '#3b82f6' : 'white',
-                          border: `1.5px solid ${preferences.includes(item.label) ? '#3b82f6' : '#e2e8f0'}`,
-                          borderRadius: '8px', textAlign: 'center', cursor: 'pointer',
-                          color: preferences.includes(item.label) ? 'white' : '#1e293b'
-                        }}>
-                          <div style={{ fontSize: '18px', marginBottom: '2px' }}>{item.icon}</div>
-                          <div style={{ fontSize: '11px', fontWeight: '500' }}>{item.label}</div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                ) : (
-                  <div style={s.grid2}>
-                    {cities.map(city => (
-                      <div key={city.name} onClick={() => setSelectedCity(city.name)} style={{
-                        padding: '10px', background: selectedCity === city.name ? '#3b82f6' : 'white',
-                        border: `1.5px solid ${selectedCity === city.name ? '#3b82f6' : '#e2e8f0'}`,
-                        borderRadius: '8px', cursor: 'pointer',
-                        color: selectedCity === city.name ? 'white' : '#1e293b'
-                      }}>
-                        <div style={{ fontWeight: '600', fontSize: '14px' }}>{city.name}</div>
-                        <div style={{ fontSize: '11px' }}>{city.weather} {city.temp}</div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              <div style={s.card}>
-                <div style={s.step}>
-                  <span style={s.stepNum}>3</span>
-                  <span style={{ fontSize: '16px', fontWeight: '600' }}>确认同行伙伴</span>
-                </div>
-                {pets.map(pet => (
-                  <div key={pet.id} style={{
-                    display: 'flex', alignItems: 'center', gap: '10px', padding: '10px',
-                    background: '#f0f9ff', borderRadius: '8px', marginBottom: '8px'
-                  }}>
-                    <div style={{ fontSize: '20px', width: '40px', height: '40px', background: 'white', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      {pet.emoji}
-                    </div>
-                    <div style={{ flex: 1 }}>
-                      <div style={{ fontSize: '14px', fontWeight: '600' }}>{pet.name}</div>
-                      <div style={{ fontSize: '11px', color: '#64748b' }}>{pet.type} · {pet.weight}</div>
-                    </div>
-                    {pets.length > 1 && (
-                      <button onClick={() => setPets(pets.filter(p => p.id !== pet.id))} style={{ background: 'none', border: 'none', color: '#ef4444', fontSize: '16px' }}>✕</button>
-                    )}
-                  </div>
-                ))}
-                <button onClick={() => setShowAddPet(true)} style={{
-                  width: '100%', padding: '10px', background: 'white', border: '2px dashed #e2e8f0',
-                  borderRadius: '8px', color: '#64748b', fontSize: '13px', fontWeight: '500'
-                }}>
-                  + 添加宠物
-                </button>
-              </div>
             </div>
 
-            <div style={s.bottom}>
-              <button onClick={generateTrips} disabled={!selectedCity || !tripType || pets.length === 0} style={{
-                ...s.btn,
-                background: selectedCity && tripType && pets.length > 0 ? '#3b82f6' : '#e2e8f0',
-                color: selectedCity && tripType && pets.length > 0 ? 'white' : '#94a3b8'
-              }}>
-                {loading ? '生成中...' : '✨ 生成旅行方案'}
+            <div style={s.fixed}>
+              <button onClick={generatePlans} disabled={data.pets.length === 0 || data.tags.length === 0}
+                      style={{ ...s.btn, opacity: data.pets.length && data.tags.length ? 1 : 0.5 }}>
+                {loading ? <span className="pulse">AI生成中...</span> : '生成方案'}
               </button>
             </div>
 
-            {showAddPet && (
-              <div style={s.modal}>
-                <div style={s.modalContent}>
+            {modal === 'pet' && (
+              <div style={s.modal} className="fade">
+                <div style={s.modalBox} className="slide">
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px' }}>
-                    <h3 style={{ fontSize: '16px', fontWeight: '700' }}>添加宠物</h3>
-                    <button onClick={() => setShowAddPet(false)} style={{ background: 'none', border: 'none', fontSize: '20px' }}>✕</button>
+                    <h3 style={{ fontSize: '20px', fontWeight: '700' }}>添加宠物</h3>
+                    <button onClick={() => setModal(null)} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.5)', fontSize: '20px' }}>✕</button>
                   </div>
-                  <input type="text" placeholder="宠物名字" value={newPet.name} onChange={(e) => setNewPet({...newPet, name: e.target.value})} style={s.input} />
-                  <input type="text" placeholder="品种" value={newPet.type} onChange={(e) => setNewPet({...newPet, type: e.target.value})} style={s.input} />
-                  <input type="text" placeholder="体重" value={newPet.weight} onChange={(e) => setNewPet({...newPet, weight: e.target.value})} style={s.input} />
-                  <button onClick={addPet} style={s.btn}>确认添加</button>
+                  <input placeholder="宠物昵称" value={newPet.name} onChange={e => setNewPet({...newPet, name: e.target.value})} style={s.input} />
+                  <input placeholder="品种" value={newPet.type} onChange={e => setNewPet({...newPet, type: e.target.value})} style={s.input} />
+                  <button onClick={() => {
+                    if (newPet.name && newPet.type) {
+                      setData({...data, pets: [...data.pets, {...newPet, id: Date.now()}]});
+                      setNewPet({ name: '', type: '' });
+                      setModal(null);
+                    }
+                  }} style={s.btn}>确认</button>
                 </div>
               </div>
             )}
@@ -272,130 +230,64 @@
         );
       }
 
-      if (page === 'results' && !selectedTrip) {
+      if (screen === 'plans') {
         return (
-          <div style={s.container}>
-            <div style={{ ...s.header, display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <button onClick={() => setPage('planning')} style={{ background: 'none', border: 'none', fontSize: '20px' }}>←</button>
-              <div style={{ flex: 1 }}>
-                <div style={{ fontSize: '16px', fontWeight: '600' }}>推荐方案</div>
-                <div style={{ fontSize: '11px', color: '#64748b' }}>深圳本地 · {pets[0].name}的旅行</div>
-              </div>
+          <div style={s.page} className="fade">
+            <div style={s.header}>
+              <button onClick={() => setScreen('setup')} style={{ background: 'none', border: 'none', color: '#fff', fontSize: '20px', marginBottom: '16px' }}>←</button>
+              <h2 style={{ fontSize: '24px', fontWeight: '700' }}>推荐方案</h2>
+              <p style={{ fontSize: '14px', color: 'rgba(255,255,255,0.5)', marginTop: '4px' }}>{data.city} · {plans.length}个方案</p>
             </div>
-
-            <div style={{ padding: '12px' }}>
-              {trips.map((trip, idx) => (
-                <div key={trip.id} onClick={() => setSelectedTrip(trip)} style={{ ...s.card, cursor: 'pointer', overflow: 'hidden', padding: 0 }}>
-                  <div style={{ height: '140px', background: `url(${trip.image}) center/cover`, position: 'relative' }}>
-                    <div style={{ position: 'absolute', top: '10px', left: '10px', background: 'rgba(0,0,0,0.5)', color: 'white', padding: '3px 8px', borderRadius: '6px', fontSize: '11px' }}>
-                      方案 {idx + 1}
+            
+            <div style={{ padding: '0 20px' }}>
+              {plans.map(plan => (
+                <div key={plan.id} onClick={() => setSelectedPlan(plan)} style={{ ...s.card, padding: 0, overflow: 'hidden' }}>
+                  <div style={{ height: '160px', background: `url(${plan.img}) center/cover`, position: 'relative' }}>
+                    <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, transparent, rgba(0,0,0,0.8))' }}></div>
+                    <div style={{ position: 'absolute', top: '12px', left: '12px', padding: '4px 10px', background: '#ef4444', borderRadius: '8px', fontSize: '11px', fontWeight: '700' }}>{plan.tag}</div>
+                    <div style={{ position: 'absolute', bottom: '12px', left: '12px', right: '12px' }}>
+                      <div style={{ fontSize: '20px', fontWeight: '700', marginBottom: '4px' }}>{plan.name}</div>
+                      <div style={{ fontSize: '13px', opacity: 0.8 }}>⏱ {plan.time} · 💪 {plan.level} · ⭐ {plan.score}</div>
                     </div>
-                    {trip.hot && (
-                      <div style={{ position: 'absolute', bottom: '10px', left: '10px', background: '#ff6b6b', color: 'white', padding: '3px 8px', borderRadius: '6px', fontSize: '10px' }}>
-                        🔥 {trip.hot}
-                      </div>
-                    )}
                   </div>
-                  <div style={{ padding: '12px' }}>
-                    <h3 style={{ fontSize: '15px', fontWeight: '600', marginBottom: '4px' }}>{trip.title}</h3>
-                    <p style={{ fontSize: '11px', color: '#64748b', marginBottom: '10px' }}>{trip.subtitle}</p>
-                    <div style={{ display: 'flex', gap: '12px', marginBottom: '10px' }}>
-                      <span style={{ fontSize: '11px', color: '#64748b' }}>⏱ {trip.duration}</span>
-                      <span style={{ fontSize: '11px', color: '#64748b' }}>📍 {trip.distance}</span>
-                    </div>
-                    <div style={{ display: 'flex', gap: '4px', marginBottom: '10px' }}>
-                      {trip.highlights.map((h, i) => (
-                        <span key={i} style={{ background: '#f0f9ff', color: '#3b82f6', padding: '3px 6px', borderRadius: '4px', fontSize: '10px' }}>
-                          {h}
-                        </span>
-                      ))}
-                    </div>
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                        <span>⭐</span>
-                        <span style={{ fontSize: '13px', fontWeight: '600' }}>{trip.rating}</span>
-                        <span style={{ fontSize: '10px', color: '#64748b' }}>({trip.reviews})</span>
-                      </div>
-                      <span>›</span>
-                    </div>
+                  <div style={{ padding: '12px', display: 'flex', gap: '6px' }}>
+                    {plan.feat.map((f, i) => (
+                      <span key={i} style={{ padding: '4px 8px', background: 'rgba(255,255,255,0.08)', borderRadius: '6px', fontSize: '11px' }}>{f}</span>
+                    ))}
                   </div>
                 </div>
               ))}
             </div>
 
-            <div style={s.bottom}>
-              <button onClick={() => setPage('planning')} style={s.btn}>重新规划</button>
-            </div>
-          </div>
-        );
-      }
-
-      if (selectedTrip) {
-        const detail = selectedTrip.details;
-        return (
-          <div style={s.container}>
-            <div style={{ ...s.header, display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <button onClick={() => setSelectedTrip(null)} style={{ background: 'none', border: 'none', fontSize: '20px' }}>←</button>
-              <div style={{ fontSize: '16px', fontWeight: '600', flex: 1 }}>方案详情</div>
-            </div>
-
-            <div style={{ height: '200px', background: `url(${selectedTrip.image}) center/cover` }}></div>
-
-            <div style={{ padding: '12px' }}>
-              <div style={s.card}>
-                <h2 style={{ fontSize: '18px', fontWeight: '600', marginBottom: '6px' }}>{selectedTrip.title}</h2>
-                <p style={{ fontSize: '12px', color: '#64748b', marginBottom: '12px' }}>{selectedTrip.subtitle}</p>
-                <div style={s.grid2}>
-                  <div>
-                    <div style={{ fontSize: '11px', color: '#64748b' }}>最佳时间</div>
-                    <div style={{ fontSize: '13px', fontWeight: '600' }}>{detail.bestTime}</div>
+            {selectedPlan && (
+              <div style={s.modal} onClick={() => setSelectedPlan(null)} className="fade">
+                <div style={{ ...s.modalBox, maxHeight: '80vh', overflowY: 'auto' }} onClick={e => e.stopPropagation()} className="slide">
+                  <h3 style={{ fontSize: '22px', fontWeight: '700', marginBottom: '20px' }}>{selectedPlan.name}</h3>
+                  
+                  <div style={{ marginBottom: '20px' }}>
+                    <h4 style={{ fontSize: '14px', color: 'rgba(255,255,255,0.5)', marginBottom: '12px' }}>推荐理由</h4>
+                    {selectedPlan.why.map((w, i) => (
+                      <div key={i} style={{ marginBottom: '8px', fontSize: '14px' }}>• {w}</div>
+                    ))}
                   </div>
-                  <div>
-                    <div style={{ fontSize: '11px', color: '#64748b' }}>人流情况</div>
-                    <div style={{ fontSize: '13px', fontWeight: '600' }}>{detail.crowd}</div>
+                  
+                  <div style={{ marginBottom: '20px' }}>
+                    <h4 style={{ fontSize: '14px', color: 'rgba(255,255,255,0.5)', marginBottom: '12px' }}>温馨提示</h4>
+                    {selectedPlan.tips.map((t, i) => (
+                      <div key={i} style={{ marginBottom: '8px', fontSize: '14px', color: 'rgba(255,255,255,0.7)' }}>• {t}</div>
+                    ))}
                   </div>
+                  
+                  <button style={s.btn}>开始导航</button>
                 </div>
               </div>
-
-              <div style={s.card}>
-                <h3 style={{ fontSize: '14px', fontWeight: '600', marginBottom: '10px' }}>为什么推荐</h3>
-                {detail.why.map((item, i) => (
-                  <div key={i} style={{ fontSize: '12px', marginBottom: '6px' }}>{item}</div>
-                ))}
-              </div>
-
-              <div style={s.card}>
-                <h3 style={{ fontSize: '14px', fontWeight: '600', marginBottom: '10px' }}>设施服务</h3>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
-                  {detail.facilities.map((f, i) => (
-                    <span key={i} style={{ background: '#f0f9ff', color: '#3b82f6', padding: '4px 8px', borderRadius: '6px', fontSize: '11px' }}>
-                      ✓ {f}
-                    </span>
-                  ))}
-                </div>
-              </div>
-
-              <div style={{ ...s.card, background: '#fffbeb' }}>
-                <h3 style={{ fontSize: '14px', fontWeight: '600', color: '#92400e', marginBottom: '10px' }}>💡 贴心提示</h3>
-                {detail.tips.map((tip, i) => (
-                  <div key={i} style={{ fontSize: '11px', color: '#78350f', marginBottom: '4px' }}>• {tip}</div>
-                ))}
-              </div>
-            </div>
-
-            <div style={s.bottom}>
-              <div style={{ display: 'flex', gap: '10px' }}>
-                <button style={{ ...s.btnOutline, flex: 1 }}>❤️ 收藏</button>
-                <button style={{ ...s.btn, flex: 2 }}>开始导航</button>
-              </div>
-            </div>
+            )}
           </div>
         );
       }
     };
 
-    const root = ReactDOM.createRoot(document.getElementById('root'));
-    root.render(<App />);
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
   </script>
 </body>
 </html>
