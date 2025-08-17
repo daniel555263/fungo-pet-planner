@@ -712,3 +712,505 @@ const FunGoPlanningPage = () => {
 };
 
 export default FunGoPlanningPage;
+import { useState } from 'react';
+import { ArrowLeft, Clock, MapPin, Star, Heart, ChevronRight } from 'lucide-react';
+
+const FunGoResults = () => {
+  const [currentPage, setCurrentPage] = useState('results');
+  const [selectedTrip, setSelectedTrip] = useState(null);
+
+  const trips = [
+    {
+      id: 1,
+      title: '深圳湾公园宠物友好半日游',
+      subtitle: '海滨休闲 · 适合大型犬',
+      location: '深圳湾公园',
+      duration: '3-4小时',
+      distance: '12km',
+      image: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400',
+      highlights: ['沙滩玩水', '海景步道', '宠物友好'],
+      rating: 4.8,
+      reviews: 1240,
+      hotReason: '小红书推荐'
+    },
+    {
+      id: 2,
+      title: '莲花山公园城市探索',
+      subtitle: '都市探索 · 适合拍照',
+      location: '莲花山公园',
+      duration: '2-3小时',
+      distance: '8km',
+      image: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=400',
+      highlights: ['山顶观景', '城市全景', '拍照打卡'],
+      rating: 4.6,
+      reviews: 856,
+      hotReason: '深圳必去'
+    }
+  ];
+
+  const details = {
+    1: {
+      whyRecommend: [
+        '🌊 9公里海岸线，深圳最长海滨步道',
+        '🏖️ 专门的宠物活动区域',
+        '🚗 充足停车位，交通便利',
+        '💧 多个饮水点和便民设施'
+      ],
+      tips: [
+        '建议下午4点后前往',
+        '带上宠物饮用水',
+        '海边风大注意保暖',
+        '玩耍后清洁脚掌'
+      ],
+      facilities: ['免费停车', '饮水点', '垃圾袋', '清洁区'],
+      bestTime: '16:00-18:30',
+      crowdLevel: '周末较多'
+    },
+    2: {
+      whyRecommend: [
+        '🏔️ 深圳制高点，360度俯瞰',
+        '🐕 山路平缓，适合宠物',
+        '📸 多个观景平台',
+        '🌳 绿树成荫，空气清新'
+      ],
+      tips: [
+        '带水和零食',
+        '注意宠物安全',
+        '早晚光线最佳',
+        '工作日人少'
+      ],
+      facilities: ['免费入园', '休息亭', '观景台', '饮水点'],
+      bestTime: '08:00-10:00',
+      crowdLevel: '工作日较少'
+    }
+  };
+
+  const viewDetails = (trip) => {
+    setSelectedTrip(trip);
+    setCurrentPage('details');
+  };
+
+  // Results Page
+  if (currentPage === 'results') {
+    return (
+      <div style={{
+        fontFamily: '-apple-system, BlinkMacSystemFont, sans-serif',
+        background: '#f8fafc',
+        minHeight: '100vh',
+        paddingBottom: '80px'
+      }}>
+        {/* Header */}
+        <div style={{
+          background: 'white',
+          padding: '14px 16px',
+          boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+          position: 'sticky',
+          top: 0,
+          zIndex: 10,
+          display: 'flex',
+          alignItems: 'center',
+          gap: '10px'
+        }}>
+          <ArrowLeft size={20} />
+          <div style={{ flex: 1 }}>
+            <div style={{
+              fontSize: '16px',
+              fontWeight: '600',
+              color: '#1e293b'
+            }}>
+              推荐方案
+            </div>
+            <div style={{
+              fontSize: '11px',
+              color: '#64748b'
+            }}>
+              深圳本地 · 旺财的旅行
+            </div>
+          </div>
+        </div>
+
+        {/* Trip Cards */}
+        <div style={{ padding: '12px' }}>
+          {trips.map((trip, index) => (
+            <div
+              key={trip.id}
+              style={{
+                background: 'white',
+                borderRadius: '12px',
+                overflow: 'hidden',
+                marginBottom: '12px',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.06)'
+              }}
+              onClick={() => viewDetails(trip)}
+            >
+              <div style={{
+                height: '140px',
+                background: `url(${trip.image}) center/cover`,
+                position: 'relative'
+              }}>
+                <div style={{
+                  position: 'absolute',
+                  top: '10px',
+                  left: '10px',
+                  background: 'rgba(0,0,0,0.5)',
+                  color: 'white',
+                  padding: '3px 8px',
+                  borderRadius: '6px',
+                  fontSize: '11px'
+                }}>
+                  方案 {index + 1}
+                </div>
+                {trip.hotReason && (
+                  <div style={{
+                    position: 'absolute',
+                    bottom: '10px',
+                    left: '10px',
+                    background: '#ff6b6b',
+                    color: 'white',
+                    padding: '3px 8px',
+                    borderRadius: '6px',
+                    fontSize: '10px'
+                  }}>
+                    🔥 {trip.hotReason}
+                  </div>
+                )}
+              </div>
+
+              <div style={{ padding: '12px' }}>
+                <h3 style={{
+                  fontSize: '15px',
+                  fontWeight: '600',
+                  marginBottom: '4px'
+                }}>
+                  {trip.title}
+                </h3>
+                <p style={{
+                  fontSize: '11px',
+                  color: '#64748b',
+                  marginBottom: '10px'
+                }}>
+                  {trip.subtitle}
+                </p>
+
+                <div style={{
+                  display: 'flex',
+                  gap: '12px',
+                  marginBottom: '10px'
+                }}>
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '3px',
+                    fontSize: '11px',
+                    color: '#64748b'
+                  }}>
+                    <Clock size={12} />
+                    {trip.duration}
+                  </div>
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '3px',
+                    fontSize: '11px',
+                    color: '#64748b'
+                  }}>
+                    <MapPin size={12} />
+                    {trip.distance}
+                  </div>
+                </div>
+
+                <div style={{
+                  display: 'flex',
+                  gap: '4px',
+                  marginBottom: '10px'
+                }}>
+                  {trip.highlights.map((h, i) => (
+                    <span
+                      key={i}
+                      style={{
+                        background: '#f0f9ff',
+                        color: '#3b82f6',
+                        padding: '3px 6px',
+                        borderRadius: '4px',
+                        fontSize: '10px'
+                      }}
+                    >
+                      {h}
+                    </span>
+                  ))}
+                </div>
+
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between'
+                }}>
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px'
+                  }}>
+                    <Star size={12} fill="#fbbf24" color="#fbbf24" />
+                    <span style={{ fontSize: '13px', fontWeight: '600' }}>{trip.rating}</span>
+                    <span style={{ fontSize: '10px', color: '#64748b' }}>
+                      ({trip.reviews})
+                    </span>
+                  </div>
+                  <ChevronRight size={16} color="#94a3b8" />
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div style={{
+          position: 'fixed',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          padding: '12px',
+          background: 'white',
+          boxShadow: '0 -2px 10px rgba(0,0,0,0.08)'
+        }}>
+          <button style={{
+            width: '100%',
+            padding: '12px',
+            background: '#3b82f6',
+            color: 'white',
+            border: 'none',
+            borderRadius: '8px',
+            fontSize: '14px',
+            fontWeight: '600'
+          }}>
+            重新规划
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Details Page
+  if (currentPage === 'details' && selectedTrip) {
+    const detail = details[selectedTrip.id];
+    
+    return (
+      <div style={{
+        fontFamily: '-apple-system, BlinkMacSystemFont, sans-serif',
+        background: '#f8fafc',
+        minHeight: '100vh',
+        paddingBottom: '80px'
+      }}>
+        <div style={{
+          background: 'white',
+          padding: '14px 16px',
+          boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+          position: 'sticky',
+          top: 0,
+          zIndex: 10,
+          display: 'flex',
+          alignItems: 'center',
+          gap: '10px'
+        }}>
+          <button
+            onClick={() => setCurrentPage('results')}
+            style={{ background: 'none', border: 'none', padding: 0 }}
+          >
+            <ArrowLeft size={20} />
+          </button>
+          <div style={{
+            fontSize: '16px',
+            fontWeight: '600',
+            flex: 1
+          }}>
+            方案详情
+          </div>
+        </div>
+
+        <div style={{
+          height: '200px',
+          background: `url(${selectedTrip.image}) center/cover`
+        }}></div>
+
+        <div style={{ padding: '12px' }}>
+          <div style={{
+            background: 'white',
+            borderRadius: '12px',
+            padding: '14px',
+            marginBottom: '12px'
+          }}>
+            <h2 style={{
+              fontSize: '18px',
+              fontWeight: '600',
+              marginBottom: '6px'
+            }}>
+              {selectedTrip.title}
+            </h2>
+            <p style={{
+              fontSize: '12px',
+              color: '#64748b',
+              marginBottom: '12px'
+            }}>
+              {selectedTrip.subtitle}
+            </p>
+
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: '1fr 1fr',
+              gap: '10px',
+              paddingTop: '12px',
+              borderTop: '1px solid #e2e8f0'
+            }}>
+              <div>
+                <div style={{ fontSize: '11px', color: '#64748b', marginBottom: '2px' }}>
+                  最佳时间
+                </div>
+                <div style={{ fontSize: '13px', fontWeight: '600' }}>
+                  {detail.bestTime}
+                </div>
+              </div>
+              <div>
+                <div style={{ fontSize: '11px', color: '#64748b', marginBottom: '2px' }}>
+                  人流情况
+                </div>
+                <div style={{ fontSize: '13px', fontWeight: '600' }}>
+                  {detail.crowdLevel}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div style={{
+            background: 'white',
+            borderRadius: '12px',
+            padding: '14px',
+            marginBottom: '12px'
+          }}>
+            <h3 style={{
+              fontSize: '14px',
+              fontWeight: '600',
+              marginBottom: '10px'
+            }}>
+              为什么推荐
+            </h3>
+            {detail.whyRecommend.map((r, i) => (
+              <div key={i} style={{
+                fontSize: '12px',
+                color: '#475569',
+                marginBottom: '6px',
+                lineHeight: '1.4'
+              }}>
+                {r}
+              </div>
+            ))}
+          </div>
+
+          <div style={{
+            background: 'white',
+            borderRadius: '12px',
+            padding: '14px',
+            marginBottom: '12px'
+          }}>
+            <h3 style={{
+              fontSize: '14px',
+              fontWeight: '600',
+              marginBottom: '10px'
+            }}>
+              设施服务
+            </h3>
+            <div style={{
+              display: 'flex',
+              flexWrap: 'wrap',
+              gap: '6px'
+            }}>
+              {detail.facilities.map((f, i) => (
+                <span key={i} style={{
+                  background: '#f0f9ff',
+                  color: '#3b82f6',
+                  padding: '4px 8px',
+                  borderRadius: '6px',
+                  fontSize: '11px'
+                }}>
+                  ✓ {f}
+                </span>
+              ))}
+            </div>
+          </div>
+
+          <div style={{
+            background: '#fffbeb',
+            borderRadius: '12px',
+            padding: '14px',
+            marginBottom: '12px'
+          }}>
+            <h3 style={{
+              fontSize: '14px',
+              fontWeight: '600',
+              color: '#92400e',
+              marginBottom: '10px'
+            }}>
+              💡 贴心提示
+            </h3>
+            {detail.tips.map((tip, i) => (
+              <div key={i} style={{
+                fontSize: '11px',
+                color: '#78350f',
+                marginBottom: '4px',
+                paddingLeft: '12px',
+                position: 'relative'
+              }}>
+                <span style={{ position: 'absolute', left: 0 }}>•</span>
+                {tip}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div style={{
+          position: 'fixed',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          padding: '12px',
+          background: 'white',
+          boxShadow: '0 -2px 10px rgba(0,0,0,0.08)',
+          display: 'flex',
+          gap: '10px'
+        }}>
+          <button style={{
+            flex: 1,
+            padding: '12px',
+            background: 'white',
+            color: '#3b82f6',
+            border: '2px solid #3b82f6',
+            borderRadius: '8px',
+            fontSize: '13px',
+            fontWeight: '600',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '4px'
+          }}>
+            <Heart size={14} />
+            收藏
+          </button>
+          <button style={{
+            flex: 2,
+            padding: '12px',
+            background: '#3b82f6',
+            color: 'white',
+            border: 'none',
+            borderRadius: '8px',
+            fontSize: '14px',
+            fontWeight: '600'
+          }}>
+            开始导航
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return null;
+};
+
+export default FunGoResults;
