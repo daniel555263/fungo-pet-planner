@@ -115,24 +115,164 @@
         { value: '5', label: '5天4夜', desc: '深度游' },
         { value: '7', label: '7天6夜', desc: '度假游' }
       ],
-      // 模拟地点数据
+      // 智能数据源配置
+      dataSources: {
+        external: [
+          { name: '小红书', logo: '🌺', weight: 30, freshness: 95 },
+          { name: '大众点评', logo: '🍽️', weight: 25, freshness: 88 },
+          { name: '美团', logo: '🛍️', weight: 20, freshness: 92 }
+        ],
+        internal: [
+          { name: 'FunGo踩点', logo: '👥', weight: 15, freshness: 98 },
+          { name: '用户评价', logo: '⭐', weight: 10, freshness: 90 }
+        ]
+      },
+      
+      // 智能推荐理由模板
+      recommendReasons: {
+        timeMatch: ['适合当前时段', '正值活跃时间', '现在去正合适'],
+        preference: ['符合您的兴趣偏好', '根据您的选择推荐', '为您量身定制'],
+        petFriendly: ['宠物超级友好', '毛孩子们的天堂', '专为宠物设计'],
+        popular: ['最近很受欢迎', '用户好评如潮', '热门推荐地点'],
+        distance: ['距离适中', '就在附近', '步行可达'],
+        weather: ['适合当前天气', '天气条件完美', '户外体验佳']
+      },
+
+      // 模拟地点数据 - 增强版
       mockPlaces: {
         '深圳-南山区': [
-          { id: 1, name: '深圳湾公园', type: 'park', distance: 1.2, rating: 4.8, petFriendly: 5, time: '全天', features: ['宠物专区', '海滨步道'] },
-          { id: 2, name: 'MUJI咖啡', type: 'cafe', distance: 0.8, rating: 4.6, petFriendly: 4, time: '10:00-22:00', features: ['宠物友好', '下午茶'] },
-          { id: 3, name: '欢乐海岸', type: 'food', distance: 2.1, rating: 4.7, petFriendly: 4, time: '10:00-22:00', features: ['户外座位', '美食街'] },
-          { id: 4, name: '大南山', type: 'mountain', distance: 5.2, rating: 4.9, petFriendly: 5, time: '全天', features: ['登山步道', '观景台'] },
-          { id: 5, name: '西丽湖', type: 'lake', distance: 8.5, rating: 4.5, petFriendly: 5, time: '06:00-18:00', features: ['湖边栈道', '草坪'] }
+          { 
+            id: 1, 
+            name: '深圳湾公园', 
+            type: 'park', 
+            distance: 1.2, 
+            rating: 4.8, 
+            petFriendly: 5, 
+            time: '全天', 
+            features: ['宠物专区', '海滨步道'],
+            aiScore: 94,
+            dataSources: ['小红书', 'FunGo踩点', '用户评价'],
+            popularity: 'high',
+            lastUpdated: '2分钟前',
+            userFeedback: { likes: 1247, dislikes: 23 },
+            staffVerified: true
+          },
+          { 
+            id: 2, 
+            name: 'MUJI咖啡', 
+            type: 'cafe', 
+            distance: 0.8, 
+            rating: 4.6, 
+            petFriendly: 4, 
+            time: '10:00-22:00', 
+            features: ['宠物友好', '下午茶'],
+            aiScore: 87,
+            dataSources: ['大众点评', '小红书'],
+            popularity: 'medium',
+            lastUpdated: '5分钟前',
+            userFeedback: { likes: 892, dislikes: 45 },
+            staffVerified: false
+          },
+          { 
+            id: 3, 
+            name: '欢乐海岸', 
+            type: 'food', 
+            distance: 2.1, 
+            rating: 4.7, 
+            petFriendly: 4, 
+            time: '10:00-22:00', 
+            features: ['户外座位', '美食街'],
+            aiScore: 91,
+            dataSources: ['美团', '大众点评', 'FunGo踩点'],
+            popularity: 'high',
+            lastUpdated: '1分钟前',
+            userFeedback: { likes: 2156, dislikes: 67 },
+            staffVerified: true
+          },
+          { 
+            id: 4, 
+            name: '大南山', 
+            type: 'mountain', 
+            distance: 5.2, 
+            rating: 4.9, 
+            petFriendly: 5, 
+            time: '全天', 
+            features: ['登山步道', '观景台'],
+            aiScore: 96,
+            dataSources: ['小红书', 'FunGo踩点', '用户评价'],
+            popularity: 'high',
+            lastUpdated: '刚刚',
+            userFeedback: { likes: 3421, dislikes: 12 },
+            staffVerified: true
+          },
+          { 
+            id: 5, 
+            name: '西丽湖', 
+            type: 'lake', 
+            distance: 8.5, 
+            rating: 4.5, 
+            petFriendly: 5, 
+            time: '06:00-18:00', 
+            features: ['湖边栈道', '草坪'],
+            aiScore: 82,
+            dataSources: ['小红书', '用户评价'],
+            popularity: 'medium',
+            lastUpdated: '10分钟前',
+            userFeedback: { likes: 567, dislikes: 31 },
+            staffVerified: false
+          }
         ],
         '北京-朝阳区': [
-          { id: 11, name: '朝阳公园', type: 'park', distance: 1.5, rating: 4.7, petFriendly: 5, time: '全天', features: ['大草坪', '宠物训练区'] },
-          { id: 12, name: '三里屯咖啡厅', type: 'cafe', distance: 2.3, rating: 4.5, petFriendly: 4, time: '08:00-22:00', features: ['露天座位', '宠物餐具'] },
-          { id: 13, name: '奥林匹克公园', type: 'park', distance: 8.7, rating: 4.9, petFriendly: 5, time: '全天', features: ['广阔空间', '景观湖'] }
+          { 
+            id: 11, 
+            name: '朝阳公园', 
+            type: 'park', 
+            distance: 1.5, 
+            rating: 4.7, 
+            petFriendly: 5, 
+            time: '全天', 
+            features: ['大草坪', '宠物训练区'],
+            aiScore: 89,
+            dataSources: ['大众点评', 'FunGo踩点'],
+            popularity: 'high',
+            lastUpdated: '3分钟前',
+            userFeedback: { likes: 1876, dislikes: 34 },
+            staffVerified: true
+          },
+          { 
+            id: 12, 
+            name: '三里屯咖啡厅', 
+            type: 'cafe', 
+            distance: 2.3, 
+            rating: 4.5, 
+            petFriendly: 4, 
+            time: '08:00-22:00', 
+            features: ['露天座位', '宠物餐具'],
+            aiScore: 85,
+            dataSources: ['小红书', '美团'],
+            popularity: 'medium',
+            lastUpdated: '7分钟前',
+            userFeedback: { likes: 743, dislikes: 29 },
+            staffVerified: false
+          }
         ],
         '上海-浦东新区': [
-          { id: 21, name: '世纪公园', type: 'park', distance: 2.1, rating: 4.8, petFriendly: 5, time: '全天', features: ['樱花大道', '宠物乐园'] },
-          { id: 22, name: '陆家嘴咖啡', type: 'cafe', distance: 1.8, rating: 4.6, petFriendly: 4, time: '07:00-21:00', features: ['江景座位', '宠物友好'] },
-          { id: 23, name: '滨江大道', type: 'photo', distance: 3.2, rating: 4.7, petFriendly: 4, time: '全天', features: ['黄浦江景', '夜景拍照'] }
+          { 
+            id: 21, 
+            name: '世纪公园', 
+            type: 'park', 
+            distance: 2.1, 
+            rating: 4.8, 
+            petFriendly: 5, 
+            time: '全天', 
+            features: ['樱花大道', '宠物乐园'],
+            aiScore: 93,
+            dataSources: ['小红书', 'FunGo踩点', '用户评价'],
+            popularity: 'high',
+            lastUpdated: '1分钟前',
+            userFeedback: { likes: 2134, dislikes: 18 },
+            staffVerified: true
+          }
         ]
       },
       // 模拟酒店数据
@@ -164,11 +304,58 @@
       const [newPet, setNewPet] = useState({ name: '', type: '', weight: '' });
       const [loading, setLoading] = useState(false);
       const [animationClass, setAnimationClass] = useState('');
+      const [aiAnalyzing, setAiAnalyzing] = useState(false);
+      const [lastAnalysisTime, setLastAnalysisTime] = useState(null);
 
       const currentTimeSlot = getCurrentTimeSlot();
 
       useEffect(() => {
         setAnimationClass('fade-in');
+        // 模拟初始AI分析
+        setLastAnalysisTime(new Date());
+      }, []);
+
+      // 生成智能推荐理由
+      const generateRecommendReason = useCallback((place, index) => {
+        const reasons = [];
+        const { recommendReasons } = CONFIG;
+        
+        // 基于时段
+        if (index === 0) {
+          reasons.push(recommendReasons.timeMatch[Math.floor(Math.random() * recommendReasons.timeMatch.length)]);
+        }
+        
+        // 基于偏好匹配
+        if (preferences.length > 0) {
+          reasons.push(recommendReasons.preference[Math.floor(Math.random() * recommendReasons.preference.length)]);
+        }
+        
+        // 基于宠物友好度
+        if (place.petFriendly >= 4) {
+          reasons.push(recommendReasons.petFriendly[Math.floor(Math.random() * recommendReasons.petFriendly.length)]);
+        }
+        
+        // 基于AI评分
+        if (place.aiScore >= 90) {
+          reasons.push(recommendReasons.popular[Math.floor(Math.random() * recommendReasons.popular.length)]);
+        }
+        
+        // 基于距离
+        if (place.distance <= 2) {
+          reasons.push(recommendReasons.distance[Math.floor(Math.random() * recommendReasons.distance.length)]);
+        }
+        
+        return reasons.slice(0, 2); // 最多显示2个理由
+      }, [preferences]);
+
+      // 智能重新分析
+      const triggerAiAnalysis = useCallback(() => {
+        setAiAnalyzing(true);
+        setTimeout(() => {
+          setAiAnalyzing(false);
+          setLastAnalysisTime(new Date());
+          // 可以在这里更新推荐列表或评分
+        }, 2000);
       }, []);
 
       // 计算属性
@@ -224,7 +411,13 @@
           features: place.features,
           rating: place.rating,
           petFriendly: place.petFriendly,
-          timeRecommend: index === 0 ? currentTimeSlot.activity : null
+          timeRecommend: index === 0 ? currentTimeSlot.activity : null,
+          aiScore: place.aiScore,
+          dataSources: place.dataSources,
+          lastUpdated: place.lastUpdated,
+          userFeedback: place.userFeedback,
+          staffVerified: place.staffVerified,
+          recommendReasons: generateRecommendReason(place, index)
         }));
       }, [selectedCity, selectedDistrict, preferences, currentTimeSlot]);
 
@@ -504,6 +697,127 @@
         );
       };
 
+      // 数据来源徽章组件
+      const DataSourceBadges = ({ dataSources, lastUpdated }) => {
+        const sourceConfig = CONFIG.dataSources;
+        const allSources = [...sourceConfig.external, ...sourceConfig.internal];
+        
+        return (
+          <div style={{ marginBottom: '8px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
+              <span style={{ fontSize: '11px', color: '#86868b' }}>数据来源:</span>
+              {dataSources.map(sourceName => {
+                const source = allSources.find(s => s.name === sourceName);
+                return source ? (
+                  <div key={sourceName} style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '2px',
+                    background: 'rgba(0, 122, 255, 0.08)',
+                    padding: '2px 6px',
+                    borderRadius: '10px',
+                    fontSize: '10px',
+                    color: '#007aff'
+                  }}>
+                    <span>{source.logo}</span>
+                    <span>{source.name}</span>
+                  </div>
+                ) : null;
+              })}
+            </div>
+            <div style={{ fontSize: '10px', color: '#86868b' }}>
+              🔄 更新于 {lastUpdated}
+            </div>
+          </div>
+        );
+      };
+
+      // AI评分组件
+      const AiScoreDisplay = ({ aiScore, userFeedback, staffVerified }) => {
+        const getScoreColor = (score) => {
+          if (score >= 90) return '#30d158';
+          if (score >= 80) return '#ff9500';
+          return '#ff3b30';
+        };
+
+        const getScoreLevel = (score) => {
+          if (score >= 90) return '极力推荐';
+          if (score >= 80) return '值得一去';
+          return '一般推荐';
+        };
+
+        return (
+          <div style={{
+            background: 'linear-gradient(135deg, rgba(0, 122, 255, 0.05), rgba(0, 122, 255, 0.1))',
+            borderRadius: '8px',
+            padding: '8px',
+            marginBottom: '10px',
+            border: '0.5px solid rgba(0, 122, 255, 0.2)'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '4px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <span style={{ fontSize: '12px', fontWeight: '600', color: '#007aff' }}>🤖 FunGo AI评分</span>
+                {staffVerified && (
+                  <span style={{
+                    background: '#30d158',
+                    color: 'white',
+                    padding: '1px 4px',
+                    borderRadius: '4px',
+                    fontSize: '9px',
+                    fontWeight: '500'
+                  }}>
+                    ✓ 员工认证
+                  </span>
+                )}
+              </div>
+              <div style={{
+                fontSize: '16px',
+                fontWeight: '700',
+                color: getScoreColor(aiScore)
+              }}>
+                {aiScore}
+              </div>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <span style={{ fontSize: '11px', color: getScoreColor(aiScore), fontWeight: '500' }}>
+                {getScoreLevel(aiScore)}
+              </span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '10px', color: '#86868b' }}>
+                <span>👍 {userFeedback.likes}</span>
+                <span>👎 {userFeedback.dislikes}</span>
+              </div>
+            </div>
+          </div>
+        );
+      };
+
+      // 推荐理由组件
+      const RecommendReasons = ({ reasons }) => {
+        if (!reasons || reasons.length === 0) return null;
+        
+        return (
+          <div style={{ marginBottom: '10px' }}>
+            <div style={{ fontSize: '12px', color: '#86868b', marginBottom: '4px' }}>
+              💡 推荐理由:
+            </div>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
+              {reasons.map((reason, index) => (
+                <span key={index} style={{
+                  background: 'rgba(48, 209, 88, 0.1)',
+                  color: '#30d158',
+                  padding: '2px 6px',
+                  borderRadius: '4px',
+                  fontSize: '10px',
+                  fontWeight: '500',
+                  border: '0.5px solid rgba(48, 209, 88, 0.3)'
+                }}>
+                  {reason}
+                </span>
+              ))}
+            </div>
+          </div>
+        );
+      };
       // 方案卡片组件（找事做模式）
       const LocalPlanCard = ({ plan, onSave, isSaved, onPreview }) => {
         return (
@@ -543,11 +857,27 @@
                   </p>
                 </div>
               </div>
+
+              {/* 数据来源 */}
+              <DataSourceBadges 
+                dataSources={plan.dataSources} 
+                lastUpdated={plan.lastUpdated}
+              />
+
+              {/* AI评分 */}
+              <AiScoreDisplay 
+                aiScore={plan.aiScore}
+                userFeedback={plan.userFeedback}
+                staffVerified={plan.staffVerified}
+              />
+
+              {/* 推荐理由 */}
+              <RecommendReasons reasons={plan.recommendReasons} />
               
               {/* 评分和宠物友好度 */}
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '10px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                  <span style={{ fontSize: '13px', color: '#86868b' }}>评分</span>
+                  <span style={{ fontSize: '13px', color: '#86868b' }}>用户评分</span>
                   <span style={{ fontSize: '14px', fontWeight: '500', color: '#1d1d1f' }}>{plan.rating}</span>
                   <span style={{ fontSize: '12px', color: '#ffa726' }}>★</span>
                 </div>
@@ -590,6 +920,39 @@
                     flex: 1,
                     padding: '10px',
                     background: '#f2f2f7',
+                    color: '#007aff',
+                    border: 'none',
+                    borderRadius: '8px',
+                    fontSize: '14px',
+                    fontWeight: '500',
+                    cursor: 'pointer'
+                  }}
+                >
+                  预览详情
+                </button>
+                <button
+                  onClick={() => onSave(plan)}
+                  style={{
+                    padding: '10px 16px',
+                    background: isSaved ? '#30d158' : '#007aff',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '8px',
+                    fontSize: '14px',
+                    fontWeight: '500',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px'
+                  }}
+                >
+                  {isSaved ? '✓ 已收藏' : '收藏'}
+                </button>
+              </div>
+            </div>
+          </div>
+        );
+      };f2f7',
                     color: '#007aff',
                     border: 'none',
                     borderRadius: '8px',
@@ -1418,6 +1781,74 @@
                 </div>
               )}
 
+              {/* AI分析状态 */}
+              <div style={{
+                background: 'white',
+                borderRadius: '12px',
+                padding: '12px',
+                marginBottom: '16px',
+                border: '0.5px solid rgba(0,0,0,0.04)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <div style={{
+                    width: '32px',
+                    height: '32px',
+                    background: 'linear-gradient(135deg, #007aff, #5ac8fa)',
+                    borderRadius: '50%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '16px'
+                  }}>
+                    🤖
+                  </div>
+                  <div>
+                    <div style={{ fontSize: '14px', fontWeight: '600', color: '#1d1d1f' }}>
+                      FunGo AI 智能推荐引擎
+                    </div>
+                    <div style={{ fontSize: '12px', color: '#86868b' }}>
+                      {aiAnalyzing ? '正在重新分析中...' : 
+                       lastAnalysisTime ? `上次分析: ${lastAnalysisTime.toLocaleTimeString()}` : '已完成智能分析'}
+                    </div>
+                  </div>
+                </div>
+                <button
+                  onClick={triggerAiAnalysis}
+                  disabled={aiAnalyzing}
+                  style={{
+                    background: aiAnalyzing ? '#f2f2f7' : 'rgba(0, 122, 255, 0.1)',
+                    color: aiAnalyzing ? '#86868b' : '#007aff',
+                    border: 'none',
+                    borderRadius: '8px',
+                    padding: '8px 12px',
+                    fontSize: '12px',
+                    fontWeight: '500',
+                    cursor: aiAnalyzing ? 'not-allowed' : 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px'
+                  }}
+                >
+                  {aiAnalyzing ? (
+                    <>
+                      <div className="spin" style={{ 
+                        width: '10px', 
+                        height: '10px', 
+                        border: '1px solid rgba(134,134,139,0.3)', 
+                        borderTop: '1px solid #86868b', 
+                        borderRadius: '50%' 
+                      }}></div>
+                      分析中
+                    </>
+                  ) : (
+                    <>🔄 重新分析</>
+                  )}
+                </button>
+              </div>
+
               {/* 方案列表 */}
               <div style={styles.section}>
                 {tripType === 'local' ? (
@@ -1467,6 +1898,23 @@
                   查看更多 →
                 </button>
               </div>
+
+              {/* 数据透明度说明 */}
+              <div style={{
+                background: 'rgba(0, 122, 255, 0.05)',
+                borderRadius: '10px',
+                padding: '12px',
+                marginTop: '16px',
+                border: '0.5px solid rgba(0, 122, 255, 0.1)'
+              }}>
+                <div style={{ fontSize: '12px', fontWeight: '600', color: '#007aff', marginBottom: '6px' }}>
+                  📊 推荐算法透明度
+                </div>
+                <div style={{ fontSize: '11px', color: '#86868b', lineHeight: '1.4' }}>
+                  我们的推荐基于多维度数据：外部平台用户评价(75%)、FunGo员工实地踩点(15%)、用户反馈(10%)。
+                  所有数据实时更新，确保推荐的准确性和时效性。
+                </div>
+              </div>
             </div>
 
             {/* 底部状态栏 */}
@@ -1477,8 +1925,14 @@
                 justifyContent: 'space-between',
                 fontSize: '14px'
               }}>
-                <div style={{ color: '#86868b' }}>
-                  已收藏 {savedPlans.length} 个方案
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <div style={{ color: '#86868b' }}>
+                    已收藏 {savedPlans.length} 个方案
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '12px', color: '#007aff' }}>
+                    <span>🤖</span>
+                    <span>AI推荐</span>
+                  </div>
                 </div>
                 {savedPlans.length > 0 && (
                   <button
