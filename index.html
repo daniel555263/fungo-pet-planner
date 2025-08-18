@@ -1049,6 +1049,71 @@
         );
       };
 
+      // 城市选择模态框组件
+      const CitySelectModal = () => (
+        <div style={styles.modal} onClick={(e) => e.target === e.currentTarget && setShowCitySelect(false)}>
+          <div style={styles.modalContent}>
+            <div style={{ 
+              display: 'flex', 
+              justifyContent: 'space-between', 
+              alignItems: 'center', 
+              marginBottom: '20px',
+              paddingBottom: '12px',
+              borderBottom: '0.5px solid rgba(0,0,0,0.05)'
+            }}>
+              <h3 style={{ fontSize: '18px', fontWeight: '600', color: '#1d1d1f' }}>选择位置</h3>
+              <button 
+                onClick={() => setShowCitySelect(false)} 
+                style={{ 
+                  background: 'none', 
+                  border: 'none', 
+                  fontSize: '22px', 
+                  color: '#86868b',
+                  cursor: 'pointer'
+                }}
+              >
+                ×
+              </button>
+            </div>
+            
+            <div style={{ maxHeight: '60vh', overflowY: 'auto' }}>
+              {CONFIG.cities.major.map(city => (
+                <div key={city.name} style={{ marginBottom: '16px' }}>
+                  <div style={{ fontSize: '16px', fontWeight: '600', marginBottom: '10px', color: '#1d1d1f', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    {city.name} 
+                    <span style={{ fontSize: '13px', color: '#86868b' }}>{city.weather} {city.temp}</span>
+                  </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '8px' }}>
+                    {city.districts.map(district => (
+                      <button
+                        key={district}
+                        onClick={() => handleCitySelect(city.name, district)}
+                        style={{
+                          padding: '12px 14px',
+                          background: selectedCity === city.name && selectedDistrict === district 
+                            ? '#007aff' 
+                            : 'white',
+                          color: selectedCity === city.name && selectedDistrict === district ? 'white' : '#1d1d1f',
+                          border: '0.5px solid',
+                          borderColor: selectedCity === city.name && selectedDistrict === district ? '#007aff' : 'rgba(0,0,0,0.08)',
+                          borderRadius: '8px',
+                          fontSize: '14px',
+                          fontWeight: '500',
+                          cursor: 'pointer',
+                          fontFamily: 'inherit'
+                        }}
+                      >
+                        {district}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      );
+
       // 主渲染
       if (page === 'planning') {
         return (
@@ -1180,7 +1245,95 @@
                     </div>
                     {pets.length > 1 && (
                       <button 
-                      onClick={() => setShowCitySelect(false)} 
+                        onClick={() => handleRemovePet(pet.id)} 
+                        style={{ 
+                          background: 'none', 
+                          border: 'none', 
+                          color: '#ff3b30', 
+                          fontSize: '18px',
+                          cursor: 'pointer',
+                          padding: '6px'
+                        }}
+                      >
+                        ×
+                      </button>
+                    )}
+                  </div>
+                ))}
+                
+                <button 
+                  onClick={() => setShowAddPet(true)} 
+                  style={{
+                    ...styles.button,
+                    ...styles.buttonSecondary,
+                    fontSize: '15px'
+                  }}
+                >
+                  + 添加宠物
+                </button>
+              </div>
+
+              {savedPlans.length > 0 && (
+                <div style={styles.section}>
+                  <div style={styles.sectionTitle}>
+                    我的收藏 ({savedPlans.length})
+                  </div>
+                  <div style={{
+                    background: 'white',
+                    borderRadius: '12px',
+                    padding: '12px',
+                    border: '0.5px solid rgba(0,0,0,0.04)'
+                  }}>
+                    {savedPlans.map((plan, index) => (
+                      <div key={plan.id} style={{
+                        fontSize: '14px',
+                        padding: '8px 0',
+                        borderBottom: index < savedPlans.length - 1 ? '0.5px solid rgba(0,0,0,0.05)' : 'none'
+                      }}>
+                        {plan.title}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div style={styles.bottomBar}>
+              <button 
+                onClick={generatePlans} 
+                disabled={!isFormValid} 
+                style={{
+                  ...styles.button,
+                  background: isFormValid ? '#007aff' : '#d1d1d6',
+                  color: isFormValid ? 'white' : '#86868b',
+                  cursor: isFormValid ? 'pointer' : 'not-allowed'
+                }}
+              >
+                {loading ? (
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+                    <div className="spin" style={{ 
+                      width: '14px', 
+                      height: '14px', 
+                      border: '2px solid rgba(255,255,255,0.3)', 
+                      borderTop: '2px solid white', 
+                      borderRadius: '50%' 
+                    }}></div>
+                    生成中...
+                  </div>
+                ) : (
+                  tripType === 'local' ? '智能推荐' : '生成行程'
+                )}
+              </button>
+            </div>
+
+            {/* 添加宠物模态框 */}
+            {showAddPet && (
+              <div style={styles.modal} onClick={(e) => e.target === e.currentTarget && setShowAddPet(false)}>
+                <div style={styles.modalContent}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+                    <h3 style={{ fontSize: '18px', fontWeight: '600', color: '#1d1d1f' }}>添加宠物</h3>
+                    <button 
+                      onClick={() => setShowAddPet(false)} 
                       style={{ 
                         background: 'none', 
                         border: 'none', 
@@ -1192,44 +1345,39 @@
                       ×
                     </button>
                   </div>
-                  
-                  <div style={{ maxHeight: '60vh', overflowY: 'auto' }}>
-                    {CONFIG.cities.major.map(city => (
-                      <div key={city.name} style={{ marginBottom: '16px' }}>
-                        <div style={{ fontSize: '16px', fontWeight: '600', marginBottom: '10px', color: '#1d1d1f', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                          {city.name} 
-                          <span style={{ fontSize: '13px', color: '#86868b' }}>{city.weather} {city.temp}</span>
-                        </div>
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '8px' }}>
-                          {city.districts.map(district => (
-                            <button
-                              key={district}
-                              onClick={() => handleCitySelect(city.name, district)}
-                              style={{
-                                padding: '12px 14px',
-                                background: selectedCity === city.name && selectedDistrict === district 
-                                  ? '#007aff' 
-                                  : 'white',
-                                color: selectedCity === city.name && selectedDistrict === district ? 'white' : '#1d1d1f',
-                                border: '0.5px solid',
-                                borderColor: selectedCity === city.name && selectedDistrict === district ? '#007aff' : 'rgba(0,0,0,0.08)',
-                                borderRadius: '8px',
-                                fontSize: '14px',
-                                fontWeight: '500',
-                                cursor: 'pointer',
-                                fontFamily: 'inherit'
-                              }}
-                            >
-                              {district}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
+                  <input 
+                    type="text" 
+                    placeholder="宠物名字" 
+                    value={newPet.name} 
+                    onChange={(e) => setNewPet({...newPet, name: e.target.value})} 
+                    style={styles.input}
+                  />
+                  <input 
+                    type="text" 
+                    placeholder="品种" 
+                    value={newPet.type} 
+                    onChange={(e) => setNewPet({...newPet, type: e.target.value})} 
+                    style={styles.input}
+                  />
+                  <input 
+                    type="text" 
+                    placeholder="体重" 
+                    value={newPet.weight} 
+                    onChange={(e) => setNewPet({...newPet, weight: e.target.value})} 
+                    style={styles.input}
+                  />
+                  <button 
+                    onClick={handleAddPet} 
+                    style={styles.button}
+                  >
+                    确认添加
+                  </button>
                 </div>
               </div>
             )}
+
+            {/* 城市选择模态框 */}
+            {showCitySelect && <CitySelectModal />}
           </div>
         );
       }
@@ -1463,6 +1611,7 @@
               </div>
             </div>
 
+            {/* 预览模态框 */}
             {currentPlan && (
               <PlanPreview 
                 plan={currentPlan}
@@ -1472,6 +1621,7 @@
               />
             )}
 
+            {/* 地图视图 */}
             {showMapView && (
               <MapView 
                 places={tripType === 'local' ? plans.map(p => p.place) : plans[0]?.places}
@@ -1485,143 +1635,8 @@
       return null;
     };
 
+    // 渲染应用
     ReactDOM.render(<App />, document.getElementById('root'));
   </script>
 </body>
 </html>
-                        onClick={() => handleRemovePet(pet.id)} 
-                        style={{ 
-                          background: 'none', 
-                          border: 'none', 
-                          color: '#ff3b30', 
-                          fontSize: '18px',
-                          cursor: 'pointer',
-                          padding: '6px'
-                        }}
-                      >
-                        ×
-                      </button>
-                    )}
-                  </div>
-                ))}
-                
-                <button 
-                  onClick={() => setShowAddPet(true)} 
-                  style={{
-                    ...styles.button,
-                    ...styles.buttonSecondary,
-                    fontSize: '15px'
-                  }}
-                >
-                  + 添加宠物
-                </button>
-              </div>
-
-              {savedPlans.length > 0 && (
-                <div style={styles.section}>
-                  <div style={styles.sectionTitle}>
-                    我的收藏 ({savedPlans.length})
-                  </div>
-                  <div style={{
-                    background: 'white',
-                    borderRadius: '12px',
-                    padding: '12px',
-                    border: '0.5px solid rgba(0,0,0,0.04)'
-                  }}>
-                    {savedPlans.map((plan, index) => (
-                      <div key={plan.id} style={{
-                        fontSize: '14px',
-                        padding: '8px 0',
-                        borderBottom: index < savedPlans.length - 1 ? '0.5px solid rgba(0,0,0,0.05)' : 'none'
-                      }}>
-                        {plan.title}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-
-            <div style={styles.bottomBar}>
-              <button 
-                onClick={generatePlans} 
-                disabled={!isFormValid} 
-                style={{
-                  ...styles.button,
-                  background: isFormValid ? '#007aff' : '#d1d1d6',
-                  color: isFormValid ? 'white' : '#86868b',
-                  cursor: isFormValid ? 'pointer' : 'not-allowed'
-                }}
-              >
-                {loading ? (
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
-                    <div className="spin" style={{ 
-                      width: '14px', 
-                      height: '14px', 
-                      border: '2px solid rgba(255,255,255,0.3)', 
-                      borderTop: '2px solid white', 
-                      borderRadius: '50%' 
-                    }}></div>
-                    生成中...
-                  </div>
-                ) : (
-                  tripType === 'local' ? '智能推荐' : '生成行程'
-                )}
-              </button>
-            </div>
-
-            {showAddPet && (
-              <div style={styles.modal} onClick={(e) => e.target === e.currentTarget && setShowAddPet(false)}>
-                <div style={styles.modalContent}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-                    <h3 style={{ fontSize: '18px', fontWeight: '600', color: '#1d1d1f' }}>添加宠物</h3>
-                    <button 
-                      onClick={() => setShowAddPet(false)} 
-                      style={{ 
-                        background: 'none', 
-                        border: 'none', 
-                        fontSize: '22px', 
-                        color: '#86868b',
-                        cursor: 'pointer'
-                      }}
-                    >
-                      ×
-                    </button>
-                  </div>
-                  <input 
-                    type="text" 
-                    placeholder="宠物名字" 
-                    value={newPet.name} 
-                    onChange={(e) => setNewPet({...newPet, name: e.target.value})} 
-                    style={styles.input}
-                  />
-                  <input 
-                    type="text" 
-                    placeholder="品种" 
-                    value={newPet.type} 
-                    onChange={(e) => setNewPet({...newPet, type: e.target.value})} 
-                    style={styles.input}
-                  />
-                  <input 
-                    type="text" 
-                    placeholder="体重" 
-                    value={newPet.weight} 
-                    onChange={(e) => setNewPet({...newPet, weight: e.target.value})} 
-                    style={styles.input}
-                  />
-                  <button 
-                    onClick={handleAddPet} 
-                    style={styles.button}
-                  >
-                    确认添加
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {showCitySelect && (
-              <div style={styles.modal} onClick={(e) => e.target === e.currentTarget && setShowCitySelect(false)}>
-                <div style={styles.modalContent}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-                    <h3 style={{ fontSize: '18px', fontWeight: '600', color: '#1d1d1f' }}>选择位置</h3>
-                    <button
