@@ -15,31 +15,49 @@
     }
     
     body { 
-      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "PingFang SC", "Microsoft YaHei", sans-serif; 
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", sans-serif; 
+      background: #f8f9fb;
       min-height: 100vh;
-      color: #2d3436;
+      color: #1d1d1f;
+      line-height: 1.4;
     }
     
-    @keyframes slideIn { 
-      from { opacity: 0; transform: translateY(20px); } 
+    @keyframes spin { 
+      to { transform: rotate(360deg); } 
+    }
+    
+    @keyframes bounce { 
+      0%, 20%, 50%, 80%, 100% { transform: translateY(0); } 
+      40% { transform: translateY(-3px); } 
+      60% { transform: translateY(-1px); } 
+    }
+    
+    @keyframes fadeInUp { 
+      from { opacity: 0; transform: translateY(30px); } 
       to { opacity: 1; transform: translateY(0); } 
     }
     
     @keyframes pulse { 
-      0% { transform: scale(1); opacity: 1; }
-      50% { transform: scale(1.05); opacity: 0.8; }
-      100% { transform: scale(1); opacity: 1; }
+      0%, 100% { opacity: 0.6; } 
+      50% { opacity: 1; } 
     }
     
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
+    @keyframes slideInLeft {
+      from { opacity: 0; transform: translateX(-20px); }
+      to { opacity: 1; transform: translateX(0); }
     }
     
-    .slide-in { animation: slideIn 0.5s ease-out; }
+    @keyframes float {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-10px); }
+    }
+    
+    .spin { animation: spin 1s linear infinite; }
+    .bounce { animation: bounce 2s infinite; }
+    .fade-in { animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1); }
     .pulse { animation: pulse 2s ease-in-out infinite; }
-    .fade-in { animation: fadeIn 0.3s ease-out; }
+    .slide-in { animation: slideInLeft 0.6s cubic-bezier(0.16, 1, 0.3, 1); }
+    .float { animation: float 3s ease-in-out infinite; }
   </style>
 </head>
 <body>
@@ -48,667 +66,1004 @@
   <script type="text/babel">
     const { useState, useEffect, useMemo } = React;
 
-    // 智能时段推荐系统
-    const getTimeBasedRecommendations = () => {
+    // 获取当前时段
+    const getCurrentTimeSlot = () => {
       const hour = new Date().getHours();
-      
-      if (hour >= 6 && hour < 10) {
-        return {
-          period: '早晨',
-          emoji: '🌅',
-          activities: ['晨跑公园', '宠物早餐店', '湖边散步'],
-          highlight: '清晨空气清新，适合运动'
-        };
-      } else if (hour >= 10 && hour < 14) {
-        return {
-          period: '上午',
-          emoji: '☀️',
-          activities: ['宠物游乐园', '室内活动中心', '宠物美容'],
-          highlight: '阳光充足，注意防晒'
-        };
-      } else if (hour >= 14 && hour < 17) {
-        return {
-          period: '下午',
-          emoji: '🌤️',
-          activities: ['宠物咖啡厅', '购物中心', '室内游戏'],
-          highlight: '避开最热时段，室内活动为主'
-        };
-      } else if (hour >= 17 && hour < 20) {
-        return {
-          period: '傍晚',
-          emoji: '🌆',
-          activities: ['海边漫步', '宠物公园', '户外晚餐'],
-          highlight: '黄金遛狗时间，温度适宜'
-        };
-      } else {
-        return {
-          period: '夜晚',
-          emoji: '🌙',
-          activities: ['宠物友好餐厅', '夜市遛弯', '星空露营'],
-          highlight: '凉爽舒适，注意安全'
-        };
-      }
+      if (hour >= 6 && hour < 9) return { slot: 'morning', label: '早晨', icon: '🌅' };
+      if (hour >= 9 && hour < 12) return { slot: 'forenoon', label: '上午', icon: '☀️' };
+      if (hour >= 12 && hour < 14) return { slot: 'noon', label: '中午', icon: '🌞' };
+      if (hour >= 14 && hour < 17) return { slot: 'afternoon', label: '下午', icon: '🌤️' };
+      if (hour >= 17 && hour < 19) return { slot: 'evening', label: '傍晚', icon: '🌆' };
+      if (hour >= 19 && hour < 22) return { slot: 'night', label: '夜晚', icon: '🌃' };
+      return { slot: 'late', label: '深夜', icon: '🌙' };
     };
 
-    // 生成智能推荐方案
-    const generateSmartPlans = (tripType, preferences, city, duration) => {
-      const timeRec = getTimeBasedRecommendations();
-      
-      if (tripType === 'local') {
-        // 本地游方案 - 基于当前时段
-        return [
+    // 数据配置
+    const CONFIG = {
+      cities: {
+        major: [
+          { name: '北京', districts: ['朝阳区', '海淀区', '西城区', '东城区'], weather: '☀️', temp: '24°C' },
+          { name: '上海', districts: ['浦东新区', '黄浦区', '静安区', '徐汇区'], weather: '⛅', temp: '26°C' },
+          { name: '广州', districts: ['天河区', '越秀区', '海珠区', '荔湾区'], weather: '🌦️', temp: '29°C' },
+          { name: '深圳', districts: ['南山区', '福田区', '罗湖区', '宝安区'], weather: '☀️', temp: '28°C' },
+          { name: '杭州', districts: ['西湖区', '拱墅区', '江干区', '下城区'], weather: '🌦️', temp: '22°C' },
+          { name: '成都', districts: ['锦江区', '青羊区', '金牛区', '武侯区'], weather: '☁️', temp: '20°C' },
+          { name: '南京', districts: ['玄武区', '秦淮区', '建邺区', '鼓楼区'], weather: '⛅', temp: '23°C' },
+          { name: '武汉', districts: ['江汉区', '江岸区', '硚口区', '汉阳区'], weather: '🌤️', temp: '25°C' }
+        ]
+      },
+      interests: [
+        { id: 'beach', label: '玩水嬉戏', icon: '🏖️' },
+        { id: 'run', label: '狗狗奔跑', icon: '🏃' },
+        { id: 'cafe', label: '喝下午茶', icon: '☕' },
+        { id: 'park', label: '公园漫步', icon: '🌳' },
+        { id: 'photo', label: '拍照打卡', icon: '📸' },
+        { id: 'food', label: '美食探店', icon: '🍽️' },
+        { id: 'mountain', label: '登山徒步', icon: '🏔️' },
+        { id: 'lake', label: '湖边休闲', icon: '🏞️' }
+      ],
+      durations: [
+        { value: '1', label: '1天', desc: '当日往返' },
+        { value: '2-3', label: '2-3天', desc: '周末短途' },
+        { value: '4-7', label: '4-7天', desc: '小长假' },
+        { value: '7+', label: '7天以上', desc: '深度游' }
+      ],
+      // 智能推荐方案模板
+      smartPlans: {
+        local: {
+          morning: [
+            { 
+              id: 1, 
+              title: '清晨遛狗套餐', 
+              subtitle: '适合晨练的狗狗', 
+              petFriendly: 5, 
+              duration: '2-3小时',
+              highlights: ['宠物公园', '晨跑步道', '早餐咖啡'],
+              timeAdvice: '6:00-9:00 最佳'
+            }
+          ],
+          forenoon: [
+            { 
+              id: 2, 
+              title: '上午活力方案', 
+              subtitle: '精力充沛的完美时光', 
+              petFriendly: 5, 
+              duration: '3-4小时',
+              highlights: ['室内宠物乐园', '宠物友好商场', '互动体验'],
+              timeAdvice: '9:00-12:00 推荐'
+            }
+          ],
+          afternoon: [
+            { 
+              id: 3, 
+              title: '下午悠闲计划', 
+              subtitle: '慢节奏享受时光', 
+              petFriendly: 4, 
+              duration: '2-3小时',
+              highlights: ['宠物咖啡厅', '公园野餐', '拍照打卡'],
+              timeAdvice: '14:00-17:00 舒适'
+            }
+          ],
+          evening: [
+            { 
+              id: 4, 
+              title: '傍晚漫步套餐', 
+              subtitle: '最美黄昏时刻', 
+              petFriendly: 5, 
+              duration: '2小时',
+              highlights: ['海边栈道', '落日观景', '户外晚餐'],
+              timeAdvice: '17:00-19:00 绝佳'
+            }
+          ],
+          night: [
+            { 
+              id: 5, 
+              title: '夜晚温馨方案', 
+              subtitle: '适合夜猫子的选择', 
+              petFriendly: 4, 
+              duration: '2-3小时',
+              highlights: ['宠物友好餐厅', '夜市漫步', '星空露营'],
+              timeAdvice: '19:00-22:00 推荐'
+            }
+          ]
+        },
+        travel: [
           {
-            id: 1,
-            title: `${timeRec.period}限定体验`,
-            subtitle: timeRec.highlight,
-            emoji: timeRec.emoji,
-            type: 'time-based',
-            highlights: ['实时推荐', '当季最佳', '宠物专属'],
-            petActivities: timeRec.activities,
-            duration: '2-3小时',
-            petFriendly: 5,
-            price: '💰💰',
-            tags: ['即刻出发', '宠物游乐', '拍照打卡']
-          },
-          {
-            id: 2,
-            title: '周末休闲套餐',
-            subtitle: '轻松惬意的亲子时光',
-            emoji: '🎪',
-            type: 'leisure',
-            highlights: ['宠物乐园', '美食探店', '专属摄影'],
-            petActivities: ['狗狗游泳池', '宠物运动场', '社交派对'],
-            duration: '半天',
-            petFriendly: 5,
-            price: '💰💰💰',
-            tags: ['社交', '运动', '美食']
-          },
-          {
-            id: 3,
-            title: '探索城市秘境',
-            subtitle: '发现城市里的宠物天堂',
-            emoji: '🗺️',
-            type: 'explore',
-            highlights: ['小众景点', '自然风光', '私密空间'],
-            petActivities: ['秘密花园', '私人海滩', '山林徒步'],
-            duration: '全天',
-            petFriendly: 4,
-            price: '💰',
-            tags: ['探险', '自然', '私密']
-          }
-        ];
-      } else {
-        // 长途游方案 - 基于行程类型
-        return [
-          {
-            id: 1,
+            id: 10,
             title: '舒适度假型',
-            subtitle: '宠物友好度假村体验',
-            emoji: '🏖️',
-            type: 'resort',
-            highlights: ['五星酒店', '私人沙滩', '管家服务'],
-            accommodation: '宠物度假村',
-            transport: '商务车接送',
-            duration: duration,
+            subtitle: '五星享受，宠物也是VIP',
             petFriendly: 5,
-            price: '💰💰💰💰💰',
-            tags: ['奢华', '全包', '省心']
+            duration: '3-7天',
+            highlights: ['宠物度假村', '专属SPA', '管家服务'],
+            type: 'luxury'
           },
           {
-            id: 2,
+            id: 11,
             title: '自驾探索型',
-            subtitle: '灵活自由的公路旅行',
-            emoji: '🚗',
-            type: 'roadtrip',
-            highlights: ['随心停留', '景点丰富', '宠物友好'],
-            accommodation: '特色民宿',
-            transport: '自驾/租车',
-            duration: duration,
+            subtitle: '自由随心，发现未知美景',
             petFriendly: 4,
-            price: '💰💰💰',
-            tags: ['自由', '探索', '灵活']
+            duration: '2-5天',
+            highlights: ['宠物友好酒店', '沿途景点', '自驾路线'],
+            type: 'adventure'
           },
           {
-            id: 3,
+            id: 12,
             title: '文化体验型',
-            subtitle: '深度感受当地风情',
-            emoji: '🏛️',
-            type: 'cultural',
-            highlights: ['古镇漫步', '美食之旅', '民俗体验'],
-            accommodation: '精品客栈',
-            transport: '高铁+当地交通',
-            duration: duration,
-            petFriendly: 3,
-            price: '💰💰',
-            tags: ['文化', '美食', '慢游']
+            subtitle: '深度游览，感受当地文化',
+            petFriendly: 4,
+            duration: '4-7天',
+            highlights: ['特色民宿', '文化景点', '当地美食'],
+            type: 'culture'
           }
-        ];
+        ]
       }
     };
 
     const App = () => {
+      // 核心状态
       const [page, setPage] = useState('planning');
-      const [tripType, setTripType] = useState('');
+      const [tripType, setTripType] = useState('local');
       const [selectedCity, setSelectedCity] = useState('深圳');
       const [selectedDistrict, setSelectedDistrict] = useState('南山区');
-      const [duration, setDuration] = useState('');
+      const [duration, setDuration] = useState('2-3');
       const [pets, setPets] = useState([{ 
         id: 1, name: '旺财', type: '金毛', emoji: '🐕', weight: '25kg' 
       }]);
-      const [preferences, setPreferences] = useState([]);
-      const [generatedPlans, setGeneratedPlans] = useState([]);
-      const [selectedPlan, setSelectedPlan] = useState(null);
-      const [preservedPlans, setPreservedPlans] = useState([]);
+      const [preferences, setPreferences] = useState(['海滩休闲']);
+      const [selectedPlans, setSelectedPlans] = useState([]);
       
       // UI 状态
       const [showAddPet, setShowAddPet] = useState(false);
-      const [loading, setLoading] = useState(false);
+      const [showCustomInterest, setShowCustomInterest] = useState(false);
+      const [showCitySelect, setShowCitySelect] = useState(false);
       const [newPet, setNewPet] = useState({ name: '', type: '', weight: '' });
+      const [customInterest, setCustomInterest] = useState('');
+      const [loading, setLoading] = useState(false);
+      const [animationClass, setAnimationClass] = useState('');
 
-      // 配置数据
-      const interests = [
-        { id: 'beach', label: '海边玩水', icon: '🏖️', color: '#4ECDC4' },
-        { id: 'run', label: '自由奔跑', icon: '🏃', color: '#95E1D3' },
-        { id: 'cafe', label: '咖啡时光', icon: '☕', color: '#F3A683' },
-        { id: 'park', label: '公园散步', icon: '🌳', color: '#78E08F' },
-        { id: 'photo', label: '拍照打卡', icon: '📸', color: '#FDA7DF' },
-        { id: 'food', label: '美食探店', icon: '🍽️', color: '#FAB1A0' }
-      ];
+      const currentTimeSlot = getCurrentTimeSlot();
+
+      useEffect(() => {
+        setAnimationClass('fade-in');
+      }, []);
+
+      // 计算属性
+      const currentCityData = useMemo(() => 
+        CONFIG.cities.major.find(city => city.name === selectedCity) || CONFIG.cities.major[3], 
+        [selectedCity]
+      );
+
+      const isFormValid = useMemo(() => 
+        selectedCity && tripType && pets.length > 0 && 
+        (tripType === 'local' || duration), 
+        [selectedCity, tripType, pets.length, duration]
+      );
+
+      // 获取智能推荐方案
+      const getSmartPlans = () => {
+        if (tripType === 'local') {
+          const timeSlotPlans = CONFIG.smartPlans.local[currentTimeSlot.slot] || CONFIG.smartPlans.local.afternoon;
+          return [
+            ...timeSlotPlans,
+            // 添加基于偏好的推荐
+            {
+              id: 6,
+              title: '个性化推荐',
+              subtitle: '基于您的偏好定制',
+              petFriendly: 4,
+              duration: '2-4小时',
+              highlights: preferences.slice(0, 3),
+              timeAdvice: '灵活安排',
+              isPersonalized: true
+            },
+            {
+              id: 7,
+              title: '附近热门',
+              subtitle: `${selectedCity}${selectedDistrict}周边精选`,
+              petFriendly: 4,
+              duration: '1-3小时',
+              highlights: ['网红景点', '当地特色', '宠物友好'],
+              timeAdvice: '全天开放'
+            }
+          ];
+        } else {
+          return CONFIG.smartPlans.travel;
+        }
+      };
+
+      // 事件处理
+      const handleTripTypeChange = (type) => {
+        setTripType(type);
+        if (type === 'local') {
+          setDuration('');
+        }
+      };
+
+      const handleAddPet = () => {
+        if (newPet.name && newPet.name.trim() && newPet.type && newPet.type.trim() && newPet.weight && newPet.weight.trim()) {
+          setPets(prev => [...prev, { 
+            ...newPet, 
+            id: Date.now(), 
+            emoji: '🐕' 
+          }]);
+          setNewPet({ name: '', type: '', weight: '' });
+          setShowAddPet(false);
+        }
+      };
+
+      const handleRemovePet = (id) => {
+        if (pets.length > 1) {
+          setPets(prev => prev.filter(p => p.id !== id));
+        }
+      };
+
+      const handleToggleInterest = (interest) => {
+        setPreferences(prev => 
+          prev.includes(interest) 
+            ? prev.filter(p => p !== interest)
+            : [...prev, interest]
+        );
+      };
+
+      const handleAddCustomInterest = () => {
+        if (customInterest.trim() && !preferences.includes(customInterest.trim())) {
+          setPreferences(prev => [...prev, customInterest.trim()]);
+          setCustomInterest('');
+          setShowCustomInterest(false);
+        }
+      };
+
+      const handleCitySelect = (city, district) => {
+        setSelectedCity(city);
+        setSelectedDistrict(district);
+        setShowCitySelect(false);
+      };
+
+      const handlePlanSelect = (plan) => {
+        setSelectedPlans(prev => {
+          const exists = prev.find(p => p.id === plan.id);
+          if (exists) {
+            return prev.filter(p => p.id !== plan.id);
+          } else {
+            return [...prev, plan];
+          }
+        });
+      };
 
       const generateTrips = () => {
-        if (!tripType) return;
+        if (!isFormValid) return;
         setLoading(true);
         setTimeout(() => {
-          const plans = generateSmartPlans(tripType, preferences, selectedCity, duration);
-          setGeneratedPlans(plans);
           setLoading(false);
           setPage('plans');
         }, 1500);
       };
 
-      const selectPlan = (plan) => {
-        setSelectedPlan(plan);
-        setPage('details');
+      // Apple风格样式系统
+      const styles = {
+        container: { 
+          background: '#f8f9fb', 
+          minHeight: '100vh',
+          paddingBottom: '120px'
+        },
+        header: { 
+          background: 'rgba(255, 255, 255, 0.8)', 
+          backdropFilter: 'saturate(180%) blur(20px)',
+          WebkitBackdropFilter: 'saturate(180%) blur(20px)',
+          padding: '16px 20px', 
+          borderBottom: '0.5px solid rgba(0,0,0,0.05)',
+          position: 'sticky', 
+          top: 0, 
+          zIndex: 10
+        },
+        logo: { 
+          fontSize: '32px', 
+          fontWeight: '700', 
+          textAlign: 'center',
+          letterSpacing: '-1px',
+          marginBottom: '4px'
+        },
+        subtitle: {
+          fontSize: '15px', 
+          color: '#86868b', 
+          textAlign: 'center', 
+          fontWeight: '400'
+        },
+        content: {
+          padding: '24px 20px 0'
+        },
+        section: {
+          marginBottom: '32px'
+        },
+        sectionTitle: {
+          fontSize: '22px',
+          fontWeight: '600',
+          color: '#1d1d1f',
+          marginBottom: '16px',
+          letterSpacing: '-0.4px'
+        },
+        button: { 
+          padding: '16px 24px', 
+          background: '#007aff', 
+          color: 'white', 
+          border: 'none', 
+          borderRadius: '12px', 
+          fontSize: '17px', 
+          fontWeight: '600', 
+          width: '100%',
+          transition: 'all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+          cursor: 'pointer',
+          fontFamily: 'inherit'
+        },
+        buttonSecondary: {
+          background: '#f2f2f7',
+          color: '#007aff',
+          border: '0.5px solid rgba(0,0,0,0.04)'
+        },
+        grid2: { 
+          display: 'grid', 
+          gridTemplateColumns: '1fr 1fr', 
+          gap: '12px' 
+        },
+        grid3: { 
+          display: 'grid', 
+          gridTemplateColumns: 'repeat(3, 1fr)', 
+          gap: '12px' 
+        },
+        modal: { 
+          position: 'fixed', 
+          top: 0, 
+          left: 0, 
+          right: 0, 
+          bottom: 0, 
+          background: 'rgba(0,0,0,0.4)', 
+          display: 'flex', 
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '20px',
+          zIndex: 1000,
+          backdropFilter: 'blur(8px)',
+          WebkitBackdropFilter: 'blur(8px)'
+        },
+        modalContent: { 
+          background: 'white', 
+          borderRadius: '20px', 
+          padding: '32px 24px', 
+          width: '100%',
+          maxWidth: '400px',
+          maxHeight: '80vh',
+          overflowY: 'auto'
+        },
+        input: { 
+          width: '100%', 
+          padding: '16px 20px', 
+          border: '0.5px solid #d1d1d6', 
+          borderRadius: '12px', 
+          fontSize: '17px', 
+          marginBottom: '16px', 
+          outline: 'none',
+          transition: 'all 0.2s ease',
+          fontFamily: 'inherit',
+          background: 'white'
+        },
+        bottomBar: { 
+          position: 'fixed', 
+          bottom: 0, 
+          left: 0, 
+          right: 0, 
+          padding: '20px', 
+          background: 'rgba(255, 255, 255, 0.8)',
+          backdropFilter: 'saturate(180%) blur(20px)',
+          WebkitBackdropFilter: 'saturate(180%) blur(20px)',
+          borderTop: '0.5px solid rgba(0,0,0,0.05)'
+        }
       };
 
-      const togglePreservePlan = (planId) => {
-        setPreservedPlans(prev => 
-          prev.includes(planId) 
-            ? prev.filter(id => id !== planId)
-            : [...prev, planId]
+      // Apple风格选择组件
+      const SelectableCard = ({ 
+        selected, 
+        onClick, 
+        children, 
+        size = 'medium',
+        disabled = false 
+      }) => {
+        const cardStyle = {
+          padding: size === 'large' ? '20px' : size === 'small' ? '16px' : '18px',
+          borderRadius: '12px',
+          cursor: disabled ? 'not-allowed' : 'pointer',
+          transition: 'all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+          border: '0.5px solid',
+          borderColor: selected ? '#007aff' : 'rgba(0,0,0,0.08)',
+          background: selected ? '#007aff' : 'white',
+          color: selected ? 'white' : '#1d1d1f',
+          transform: selected ? 'scale(0.98)' : 'scale(1)',
+          opacity: disabled ? 0.5 : 1
+        };
+
+        return (
+          <div 
+            onClick={disabled ? undefined : onClick}
+            style={cardStyle}
+          >
+            {children}
+          </div>
         );
       };
 
-      // 规划页面
-      if (page === 'planning') {
-        return (
-          <div style={{ 
-            minHeight: '100vh',
-            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-            paddingBottom: '100px'
-          }}>
-            {/* 优化的头部 */}
-            <div style={{ 
-              background: 'rgba(255, 255, 255, 0.95)', 
-              backdropFilter: 'blur(10px)',
-              padding: '20px',
-              boxShadow: '0 2px 20px rgba(0,0,0,0.1)'
-            }}>
-              <div style={{ 
-                fontSize: '36px', 
-                fontWeight: '800', 
-                textAlign: 'center',
-                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                marginBottom: '8px'
-              }}>
-                FunGo
-              </div>
-              <div style={{ 
-                fontSize: '14px', 
-                color: '#8b95a5', 
-                textAlign: 'center',
-                letterSpacing: '0.5px'
-              }}>
-                🐾 和毛孩子一起探索世界
-              </div>
-            </div>
+      // 优化后的位置卡片组件
+      const LocationCard = () => {
+        const [isHovered, setIsHovered] = useState(false);
+        
+        const cardStyle = {
+          background: 'white',
+          borderRadius: '16px',
+          padding: '24px',
+          marginBottom: '24px',
+          border: '0.5px solid rgba(0,0,0,0.04)',
+          cursor: 'pointer',
+          transition: 'all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+          position: 'relative',
+          overflow: 'hidden',
+          transform: isHovered ? 'translateY(-2px)' : 'translateY(0)',
+          boxShadow: isHovered ? '0 8px 25px rgba(0,0,0,0.1)' : '0 2px 8px rgba(0,0,0,0.04)'
+        };
 
-            <div style={{ padding: '24px' }}>
-              {/* 出行类型选择 - 优化的卡片 */}
-              <div className="slide-in" style={{ marginBottom: '32px' }}>
-                <div style={{ 
-                  fontSize: '18px', 
-                  fontWeight: '600', 
-                  color: 'white',
-                  marginBottom: '16px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px'
-                }}>
-                  <span style={{ 
-                    background: 'rgba(255,255,255,0.2)', 
-                    borderRadius: '50%', 
-                    width: '28px', 
-                    height: '28px',
+        return (
+          <div 
+            onClick={() => setShowCitySelect(true)}
+            style={cardStyle}
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
+          >
+            <div style={{ position: 'relative', zIndex: 2 }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <div style={{
+                    width: '40px',
+                    height: '40px',
+                    background: 'linear-gradient(135deg, #007aff, #5ac8fa)',
+                    borderRadius: '12px',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    fontSize: '14px',
-                    fontWeight: '700'
-                  }}>1</span>
-                  选择出行方式
-                </div>
-                
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-                  {[
-                    { type: 'local', icon: '🏠', label: '本地游', desc: '2-8小时' },
-                    { type: 'travel', icon: '✈️', label: '长途游', desc: '1-7天' }
-                  ].map(item => (
-                    <div 
-                      key={item.type}
-                      onClick={() => setTripType(item.type)}
-                      style={{
-                        background: tripType === item.type 
-                          ? 'rgba(255,255,255,0.95)' 
-                          : 'rgba(255,255,255,0.85)',
-                        borderRadius: '20px',
-                        padding: '24px',
-                        cursor: 'pointer',
-                        transition: 'all 0.3s ease',
-                        transform: tripType === item.type ? 'scale(1.02)' : 'scale(1)',
-                        boxShadow: tripType === item.type 
-                          ? '0 10px 30px rgba(0,0,0,0.2)' 
-                          : '0 4px 15px rgba(0,0,0,0.1)',
-                        border: tripType === item.type 
-                          ? '2px solid #667eea'
-                          : '2px solid transparent'
-                      }}
-                    >
-                      <div style={{ fontSize: '40px', marginBottom: '12px', textAlign: 'center' }}>
-                        {item.icon}
-                      </div>
-                      <div style={{ 
-                        fontSize: '18px', 
-                        fontWeight: '600', 
-                        color: '#2d3436',
-                        textAlign: 'center',
-                        marginBottom: '4px'
-                      }}>
-                        {item.label}
-                      </div>
-                      <div style={{ 
-                        fontSize: '12px', 
-                        color: '#95a5a6',
-                        textAlign: 'center'
-                      }}>
-                        {item.desc}
-                      </div>
+                    fontSize: '18px'
+                  }}>
+                    📍
+                  </div>
+                  <div>
+                    <div style={{ fontSize: '20px', fontWeight: '600', color: '#1d1d1f', marginBottom: '2px' }}>
+                      {selectedCity} · {selectedDistrict}
                     </div>
-                  ))}
+                    <div style={{ fontSize: '14px', color: '#86868b' }}>
+                      {currentTimeSlot.icon} {currentTimeSlot.label} · 当前位置
+                    </div>
+                  </div>
                 </div>
+                <div style={{ 
+                  width: '8px', 
+                  height: '8px', 
+                  background: '#30d158', 
+                  borderRadius: '50%'
+                }} className="pulse"></div>
               </div>
-
-              {/* 位置信息 - 优化的对齐和布局 */}
-              {tripType && (
-                <div className="slide-in" style={{ marginBottom: '32px' }}>
-                  <div style={{ 
-                    fontSize: '18px', 
-                    fontWeight: '600', 
-                    color: 'white',
-                    marginBottom: '16px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '8px'
-                  }}>
-                    <span style={{ 
-                      background: 'rgba(255,255,255,0.2)', 
-                      borderRadius: '50%', 
-                      width: '28px', 
-                      height: '28px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      fontSize: '14px',
-                      fontWeight: '700'
-                    }}>2</span>
-                    {tripType === 'local' ? '确认所在位置' : '选择目的地'}
-                  </div>
-                  
-                  <div style={{
-                    background: 'white',
-                    borderRadius: '20px',
-                    padding: '20px',
-                    boxShadow: '0 4px 15px rgba(0,0,0,0.1)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between'
-                  }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                      <div style={{
-                        width: '48px',
-                        height: '48px',
-                        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                        borderRadius: '12px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        fontSize: '24px'
-                      }}>
-                        📍
-                      </div>
-                      <div>
-                        <div style={{ fontSize: '18px', fontWeight: '600', color: '#2d3436' }}>
-                          {selectedCity} · {selectedDistrict}
-                        </div>
-                        <div style={{ fontSize: '13px', color: '#95a5a6', marginTop: '4px' }}>
-                          ☀️ 28°C 适宜出行
-                        </div>
-                      </div>
-                    </div>
-                    <div className="pulse" style={{
-                      width: '10px',
-                      height: '10px',
-                      background: '#27ae60',
-                      borderRadius: '50%'
-                    }}></div>
-                  </div>
-                </div>
-              )}
-
-              {/* 偏好选择 - 优化的网格布局 */}
-              {tripType && (
-                <div className="slide-in" style={{ marginBottom: '32px' }}>
-                  <div style={{ 
-                    fontSize: '18px', 
-                    fontWeight: '600', 
-                    color: 'white',
-                    marginBottom: '16px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '8px'
-                  }}>
-                    <span style={{ 
-                      background: 'rgba(255,255,255,0.2)', 
-                      borderRadius: '50%', 
-                      width: '28px', 
-                      height: '28px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      fontSize: '14px',
-                      fontWeight: '700'
-                    }}>3</span>
-                    想要什么样的体验？
-                  </div>
-                  
-                  <div style={{ 
-                    display: 'grid', 
-                    gridTemplateColumns: 'repeat(3, 1fr)', 
-                    gap: '12px'
-                  }}>
-                    {interests.map(item => (
-                      <div 
-                        key={item.id}
-                        onClick={() => {
-                          setPreferences(prev => 
-                            prev.includes(item.label) 
-                              ? prev.filter(p => p !== item.label)
-                              : [...prev, item.label]
-                          );
-                        }}
-                        style={{
-                          background: preferences.includes(item.label) 
-                            ? item.color 
-                            : 'rgba(255,255,255,0.9)',
-                          borderRadius: '16px',
-                          padding: '16px',
-                          cursor: 'pointer',
-                          transition: 'all 0.3s ease',
-                          transform: preferences.includes(item.label) ? 'scale(0.95)' : 'scale(1)',
-                          border: '2px solid transparent'
-                        }}
-                      >
-                        <div style={{ 
-                          fontSize: '28px', 
-                          marginBottom: '8px',
-                          textAlign: 'center'
-                        }}>
-                          {item.icon}
-                        </div>
-                        <div style={{ 
-                          fontSize: '12px', 
-                          fontWeight: '500',
-                          color: preferences.includes(item.label) ? 'white' : '#2d3436',
-                          textAlign: 'center'
-                        }}>
-                          {item.label}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* 宠物信息 */}
-              {tripType && (
-                <div className="slide-in" style={{ marginBottom: '32px' }}>
-                  <div style={{ 
-                    fontSize: '18px', 
-                    fontWeight: '600', 
-                    color: 'white',
-                    marginBottom: '16px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '8px'
-                  }}>
-                    <span style={{ 
-                      background: 'rgba(255,255,255,0.2)', 
-                      borderRadius: '50%', 
-                      width: '28px', 
-                      height: '28px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      fontSize: '14px',
-                      fontWeight: '700'
-                    }}>4</span>
-                    同行伙伴
-                  </div>
-                  
-                  {pets.map(pet => (
-                    <div key={pet.id} style={{
-                      background: 'white',
-                      borderRadius: '16px',
-                      padding: '16px',
-                      marginBottom: '12px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '16px',
-                      boxShadow: '0 2px 10px rgba(0,0,0,0.1)'
-                    }}>
-                      <div style={{
-                        width: '56px',
-                        height: '56px',
-                        background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
-                        borderRadius: '50%',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        fontSize: '28px'
-                      }}>
-                        {pet.emoji}
-                      </div>
-                      <div style={{ flex: 1 }}>
-                        <div style={{ fontSize: '16px', fontWeight: '600', color: '#2d3436' }}>
-                          {pet.name}
-                        </div>
-                        <div style={{ fontSize: '14px', color: '#95a5a6' }}>
-                          {pet.type} · {pet.weight}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                  
-                  <button
-                    onClick={() => setShowAddPet(true)}
-                    style={{
-                      width: '100%',
-                      padding: '16px',
-                      background: 'rgba(255,255,255,0.3)',
-                      border: '2px dashed rgba(255,255,255,0.6)',
-                      borderRadius: '16px',
-                      color: 'white',
-                      fontSize: '16px',
-                      fontWeight: '500',
-                      cursor: 'pointer',
-                      transition: 'all 0.3s ease'
-                    }}
-                  >
-                    + 添加宠物
-                  </button>
-                </div>
-              )}
-            </div>
-
-            {/* 底部按钮 */}
-            {tripType && (
-              <div style={{
-                position: 'fixed',
-                bottom: 0,
-                left: 0,
-                right: 0,
-                padding: '20px',
-                background: 'rgba(255,255,255,0.95)',
-                backdropFilter: 'blur(10px)',
-                boxShadow: '0 -2px 20px rgba(0,0,0,0.1)'
+              <div style={{ 
+                padding: '12px 16px',
+                background: 'rgba(0, 122, 255, 0.1)',
+                borderRadius: '10px',
+                display: 'flex', 
+                alignItems: 'center', 
+                gap: '12px' 
               }}>
-                <button
-                  onClick={generateTrips}
-                  disabled={loading}
-                  style={{
-                    width: '100%',
-                    padding: '18px',
-                    background: loading 
-                      ? '#95a5a6'
-                      : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                    border: 'none',
-                    borderRadius: '16px',
-                    color: 'white',
-                    fontSize: '18px',
-                    fontWeight: '600',
-                    cursor: loading ? 'not-allowed' : 'pointer',
-                    transition: 'all 0.3s ease'
-                  }}
-                >
-                  {loading ? '生成中...' : '智能生成方案'}
-                </button>
+                <span style={{ fontSize: '16px' }}>{currentCityData.weather}</span>
+                <span style={{ fontSize: '15px', fontWeight: '500', color: '#007aff' }}>{currentCityData.temp}</span>
+                <span style={{ fontSize: '14px', color: '#86868b' }}>适宜出行</span>
+              </div>
+            </div>
+          </div>
+        );
+      };
+
+      // 方案卡片组件
+      const PlanCard = ({ plan, onSelect, selected }) => {
+        const isSelected = selected;
+        
+        return (
+          <div style={{
+            background: 'white',
+            borderRadius: '16px',
+            padding: '20px',
+            marginBottom: '16px',
+            border: `2px solid ${isSelected ? '#007aff' : 'rgba(0,0,0,0.04)'}`,
+            cursor: 'pointer',
+            transition: 'all 0.2s ease',
+            position: 'relative',
+            overflow: 'hidden'
+          }} onClick={() => onSelect(plan)}>
+            
+            {/* 智能推荐标识 */}
+            {plan.isPersonalized && (
+              <div style={{
+                position: 'absolute',
+                top: '12px',
+                right: '12px',
+                background: 'linear-gradient(135deg, #ff6b6b, #ffa726)',
+                color: 'white',
+                padding: '4px 8px',
+                borderRadius: '6px',
+                fontSize: '11px',
+                fontWeight: '600'
+              }}>
+                🤖 AI推荐
               </div>
             )}
-
-            {/* 添加宠物弹窗 */}
-            {showAddPet && (
+            
+            {/* 时段推荐标识 */}
+            {plan.timeAdvice && plan.timeAdvice.includes(currentTimeSlot.label) && (
               <div style={{
-                position: 'fixed',
-                top: 0,
-                left: 0,
-                right: 0,
-                bottom: 0,
-                background: 'rgba(0,0,0,0.5)',
+                position: 'absolute',
+                top: '12px',
+                right: plan.isPersonalized ? '85px' : '12px',
+                background: '#30d158',
+                color: 'white',
+                padding: '4px 8px',
+                borderRadius: '6px',
+                fontSize: '11px',
+                fontWeight: '600'
+              }}>
+                {currentTimeSlot.icon} 当前推荐
+              </div>
+            )}
+            
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
+              <div style={{ flex: 1 }}>
+                <h3 style={{ fontSize: '18px', fontWeight: '600', color: '#1d1d1f', marginBottom: '4px' }}>
+                  {plan.title}
+                </h3>
+                <p style={{ fontSize: '14px', color: '#86868b', marginBottom: '12px' }}>
+                  {plan.subtitle}
+                </p>
+                
+                {/* 宠物友好度 */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                  <span style={{ fontSize: '14px', color: '#86868b' }}>宠物友好度</span>
+                  <div style={{ display: 'flex', gap: '2px' }}>
+                    {[1,2,3,4,5].map(i => (
+                      <span key={i} style={{ 
+                        fontSize: '14px', 
+                        color: i <= plan.petFriendly ? '#ffa726' : '#e0e0e0' 
+                      }}>
+                        ⭐
+                      </span>
+                    ))}
+                  </div>
+                  <span style={{ fontSize: '14px', color: '#007aff', fontWeight: '500' }}>
+                    {plan.duration}
+                  </span>
+                </div>
+              </div>
+              
+              {/* 选择按钮 */}
+              <div style={{
+                width: '24px',
+                height: '24px',
+                borderRadius: '50%',
+                border: `2px solid ${isSelected ? '#007aff' : '#d1d1d6'}`,
+                background: isSelected ? '#007aff' : 'white',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                padding: '20px',
-                zIndex: 1000
+                marginLeft: '12px'
               }}>
-                <div style={{
-                  background: 'white',
-                  borderRadius: '24px',
-                  padding: '24px',
-                  width: '100%',
-                  maxWidth: '400px'
+                {isSelected && (
+                  <span style={{ color: 'white', fontSize: '12px' }}>✓</span>
+                )}
+              </div>
+            </div>
+            
+            {/* 亮点标签 */}
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '12px' }}>
+              {plan.highlights.map((highlight, index) => (
+                <span key={index} style={{
+                  background: 'rgba(0, 122, 255, 0.1)',
+                  color: '#007aff',
+                  padding: '4px 8px',
+                  borderRadius: '6px',
+                  fontSize: '12px',
+                  fontWeight: '500'
                 }}>
-                  <h3 style={{ marginBottom: '20px', color: '#2d3436' }}>添加宠物</h3>
-                  <input
-                    type="text"
-                    placeholder="宠物名字"
-                    value={newPet.name}
-                    onChange={(e) => setNewPet({...newPet, name: e.target.value})}
-                    style={{
-                      width: '100%',
-                      padding: '14px',
-                      border: '1px solid #dfe6e9',
-                      borderRadius: '12px',
-                      marginBottom: '12px',
-                      fontSize: '16px'
-                    }}
-                  />
-                  <input
-                    type="text"
-                    placeholder="品种"
-                    value={newPet.type}
-                    onChange={(e) => setNewPet({...newPet, type: e.target.value})}
-                    style={{
-                      width: '100%',
-                      padding: '14px',
-                      border: '1px solid #dfe6e9',
-                      borderRadius: '12px',
-                      marginBottom: '12px',
-                      fontSize: '16px'
-                    }}
-                  />
-                  <input
-                    type="text"
-                    placeholder="体重"
-                    value={newPet.weight}
-                    onChange={(e) => setNewPet({...newPet, weight: e.target.value})}
-                    style={{
-                      width: '100%',
-                      padding: '14px',
-                      border: '1px solid #dfe6e9',
-                      borderRadius: '12px',
-                      marginBottom: '20px',
-                      fontSize: '16px'
-                    }}
-                  />
-                  <div style={{ display: 'flex', gap: '12px' }}>
-                    <button
-                      onClick={() => setShowAddPet(false)}
-                      style={{
-                        flex: 1,
-                        padding: '14px',
-                        background: '#f1f3f5',
-                        border: 'none',
-                        borderRadius: '12px',
-                        fontSize: '16px',
+                  {highlight}
+                </span>
+              ))}
+            </div>
+            
+            {/* 时间建议 */}
+            {plan.timeAdvice && (
+              <div style={{ 
+                fontSize: '13px', 
+                color: '#86868b',
+                fontStyle: 'italic'
+              }}>
+                💡 {plan.timeAdvice}
+              </div>
+            )}
+          </div>
+        );
+      };
+
+      if (page === 'planning') {
+        return (
+          <div style={styles.container} className={animationClass}>
+            {/* 头部 */}
+            <div style={styles.header}>
+              <div style={styles.logo}>
+                <span style={{ color: '#1d1d1f' }}>Fun</span>
+                <span style={{ color: '#007aff' }}>Go</span>
+              </div>
+              <div style={styles.subtitle}>
+                和毛孩子一起探索世界
+              </div>
+            </div>
+
+            <div style={styles.content}>
+              {/* 出行类型 */}
+              <div style={styles.section}>
+                <div style={styles.sectionTitle}>出行类型</div>
+                <div style={styles.grid2}>
+                  {[
+                    { type: 'local', icon: '🏠', label: '本地游', desc: '周边游玩' },
+                    { type: 'travel', icon: '✈️', label: '长途游', desc: '跨城旅行' }
+                  ].map(item => (
+                    <SelectableCard 
+                      key={item.type}
+                      selected={tripType === item.type}
+                      onClick={() => handleTripTypeChange(item.type)}
+                      size="large"
+                    >
+                      <div style={{ textAlign: 'center' }}>
+                        <div style={{ fontSize: '32px', marginBottom: '12px' }}>{item.icon}</div>
+                        <div style={{ fontSize: '17px', fontWeight: '600', marginBottom: '4px' }}>
+                          {item.label}
+                        </div>
+                        <div style={{ fontSize: '13px', opacity: 0.7 }}>{item.desc}</div>
+                      </div>
+                    </SelectableCard>
+                  ))}
+                </div>
+              </div>
+
+              {/* 位置选择 */}
+              <div style={styles.section}>
+                <div style={styles.sectionTitle}>
+                  {tripType === 'local' ? '确认所在位置' : '选择目的地'}
+                </div>
+
+                {tripType === 'local' ? (
+                  <div>
+                    <LocationCard />
+                    
+                    <div style={{ marginBottom: '16px' }}>
+                      <div style={{ fontSize: '17px', fontWeight: '600', marginBottom: '16px', color: '#1d1d1f' }}>
+                        想要什么样的体验？
+                      </div>
+                      <div style={styles.grid3}>
+                        {CONFIG.interests.map(item => (
+                          <SelectableCard 
+                            key={item.id}
+                            selected={preferences.includes(item.label)}
+                            onClick={() => handleToggleInterest(item.label)}
+                            size="small"
+                          >
+                            <div style={{ textAlign: 'center' }}>
+                              <div style={{ fontSize: '24px', marginBottom: '8px' }}>{item.icon}</div>
+                              <div style={{ fontSize: '12px', fontWeight: '500', lineHeight: '1.2' }}>
+                                {item.label}
+                              </div>
+                            </div>
+                          </SelectableCard>
+                        ))}
+                        
+                        <SelectableCard 
+                          selected={false}
+                          onClick={() => setShowCustomInterest(true)}
+                          size="small"
+                        >
+                          <div style={{ textAlign: 'center' }}>
+                            <div style={{ fontSize: '24px', marginBottom: '8px', color: '#007aff' }}>➕</div>
+                            <div style={{ fontSize: '12px', fontWeight: '500', color: '#007aff', lineHeight: '1.2' }}>
+                              自定义
+                            </div>
+                          </div>
+                        </SelectableCard>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div>
+                    <div style={{ marginBottom: '24px' }}>
+                      <div style={styles.grid2}>
+                        {CONFIG.cities.major.slice(0, 6).map(city => (
+                          <SelectableCard 
+                            key={city.name}
+                            selected={selectedCity === city.name}
+                            onClick={() => setSelectedCity(city.name)}
+                          >
+                            <div>
+                              <div style={{ fontWeight: '600', fontSize: '17px', marginBottom: '4px' }}>
+                                {city.name}
+                              </div>
+                              <div style={{ fontSize: '13px', opacity: 0.7 }}>
+                                {city.weather} {city.temp}
+                              </div>
+                            </div>
+                          </SelectableCard>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div>
+                      <div style={{ fontSize: '17px', fontWeight: '600', marginBottom: '16px', color: '#1d1d1f' }}>
+                        预计出行天数
+                      </div>
+                      <div style={styles.grid2}>
+                        {CONFIG.durations.map(item => (
+                          <SelectableCard 
+                            key={item.value}
+                            selected={duration === item.value}
+                            onClick={() => setDuration(item.value)}
+                          >
+                            <div>
+                              <div style={{ fontWeight: '600', fontSize: '17px', marginBottom: '4px' }}>
+                                {item.label}
+                              </div>
+                              <div style={{ fontSize: '13px', opacity: 0.7 }}>
+                                {item.desc}
+                              </div>
+                            </div>
+                          </SelectableCard>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* 宠物信息 */}
+              <div style={styles.section}>
+                <div style={styles.sectionTitle}>同行伙伴</div>
+                
+                {pets.map(pet => (
+                  <div key={pet.id} style={{
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    gap: '16px', 
+                    padding: '20px',
+                    background: 'white', 
+                    borderRadius: '16px', 
+                    marginBottom: '12px',
+                    border: '0.5px solid rgba(0,0,0,0.04)'
+                  }}>
+                    <div style={{
+                      fontSize: '28px', 
+                      width: '56px', 
+                      height: '56px', 
+                      background: '#f2f2f7', 
+                      borderRadius: '50%', 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      justifyContent: 'center'
+                    }}>
+                      {pet.emoji}
+                    </div>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontSize: '17px', fontWeight: '600', marginBottom: '4px', color: '#1d1d1f' }}>
+                        {pet.name}
+                      </div>
+                      <div style={{ fontSize: '15px', color: '#86868b' }}>
+                        {pet.type} · {pet.weight}
+                      </div>
+                    </div>
+                    {pets.length > 1 && (
+                      <button 
+                        onClick={() => handleRemovePet(pet.id)} 
+                        style={{ 
+                          background: 'none', 
+                          border: 'none', 
+                          color: '#ff3b30', 
+                          fontSize: '20px',
+                          cursor: 'pointer',
+                          padding: '8px',
+                          borderRadius: '8px',
+                          transition: 'background 0.2s ease'
+                        }}
+                      >
+                        ×
+                      </button>
+                    )}
+                  </div>
+                ))}
+                
+                <button 
+                  onClick={() => setShowAddPet(true)} 
+                  style={{
+                    ...styles.button,
+                    ...styles.buttonSecondary
+                  }}
+                >
+                  + 添加宠物
+                </button>
+              </div>
+            </div>
+
+            {/* 底部操作栏 */}
+            <div style={styles.bottomBar}>
+              <button 
+                onClick={generateTrips} 
+                disabled={!isFormValid} 
+                style={{
+                  ...styles.button,
+                  background: isFormValid ? '#007aff' : '#d1d1d6',
+                  color: isFormValid ? 'white' : '#86868b',
+                  cursor: isFormValid ? 'pointer' : 'not-allowed'
+                }}
+              >
+                {loading ? (
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+                    <div style={{ 
+                      width: '16px', 
+                      height: '16px', 
+                      border: '2px solid rgba(255,255,255,0.3)', 
+                      borderTop: '2px solid white', 
+                      borderRadius: '50%' 
+                    }} className="spin"></div>
+                    生成中...
+                  </div>
+                ) : (
+                  '生成旅行方案'
+                )}
+              </button>
+            </div>
+
+            {/* 模态框：添加宠物 */}
+            {showAddPet && (
+              <div style={styles.modal} onClick={(e) => e.target === e.currentTarget && setShowAddPet(false)}>
+                <div style={styles.modalContent}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+                    <h3 style={{ fontSize: '20px', fontWeight: '600', color: '#1d1d1f' }}>添加宠物</h3>
+                    <button 
+                      onClick={() => setShowAddPet(false)} 
+                      style={{ 
+                        background: 'none', 
+                        border: 'none', 
+                        fontSize: '24px', 
+                        color: '#86868b',
                         cursor: 'pointer'
                       }}
                     >
-                      取消
+                      ×
                     </button>
-                    <button
-                      onClick={() => {
-                        if (newPet.name && newPet.type && newPet.weight) {
-                          setPets([...pets, { ...newPet, id: Date.now(), emoji: '🐕' }]);
-                          setNewPet({ name: '', type: '', weight: '' });
-                          setShowAddPet(false);
-                        }
-                      }}
-                      style={{
-                        flex: 1,
-                        padding: '14px',
-                        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                        border: 'none',
-                        borderRadius: '12px',
-                        color: 'white',
-                        fontSize: '16px',
-                        fontWeight: '600',
+                  </div>
+                  <input 
+                    type="text" 
+                    placeholder="宠物名字" 
+                    value={newPet.name} 
+                    onChange={(e) => setNewPet({...newPet, name: e.target.value})} 
+                    style={styles.input}
+                  />
+                  <input 
+                    type="text" 
+                    placeholder="品种" 
+                    value={newPet.type} 
+                    onChange={(e) => setNewPet({...newPet, type: e.target.value})} 
+                    style={styles.input}
+                  />
+                  <input 
+                    type="text" 
+                    placeholder="体重" 
+                    value={newPet.weight} 
+                    onChange={(e) => setNewPet({...newPet, weight: e.target.value})} 
+                    style={styles.input}
+                  />
+                  <button 
+                    onClick={handleAddPet} 
+                    style={styles.button}
+                  >
+                    确认添加
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* 模态框：自定义兴趣 */}
+            {showCustomInterest && (
+              <div style={styles.modal} onClick={(e) => e.target === e.currentTarget && setShowCustomInterest(false)}>
+                <div style={styles.modalContent}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+                    <h3 style={{ fontSize: '20px', fontWeight: '600', color: '#1d1d1f' }}>添加自定义体验</h3>
+                    <button 
+                      onClick={() => setShowCustomInterest(false)} 
+                      style={{ 
+                        background: 'none', 
+                        border: 'none', 
+                        fontSize: '24px', 
+                        color: '#86868b',
                         cursor: 'pointer'
                       }}
                     >
-                      确认
+                      ×
                     </button>
+                  </div>
+                  <input 
+                    type="text" 
+                    placeholder="比如：温泉体验、草原奔跑..." 
+                    value={customInterest} 
+                    onChange={(e) => setCustomInterest(e.target.value)} 
+                    style={styles.input}
+                    onKeyPress={(e) => e.key === 'Enter' && handleAddCustomInterest()}
+                  />
+                  <button 
+                    onClick={handleAddCustomInterest} 
+                    style={styles.button}
+                  >
+                    添加体验
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* 模态框：城市选择 */}
+            {showCitySelect && (
+              <div style={styles.modal} onClick={(e) => e.target === e.currentTarget && setShowCitySelect(false)}>
+                <div style={styles.modalContent}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+                    <h3 style={{ fontSize: '20px', fontWeight: '600', color: '#1d1d1f' }}>选择所在位置</h3>
+                    <button 
+                      onClick={() => setShowCitySelect(false)} 
+                      style={{ 
+                        background: 'none', 
+                        border: 'none', 
+                        fontSize: '24px', 
+                        color: '#86868b',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      ×
+                    </button>
+                  </div>
+                  
+                  <div style={{ maxHeight: '60vh', overflowY: 'auto' }}>
+                    {CONFIG.cities.major.map(city => (
+                      <div key={city.name} style={{ marginBottom: '20px' }}>
+                        <div style={{ fontSize: '18px', fontWeight: '600', marginBottom: '12px', color: '#1d1d1f', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          {city.name} 
+                          <span style={{ fontSize: '14px', color: '#86868b' }}>{city.weather} {city.temp}</span>
+                        </div>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '8px' }}>
+                          {city.districts.map(district => (
+                            <button
+                              key={district}
+                              onClick={() => handleCitySelect(city.name, district)}
+                              style={{
+                                padding: '14px 16px',
+                                background: selectedCity === city.name && selectedDistrict === district 
+                                  ? '#007aff' 
+                                  : 'white',
+                                color: selectedCity === city.name && selectedDistrict === district ? 'white' : '#1d1d1f',
+                                border: '0.5px solid',
+                                borderColor: selectedCity === city.name && selectedDistrict === district ? '#007aff' : 'rgba(0,0,0,0.08)',
+                                borderRadius: '10px',
+                                fontSize: '15px',
+                                fontWeight: '500',
+                                cursor: 'pointer',
+                                transition: 'all 0.2s ease',
+                                fontFamily: 'inherit'
+                              }}
+                            >
+                              {district}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 </div>
               </div>
@@ -719,36 +1074,719 @@
 
       // 方案选择页面
       if (page === 'plans') {
-        const timeRec = getTimeBasedRecommendations();
+        const smartPlans = getSmartPlans();
         
         return (
-          <div style={{ 
-            minHeight: '100vh',
-            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
-          }}>
-            <div style={{ 
-              background: 'rgba(255,255,255,0.95)', 
-              backdropFilter: 'blur(10px)',
-              padding: '20px',
-              boxShadow: '0 2px 20px rgba(0,0,0,0.1)'
-            }}>
+          <div style={styles.container} className="fade-in">
+            <div style={styles.header}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                <button
+                <button 
                   onClick={() => setPage('planning')}
                   style={{
                     background: 'none',
                     border: 'none',
-                    fontSize: '24px',
-                    cursor: 'pointer'
+                    fontSize: '18px',
+                    color: '#007aff',
+                    cursor: 'pointer',
+                    padding: '8px'
                   }}
                 >
-                  ←
+                  ← 返回
                 </button>
                 <div style={{ flex: 1 }}>
-                  <div style={{ fontSize: '20px', fontWeight: '700', color: '#2d3436' }}>
-                    为您智能推荐
+                  <div style={styles.logo}>
+                    <span style={{ color: '#1d1d1f' }}>Fun</span>
+                    <span style={{ color: '#007aff' }}>Go</span>
                   </div>
-                  <div style={{ fontSize: '14px', color: '#95a5a6', marginTop: '4px' }}>
-                    {tripType === 'local' 
-                      ? `基于${timeRec.period}时段 · ${selectedCity}` 
-                      : `${selectedCity}之旅 · ${duration}天行程`}
+                  <div style={styles.subtitle}>
+                    为您精选的智能方案
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div style={styles.content}>
+              {/* 当前时段提示 */}
+              <div style={{
+                background: 'linear-gradient(135deg, rgba(0, 122, 255, 0.1), rgba(90, 200, 250, 0.1))',
+                borderRadius: '16px',
+                padding: '20px',
+                marginBottom: '24px',
+                border: '1px solid rgba(0, 122, 255, 0.2)'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
+                  <span style={{ fontSize: '24px' }}>{currentTimeSlot.icon}</span>
+                  <span style={{ fontSize: '18px', fontWeight: '600', color: '#1d1d1f' }}>
+                    {currentTimeSlot.label}时光 · 智能推荐
+                  </span>
+                </div>
+                <p style={{ fontSize: '14px', color: '#86868b', lineHeight: '1.4' }}>
+                  基于当前时间和您的偏好，为{pets[0]?.name || '您的宠物'}量身定制最适合的出行方案
+                </p>
+              </div>
+
+              {/* 方案列表 */}
+              <div style={styles.section}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
+                  <div style={styles.sectionTitle}>
+                    推荐方案 ({smartPlans.length})
+                  </div>
+                  <div style={{ fontSize: '14px', color: '#86868b' }}>
+                    已选择 {selectedPlans.length} 个
+                  </div>
+                </div>
+                
+                {smartPlans.map((plan, index) => (
+                  <div key={plan.id} className="slide-in" style={{ animationDelay: `${index * 0.1}s` }}>
+                    <PlanCard 
+                      plan={plan}
+                      selected={selectedPlans.some(p => p.id === plan.id)}
+                      onSelect={handlePlanSelect}
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* 底部操作栏 */}
+            <div style={styles.bottomBar}>
+              {selectedPlans.length > 0 ? (
+                <div style={{ display: 'flex', gap: '12px' }}>
+                  <button 
+                    onClick={() => setPage('details')}
+                    style={{
+                      ...styles.button,
+                      background: '#007aff',
+                      flex: 1
+                    }}
+                  >
+                    查看详细行程 ({selectedPlans.length})
+                  </button>
+                  <button 
+                    onClick={() => setSelectedPlans([])}
+                    style={{
+                      ...styles.button,
+                      ...styles.buttonSecondary,
+                      width: 'auto',
+                      minWidth: '80px'
+                    }}
+                  >
+                    清空
+                  </button>
+                </div>
+              ) : (
+                <button 
+                  style={{
+                    ...styles.button,
+                    background: '#d1d1d6',
+                    color: '#86868b',
+                    cursor: 'not-allowed'
+                  }}
+                  disabled
+                >
+                  请选择至少一个方案
+                </button>
+              )}
+            </div>
+          </div>
+        );
+      }
+
+      // 详情页面
+      if (page === 'details') {
+        return (
+          <div style={styles.container} className="fade-in">
+            <div style={styles.header}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                <button 
+                  onClick={() => setPage('plans')}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    fontSize: '18px',
+                    color: '#007aff',
+                    cursor: 'pointer',
+                    padding: '8px'
+                  }}
+                >
+                  ← 方案
+                </button>
+                <div style={{ flex: 1 }}>
+                  <div style={styles.logo}>
+                    <span style={{ color: '#1d1d1f' }}>Fun</span>
+                    <span style={{ color: '#007aff' }}>Go</span>
+                  </div>
+                  <div style={styles.subtitle}>
+                    详细行程规划
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div style={styles.content}>
+              {/* 行程概览 */}
+              <div style={{
+                background: 'white',
+                borderRadius: '16px',
+                padding: '24px',
+                marginBottom: '24px',
+                border: '0.5px solid rgba(0,0,0,0.04)'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '16px' }}>
+                  <div style={{
+                    width: '48px',
+                    height: '48px',
+                    background: 'linear-gradient(135deg, #007aff, #5ac8fa)',
+                    borderRadius: '12px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '20px'
+                  }}>
+                    🗺️
+                  </div>
+                  <div>
+                    <h2 style={{ fontSize: '20px', fontWeight: '600', color: '#1d1d1f', marginBottom: '4px' }}>
+                      {tripType === 'local' ? `${selectedCity}本地游` : `${selectedCity}${duration}天之旅`}
+                    </h2>
+                    <p style={{ fontSize: '14px', color: '#86868b' }}>
+                      为{pets.map(p => p.name).join('、')}精心规划 · 已选择{selectedPlans.length}个方案
+                    </p>
+                  </div>
+                </div>
+                
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px' }}>
+                  <div style={{ textAlign: 'center' }}>
+                    <div style={{ fontSize: '24px', fontWeight: '700', color: '#007aff' }}>
+                      {selectedPlans.length}
+                    </div>
+                    <div style={{ fontSize: '12px', color: '#86868b' }}>精选方案</div>
+                  </div>
+                  <div style={{ textAlign: 'center' }}>
+                    <div style={{ fontSize: '24px', fontWeight: '700', color: '#30d158' }}>
+                      {Math.max(...selectedPlans.map(p => p.petFriendly))}★
+                    </div>
+                    <div style={{ fontSize: '12px', color: '#86868b' }}>宠物友好</div>
+                  </div>
+                  <div style={{ textAlign: 'center' }}>
+                    <div style={{ fontSize: '24px', fontWeight: '700', color: '#ff9500' }}>
+                      {currentTimeSlot.icon}
+                    </div>
+                    <div style={{ fontSize: '12px', color: '#86868b' }}>{currentTimeSlot.label}推荐</div>
+                  </div>
+                </div>
+              </div>
+
+              {/* 按类型分类展示 */}
+              {tripType === 'local' ? (
+                // 本地游：按活动类型分类
+                <div>
+                  {/* 立即出发 */}
+                  <div style={styles.section}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
+                      <div style={{
+                        width: '32px',
+                        height: '32px',
+                        background: '#30d158',
+                        borderRadius: '8px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: '16px'
+                      }}>
+                        🚀
+                      </div>
+                      <h3 style={{ fontSize: '20px', fontWeight: '600', color: '#1d1d1f' }}>
+                        专属活动
+                      </h3>
+                    </div>
+
+                    {selectedPlans.map(plan => (
+                      <div key={`activity-${plan.id}`} style={{
+                        background: 'white',
+                        borderRadius: '12px',
+                        padding: '16px',
+                        marginBottom: '12px',
+                        border: '0.5px solid rgba(0,0,0,0.04)'
+                      }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
+                          <div style={{ fontSize: '20px' }}>🎯</div>
+                          <div>
+                            <h4 style={{ fontSize: '16px', fontWeight: '600', color: '#1d1d1f' }}>
+                              {plan.title} - 宠物专享
+                            </h4>
+                            <p style={{ fontSize: '13px', color: '#86868b' }}>
+                              建议游玩时间：{plan.duration}
+                            </p>
+                          </div>
+                        </div>
+                        
+                        <div style={{ background: 'rgba(0, 122, 255, 0.05)', padding: '12px', borderRadius: '8px' }}>
+                          <div style={{ fontSize: '12px', color: '#007aff', fontWeight: '600', marginBottom: '6px' }}>
+                            🐕 {pets[0]?.name || '您的宠物'}可以体验：
+                          </div>
+                          <ul style={{ fontSize: '11px', color: '#86868b', lineHeight: '1.4', paddingLeft: '16px' }}>
+                            <li>自由奔跑和社交</li>
+                            <li>专业宠物训练师指导</li>
+                            <li>宠物友好设施体验</li>
+                            <li>安全围栏区域游玩</li>
+                          </ul>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                // 长途游：按行程安排分类
+                <div>
+                  {/* 住宿安排 */}
+                  <div style={styles.section}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
+                      <div style={{
+                        width: '32px',
+                        height: '32px',
+                        background: '#ff9500',
+                        borderRadius: '8px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: '16px'
+                      }}>
+                        🏨
+                      </div>
+                      <h3 style={{ fontSize: '20px', fontWeight: '600', color: '#1d1d1f' }}>
+                        住宿安排
+                      </h3>
+                      <span style={{ fontSize: '12px', color: '#ff9500', background: 'rgba(255, 149, 0, 0.1)', padding: '4px 8px', borderRadius: '6px' }}>
+                        优先推荐
+                      </span>
+                    </div>
+
+                    {selectedPlans.map((plan, index) => (
+                      <div key={`hotel-${plan.id}`} style={{
+                        background: 'white',
+                        borderRadius: '12px',
+                        padding: '18px',
+                        marginBottom: '12px',
+                        border: '0.5px solid rgba(0,0,0,0.04)',
+                        position: 'relative'
+                      }}>
+                        <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
+                          <div style={{
+                            width: '40px',
+                            height: '40px',
+                            background: 'linear-gradient(135deg, #ff9500, #ffb340)',
+                            borderRadius: '10px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            fontSize: '16px',
+                            color: 'white',
+                            fontWeight: '600'
+                          }}>
+                            {index + 1}
+                          </div>
+                          <div style={{ flex: 1 }}>
+                            <h4 style={{ fontSize: '16px', fontWeight: '600', color: '#1d1d1f', marginBottom: '4px' }}>
+                              {plan.type === 'luxury' ? '五星宠物度假村' : 
+                               plan.type === 'adventure' ? '宠物友好度假酒店' : 
+                               '特色宠物民宿'}
+                            </h4>
+                            <p style={{ fontSize: '13px', color: '#86868b', marginBottom: '8px' }}>
+                              {plan.subtitle} · 宠物友好度 {plan.petFriendly}⭐
+                            </p>
+                            
+                            <div style={{ background: 'rgba(255, 149, 0, 0.1)', padding: '8px', borderRadius: '6px', marginBottom: '8px' }}>
+                              <div style={{ fontSize: '11px', color: '#ff9500', fontWeight: '600', marginBottom: '4px' }}>
+                                🏨 住宿特色：
+                              </div>
+                              <div style={{ fontSize: '11px', color: '#86868b', lineHeight: '1.3' }}>
+                                • 宠物专用床具和用品<br/>
+                                • 24小时宠物照护服务<br/>
+                                • 室内外宠物活动区域<br/>
+                                • 宠物洗澡和美容服务
+                              </div>
+                            </div>
+
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                              <span style={{
+                                background: '#30d158',
+                                color: 'white',
+                                padding: '3px 6px',
+                                borderRadius: '4px',
+                                fontSize: '10px',
+                                fontWeight: '600'
+                              }}>
+                                可直接入住
+                              </span>
+                              <span style={{ fontSize: '11px', color: '#86868b' }}>
+                                预计 {duration} 晚住宿
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* 必游景点 */}
+                  <div style={styles.section}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
+                      <div style={{
+                        width: '32px',
+                        height: '32px',
+                        background: '#30d158',
+                        borderRadius: '8px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: '16px'
+                      }}>
+                        📍
+                      </div>
+                      <h3 style={{ fontSize: '20px', fontWeight: '600', color: '#1d1d1f' }}>
+                        必游景点
+                      </h3>
+                    </div>
+
+                    {selectedPlans.map((plan, index) => (
+                      <div key={`attraction-${plan.id}`} style={{
+                        background: 'white',
+                        borderRadius: '12px',
+                        padding: '16px',
+                        marginBottom: '12px',
+                        border: '0.5px solid rgba(0,0,0,0.04)'
+                      }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}>
+                          <div style={{ fontSize: '20px' }}>🗺️</div>
+                          <div>
+                            <h4 style={{ fontSize: '16px', fontWeight: '600', color: '#1d1d1f' }}>
+                              第{index + 1}天行程安排
+                            </h4>
+                            <p style={{ fontSize: '13px', color: '#86868b' }}>
+                              基于 "{plan.title}" 的精选路线
+                            </p>
+                          </div>
+                        </div>
+
+                        <div style={{ display: 'grid', gap: '8px' }}>
+                          {['上午景点', '下午景点', '傍晚活动'].map((timeSlot, timeIndex) => (
+                            <div key={timeIndex} style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '8px',
+                              padding: '8px',
+                              background: 'rgba(48, 209, 88, 0.05)',
+                              borderRadius: '6px'
+                            }}>
+                              <div style={{
+                                width: '6px',
+                                height: '6px',
+                                background: '#30d158',
+                                borderRadius: '50%'
+                              }}></div>
+                              <span style={{ fontSize: '12px', fontWeight: '500', color: '#30d158' }}>
+                                {timeSlot}:
+                              </span>
+                              <span style={{ fontSize: '12px', color: '#86868b' }}>
+                                {plan.highlights[timeIndex] || '宠物友好景点'}
+                              </span>
+                              <span style={{ fontSize: '10px', color: '#30d158', marginLeft: 'auto' }}>
+                                🐕 适宜
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* 交通方案 */}
+                  <div style={styles.section}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
+                      <div style={{
+                        width: '32px',
+                        height: '32px',
+                        background: '#007aff',
+                        borderRadius: '8px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: '16px'
+                      }}>
+                        🚗
+                      </div>
+                      <h3 style={{ fontSize: '20px', fontWeight: '600', color: '#1d1d1f' }}>
+                        交通方案
+                      </h3>
+                    </div>
+
+                    <div style={{
+                      background: 'white',
+                      borderRadius: '12px',
+                      padding: '18px',
+                      border: '0.5px solid rgba(0,0,0,0.04)'
+                    }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
+                        <div style={{ fontSize: '24px' }}>✈️</div>
+                        <div>
+                          <h4 style={{ fontSize: '16px', fontWeight: '600', color: '#1d1d1f' }}>
+                            推荐交通方式
+                          </h4>
+                          <p style={{ fontSize: '13px', color: '#86868b' }}>
+                            基于您的出行天数和宠物需求
+                          </p>
+                        </div>
+                      </div>
+
+                      <div style={{ display: 'grid', gap: '12px' }}>
+                        {duration === '1' ? (
+                          <div style={{ background: 'rgba(0, 122, 255, 0.1)', padding: '12px', borderRadius: '8px' }}>
+                            <div style={{ fontSize: '12px', color: '#007aff', fontWeight: '600', marginBottom: '6px' }}>
+                              🚗 当日往返 - 自驾推荐
+                            </div>
+                            <div style={{ fontSize: '11px', color: '#86868b', lineHeight: '1.4' }}>
+                              • 宠物可舒适乘坐，无托运压力<br/>
+                              • 行程时间灵活，可随时休息<br/>
+                              • 携带宠物用品方便
+                            </div>
+                          </div>
+                        ) : duration === '2-3' ? (
+                          <>
+                            <div style={{ background: 'rgba(0, 122, 255, 0.1)', padding: '12px', borderRadius: '8px' }}>
+                              <div style={{ fontSize: '12px', color: '#007aff', fontWeight: '600', marginBottom: '6px' }}>
+                                🚗 自驾出行（首选）
+                              </div>
+                              <div style={{ fontSize: '11px', color: '#86868b', lineHeight: '1.4' }}>
+                                • 最适合短途游的方式<br/>
+                                • {pets[0]?.name || '宠物'}可享受舒适旅程
+                              </div>
+                            </div>
+                            <div style={{ background: 'rgba(255, 149, 0, 0.1)', padding: '12px', borderRadius: '8px' }}>
+                              <div style={{ fontSize: '12px', color: '#ff9500', fontWeight: '600', marginBottom: '6px' }}>
+                                🚄 高铁+接驳（备选）
+                              </div>
+                              <div style={{ fontSize: '11px', color: '#86868b', lineHeight: '1.4' }}>
+                                • 需要宠物运输证明<br/>
+                                • 到达后租车或打车接驳
+                              </div>
+                            </div>
+                          </>
+                        ) : (
+                          <>
+                            <div style={{ background: 'rgba(0, 122, 255, 0.1)', padding: '12px', borderRadius: '8px' }}>
+                              <div style={{ fontSize: '12px', color: '#007aff', fontWeight: '600', marginBottom: '6px' }}>
+                                ✈️ 飞机出行（推荐）
+                              </div>
+                              <div style={{ fontSize: '11px', color: '#86868b', lineHeight: '1.4' }}>
+                                • 节省时间，适合长途旅行<br/>
+                                • 需提前办理宠物托运手续<br/>
+                                • 目的地租车自驾游览
+                              </div>
+                            </div>
+                            <div style={{ background: 'rgba(255, 149, 0, 0.1)', padding: '12px', borderRadius: '8px' }}>
+                              <div style={{ fontSize: '12px', color: '#ff9500', fontWeight: '600', marginBottom: '6px' }}>
+                                🚗 自驾长途（体验型）
+                              </div>
+                              <div style={{ fontSize: '11px', color: '#86868b', lineHeight: '1.4' }}>
+                                • 路途即是风景，深度体验<br/>
+                                • 需要合理安排休息点
+                              </div>
+                            </div>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* 温馨提示 */}
+              <div style={{
+                background: 'linear-gradient(135deg, rgba(255, 149, 0, 0.1), rgba(255, 179, 64, 0.1))',
+                borderRadius: '16px',
+                padding: '20px',
+                marginTop: '24px',
+                border: '1px solid rgba(255, 149, 0, 0.2)'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}>
+                  <span style={{ fontSize: '20px' }}>💡</span>
+                  <h3 style={{ fontSize: '16px', fontWeight: '600', color: '#1d1d1f' }}>
+                    贴心提醒
+                  </h3>
+                </div>
+                <div style={{ fontSize: '13px', color: '#86868b', lineHeight: '1.5' }}>
+                  • 出行前请确认宠物疫苗接种情况<br/>
+                  • 携带宠物健康证明和身份证明<br/>
+                  • 准备充足的宠物食物、水和常用药品<br/>
+                  • 关注天气变化，适时调整行程安排<br/>
+                  • 保持宠物在陌生环境中的情绪稳定
+                </div>
+              </div>
+            </div>
+
+            {/* 底部操作栏 */}
+            <div style={styles.bottomBar}>
+              <div style={{ display: 'flex', gap: '12px' }}>
+                <button 
+                  onClick={() => setPage('plans')}
+                  style={{
+                    ...styles.button,
+                    ...styles.buttonSecondary,
+                    width: 'auto',
+                    minWidth: '100px'
+                  }}
+                >
+                  修改方案
+                </button>
+                <button 
+                  onClick={() => {
+                    // 这里可以添加分享或保存功能
+                    alert('行程已保存到您的计划中！');
+                  }}
+                  style={{
+                    ...styles.button,
+                    background: '#007aff',
+                    flex: 1
+                  }}
+                >
+                  保存行程计划
+                </button>
+              </div>
+            </div>
+          </div>
+        );
+      }
+
+      return null;
+    };
+
+    ReactDOM.render(React.createElement(App), document.getElementById('root'));
+  </script>
+</body>
+</html>: '600', color: '#1d1d1f' }}>
+                        立即出发
+                      </h3>
+                      <span style={{ fontSize: '12px', color: '#30d158', background: 'rgba(48, 209, 88, 0.1)', padding: '4px 8px', borderRadius: '6px' }}>
+                        现在就能去
+                      </span>
+                    </div>
+
+                    {selectedPlans.filter(plan => plan.timeAdvice && plan.timeAdvice.includes('推荐')).map(plan => (
+                      <div key={plan.id} style={{
+                        background: 'white',
+                        borderRadius: '12px',
+                        padding: '16px',
+                        marginBottom: '12px',
+                        border: '0.5px solid rgba(0,0,0,0.04)',
+                        position: 'relative'
+                      }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}>
+                          <div style={{ fontSize: '20px' }}>📍</div>
+                          <div>
+                            <h4 style={{ fontSize: '16px', fontWeight: '600', color: '#1d1d1f' }}>
+                              {plan.title}
+                            </h4>
+                            <p style={{ fontSize: '13px', color: '#86868b' }}>
+                              {plan.duration} · 宠物友好度 {plan.petFriendly}⭐
+                            </p>
+                          </div>
+                          <div style={{
+                            marginLeft: 'auto',
+                            background: '#30d158',
+                            color: 'white',
+                            padding: '4px 8px',
+                            borderRadius: '6px',
+                            fontSize: '11px',
+                            fontWeight: '600'
+                          }}>
+                            {currentTimeSlot.label}最佳
+                          </div>
+                        </div>
+
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '12px' }}>
+                          {plan.highlights.map((highlight, index) => (
+                            <span key={index} style={{
+                              background: 'rgba(48, 209, 88, 0.1)',
+                              color: '#30d158',
+                              padding: '3px 6px',
+                              borderRadius: '4px',
+                              fontSize: '11px',
+                              fontWeight: '500'
+                            }}>
+                              🐕 {highlight}
+                            </span>
+                          ))}
+                        </div>
+
+                        <div style={{ fontSize: '12px', color: '#86868b' }}>
+                          💡 {plan.timeAdvice}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* 美食体验 */}
+                  <div style={styles.section}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
+                      <div style={{
+                        width: '32px',
+                        height: '32px',
+                        background: '#ff9500',
+                        borderRadius: '8px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: '16px'
+                      }}>
+                        🍽️
+                      </div>
+                      <h3 style={{ fontSize: '20px', fontWeight: '600', color: '#1d1d1f' }}>
+                        美食体验
+                      </h3>
+                    </div>
+
+                    {selectedPlans.filter(plan => plan.highlights.some(h => h.includes('餐厅') || h.includes('美食') || h.includes('咖啡'))).map(plan => (
+                      <div key={`food-${plan.id}`} style={{
+                        background: 'white',
+                        borderRadius: '12px',
+                        padding: '16px',
+                        marginBottom: '12px',
+                        border: '0.5px solid rgba(0,0,0,0.04)'
+                      }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
+                          <div style={{ fontSize: '20px' }}>🍴</div>
+                          <div>
+                            <h4 style={{ fontSize: '16px', fontWeight: '600', color: '#1d1d1f' }}>
+                              宠物友好餐厅推荐
+                            </h4>
+                            <p style={{ fontSize: '13px', color: '#86868b' }}>
+                              基于 "{plan.title}" 方案推荐
+                            </p>
+                          </div>
+                        </div>
+                        <p style={{ fontSize: '12px', color: '#86868b', lineHeight: '1.4' }}>
+                          🐕 宠物可进入用餐区域<br/>
+                          🍖 提供宠物专用餐具和食物<br/>
+                          ☕ 人宠共享悠闲时光
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* 专属活动 */}
+                  <div style={styles.section}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
+                      <div style={{
+                        width: '32px',
+                        height: '32px',
+                        background: '#007aff',
+                        borderRadius: '8px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: '16px'
+                      }}>
+                        🎾
+                      </div>
+                      <h3 style={{ fontSize: '20px', fontWeight
