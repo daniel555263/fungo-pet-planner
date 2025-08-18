@@ -3,1701 +3,813 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>FunGo - 宠物旅行规划器</title>
+  <title>FunGo 宠物旅行规划器</title>
   <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+    * { 
+      margin: 0; 
+      padding: 0; 
+      box-sizing: border-box; 
+    }
     
     body { 
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-      background: #fff;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", sans-serif; 
+      background: #f8f9fb;
       min-height: 100vh;
-      color: #1a1a1a;
-      overflow-x: hidden;
-    }
-
-    /* 动画 */
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    @keyframes rotate {
-      from { transform: rotate(0deg); }
-      to { transform: rotate(360deg); }
-    }
-
-    @keyframes bounce {
-      0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
-      40% { transform: translateY(-8px); }
-      60% { transform: translateY(-4px); }
-    }
-
-    @keyframes pawWalk {
-      0% { opacity: 0.3; transform: scale(0.8) rotate(-10deg); }
-      50% { opacity: 0.7; transform: scale(1.1) rotate(0deg); }
-      100% { opacity: 0.4; transform: scale(0.9) rotate(10deg); }
-    }
-
-    .fade-in { animation: fadeIn 0.3s ease-out; }
-    .loading-spin { animation: rotate 1s linear infinite; }
-    .bounce-ball { animation: bounce 2s infinite; }
-
-    /* 通用样式 */
-    .container {
-      min-height: 100vh;
-      background: #fff;
-      position: relative;
-    }
-
-    .header {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 60px;
-      background: rgba(255, 255, 255, 0.95);
-      backdrop-filter: blur(20px);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 20px;
-      z-index: 100;
-      border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-    }
-
-    .content {
-      padding-top: 60px;
-      padding-bottom: 90px;
-      min-height: 100vh;
-    }
-
-    .bottom-nav {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      height: 80px;
-      background: rgba(255, 255, 255, 0.95);
-      backdrop-filter: blur(20px);
-      border-top: 1px solid rgba(0, 0, 0, 0.05);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      padding-bottom: 20px;
-    }
-
-    .nav-item {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 4px;
-      color: #1a1a1a;
-      font-size: 14px;
-      font-weight: 500;
-      cursor: pointer;
-      transition: color 0.2s;
-      padding: 12px 24px;
-    }
-
-    .nav-item.active {
-      color: #2563eb;
-    }
-
-    .nav-icon {
-      font-size: 24px;
-    }
-
-    /* Logo样式 */
-    .logo-section {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .logo-text {
-      font-size: 20px;
-      font-weight: 700;
-      color: #1a1a1a;
-      letter-spacing: -0.5px;
-    }
-
-    .logo-dot {
-      width: 6px;
-      height: 6px;
-      background: #ff6b35;
-      border-radius: 50%;
-    }
-
-    .add-btn {
-      width: 32px;
-      height: 32px;
-      background: #2563eb;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: white;
-      font-size: 18px;
-      cursor: pointer;
-      border: none;
-      transition: transform 0.2s, background 0.2s;
-      box-shadow: 0 2px 8px rgba(37, 99, 235, 0.2);
-    }
-
-    .add-btn:hover {
-      background: #1d4ed8;
-      transform: scale(1.05);
-    }
-
-    .add-btn:active {
-      transform: scale(0.95);
-    }
-
-    /* 首页样式 */
-    .welcome-container {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 40px 20px 20px;
-      text-align: center;
-      min-height: calc(100vh - 150px);
-      justify-content: center;
-    }
-
-    .icon-row {
-      display: flex;
-      gap: 12px;
-      margin-bottom: 40px;
-    }
-
-    .icon-circle {
-      width: 44px;
-      height: 44px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 20px;
-      color: white;
-    }
-
-    .welcome-title {
-      font-size: 26px;
-      font-weight: 700;
-      margin-bottom: 12px;
-      color: #1a1a1a;
-    }
-
-    .welcome-desc {
-      font-size: 16px;
-      color: #6b7280;
-      line-height: 1.6;
-      max-width: 300px;
-      margin-bottom: 40px;
-    }
-
-    .paw-trail-container {
-      position: relative;
-      width: 300px;
-      height: 140px;
-      margin: 20px auto;
-    }
-
-    .paw-print {
-      position: absolute;
-      font-size: 14px;
-      color: #9ca3af;
-      animation: pawWalk 4s infinite;
-    }
-
-    /* S型路径 */
-    .paw-print:nth-child(1) { left: 30px; top: 100px; animation-delay: 0s; }
-    .paw-print:nth-child(2) { left: 60px; top: 80px; animation-delay: 0.4s; }
-    .paw-print:nth-child(3) { left: 90px; top: 50px; animation-delay: 0.8s; }
-    .paw-print:nth-child(4) { left: 130px; top: 30px; animation-delay: 1.2s; }
-    .paw-print:nth-child(5) { left: 170px; top: 40px; animation-delay: 1.6s; }
-    .paw-print:nth-child(6) { left: 200px; top: 65px; animation-delay: 2.0s; }
-    .paw-print:nth-child(7) { left: 230px; top: 90px; animation-delay: 2.4s; }
-
-    .paw-end {
-      position: absolute;
-      right: 20px;
-      top: 20px;
-      font-size: 24px;
-      animation: bounce 2s infinite;
-      animation-delay: 2.8s;
-    }
-
-    .create-trip-btn {
-      background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
-      color: white;
-      border: none;
-      border-radius: 12px;
-      padding: 16px 32px;
-      font-size: 16px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: transform 0.2s, box-shadow 0.2s;
-      box-shadow: 0 4px 16px rgba(37, 99, 235, 0.2);
-    }
-
-    .create-trip-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 24px rgba(37, 99, 235, 0.3);
-    }
-
-    .create-trip-btn:active {
-      transform: scale(0.98);
-    }
-
-    /* 行程卡片 */
-    .trip-card {
-      margin: 16px;
-      border-radius: 16px;
-      overflow: hidden;
-      box-shadow: 0 2px 12px rgba(0,0,0,0.06);
-      cursor: pointer;
-      transition: transform 0.2s, box-shadow 0.2s;
-      background: white;
-    }
-
-    .trip-card:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 24px rgba(0,0,0,0.1);
-    }
-
-    .trip-card:active {
-      transform: scale(0.98);
-    }
-
-    .trip-card-image {
-      width: 100%;
-      height: 160px;
-      background-size: cover;
-      background-position: center;
-      position: relative;
-    }
-
-    .trip-card-overlay {
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(to bottom, transparent, rgba(0,0,0,0.5));
-      padding: 16px;
-      display: flex;
-      flex-direction: column;
-      justify-content: flex-end;
-    }
-
-    .trip-date {
-      color: white;
-      font-size: 14px;
-      margin-bottom: 4px;
-      opacity: 0.9;
-    }
-
-    .trip-destination {
-      color: white;
-      font-size: 18px;
-      font-weight: 600;
-    }
-
-    .trip-card-content {
-      padding: 16px;
-    }
-
-    .trip-tags {
-      display: flex;
-      gap: 8px;
-      margin-bottom: 12px;
-    }
-
-    .trip-tag {
-      padding: 4px 8px;
-      background: #f3f4f6;
-      border-radius: 8px;
-      font-size: 12px;
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      color: #6b7280;
-    }
-
-    .trip-info-title {
-      font-size: 16px;
-      font-weight: 600;
-      margin-bottom: 8px;
-      color: #1a1a1a;
-    }
-
-    .trip-info-detail {
-      font-size: 14px;
-      color: #6b7280;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      margin-bottom: 4px;
-    }
-
-    .see-plan-btn {
-      width: 100%;
-      background: #2563eb;
-      color: white;
-      border: none;
-      border-radius: 10px;
-      padding: 12px;
-      font-size: 16px;
-      font-weight: 600;
-      cursor: pointer;
-      margin-top: 12px;
-      transition: background 0.2s;
-    }
-
-    .see-plan-btn:hover {
-      background: #1d4ed8;
-    }
-
-    /* 表单样式 */
-    .form-header {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      padding: 16px 20px;
-      background: rgba(255, 255, 255, 0.95);
-      backdrop-filter: blur(20px);
-      border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-      z-index: 100;
-    }
-
-    .back-btn {
-      font-size: 24px;
-      cursor: pointer;
-      background: none;
-      border: none;
-      padding: 0;
-      margin-right: 16px;
-      color: #2563eb;
-    }
-
-    .progress-bar {
-      height: 3px;
-      background: #f3f4f6;
-      border-radius: 2px;
-      margin: 16px 0 8px 0;
-      position: relative;
-    }
-
-    .progress-fill {
-      height: 100%;
-      background: linear-gradient(90deg, #2563eb 0%, #1d4ed8 100%);
-      border-radius: 2px;
-      transition: width 0.3s;
-    }
-
-    .step-indicator {
-      position: absolute;
-      top: -24px;
-      right: 0;
-      font-size: 14px;
-      color: #2563eb;
-      font-weight: 600;
-    }
-
-    .form-content {
-      padding: 100px 20px 120px 20px;
-      min-height: 100vh;
-    }
-
-    .step-icon {
-      width: 48px;
-      height: 48px;
-      background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 24px;
-      margin-bottom: 20px;
-      box-shadow: 0 4px 16px rgba(37, 99, 235, 0.2);
-    }
-
-    .step-title {
-      font-size: 22px;
-      font-weight: 700;
-      margin-bottom: 8px;
-      color: #1a1a1a;
-    }
-
-    .step-desc {
-      font-size: 16px;
-      color: #6b7280;
-      margin-bottom: 24px;
-      line-height: 1.5;
-    }
-
-    .location-hint {
-      background: #f0f9ff;
-      padding: 12px 16px;
-      border-radius: 12px;
-      margin-bottom: 20px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 14px;
-      color: #2563eb;
-      border: 1px solid rgba(37, 99, 235, 0.1);
-    }
-
-    .search-input {
-      width: 100%;
-      padding: 14px 16px;
-      border: 1px solid #e5e7eb;
-      border-radius: 12px;
-      font-size: 16px;
-      margin-bottom: 20px;
-      outline: none;
-      transition: border-color 0.2s;
-    }
-
-    .search-input:focus {
-      border-color: #2563eb;
-    }
-
-    .section-title {
-      font-size: 18px;
-      font-weight: 600;
-      margin-bottom: 12px;
-      color: #1a1a1a;
-    }
-
-    .city-section {
-      margin-bottom: 24px;
-    }
-
-    .district-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 12px;
-      margin-bottom: 16px;
-    }
-
-    .city-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 12px;
-    }
-
-    .city-item {
-      padding: 16px 12px;
-      background: #f9fafb;
-      border-radius: 12px;
-      cursor: pointer;
-      transition: all 0.2s;
-      border: 2px solid transparent;
-      text-align: center;
-    }
-
-    .city-item.selected {
-      background: #eff6ff;
-      border-color: #2563eb;
-    }
-
-    .city-item.local {
-      background: #f0fdf4;
-      border-color: #22c55e;
-    }
-
-    .city-item.local.selected {
-      background: #dcfce7;
-      border-color: #16a34a;
-    }
-
-    .city-flag {
-      font-size: 24px;
-      margin-bottom: 8px;
-    }
-
-    .city-name {
-      font-size: 14px;
-      font-weight: 600;
-      margin-bottom: 4px;
-      color: #1a1a1a;
-    }
-
-    .city-info {
-      font-size: 12px;
-      color: #6b7280;
-    }
-
-    .weather-info {
-      font-size: 11px;
-      color: #10b981;
-      margin-top: 2px;
-    }
-
-    .duration-counter {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 32px;
-      margin: 40px 0;
-    }
-
-    .counter-btn {
-      width: 48px;
-      height: 48px;
-      border-radius: 50%;
-      border: 2px solid #e5e7eb;
-      background: white;
-      font-size: 20px;
-      cursor: pointer;
-      transition: all 0.2s;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #1a1a1a;
-    }
-
-    .counter-btn:hover {
-      border-color: #2563eb;
-      color: #2563eb;
-    }
-
-    .counter-btn:active {
-      background: #f3f4f6;
-      transform: scale(0.95);
-    }
-
-    .counter-btn:disabled {
-      opacity: 0.3;
-      cursor: not-allowed;
-    }
-
-    .counter-value {
-      font-size: 32px;
-      font-weight: 700;
-      min-width: 100px;
-      text-align: center;
-      color: #2563eb;
-    }
-
-    .calendar-container {
-      background: white;
-      border-radius: 16px;
-      padding: 20px;
-      box-shadow: 0 2px 12px rgba(0,0,0,0.06);
-    }
-
-    .calendar-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 20px;
-    }
-
-    .calendar-title {
-      font-size: 18px;
-      font-weight: 600;
-      color: #1a1a1a;
-    }
-
-    .calendar-nav {
-      display: flex;
-      gap: 16px;
-    }
-
-    .calendar-nav-btn {
-      background: none;
-      border: none;
-      color: #2563eb;
-      font-size: 20px;
-      cursor: pointer;
-      padding: 4px;
-      border-radius: 6px;
-      transition: background 0.2s;
-    }
-
-    .calendar-nav-btn:hover {
-      background: #f3f4f6;
-    }
-
-    .calendar-grid {
-      display: grid;
-      grid-template-columns: repeat(7, 1fr);
-      gap: 2px;
-    }
-
-    .calendar-day-header {
-      text-align: center;
-      font-size: 12px;
-      color: #6b7280;
-      padding: 8px 4px;
-      font-weight: 500;
-    }
-
-    .calendar-day {
-      aspect-ratio: 1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 14px;
-      cursor: pointer;
-      border-radius: 8px;
-      transition: all 0.2s;
-    }
-
-    .calendar-day:hover {
-      background: #f3f4f6;
-    }
-
-    .calendar-day.other-month {
-      color: #d1d5db;
-    }
-
-    .calendar-day.selected {
-      background: #2563eb;
-      color: white;
-    }
-
-    .calendar-day.in-range {
-      background: #eff6ff;
-      color: #2563eb;
-    }
-
-    .calendar-day.today {
-      color: #ff6b35;
-      font-weight: 600;
-      border: 1px solid #ff6b35;
-    }
-
-    /* 宠物卡片样式 */
-    .pet-card {
-      padding: 16px;
-      background: #f9fafb;
-      border-radius: 12px;
-      margin-bottom: 12px;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      border: 1px solid #e5e7eb;
-    }
-
-    .pet-avatar {
-      width: 48px;
-      height: 48px;
-      background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 20px;
-      color: white;
-    }
-
-    .pet-info {
-      flex: 1;
-    }
-
-    .pet-name {
-      font-size: 16px;
-      font-weight: 600;
-      margin-bottom: 4px;
-      color: #1a1a1a;
-    }
-
-    .pet-details {
-      font-size: 14px;
-      color: #6b7280;
-      line-height: 1.4;
-    }
-
-    .add-pet-btn {
-      width: 100%;
-      padding: 16px;
-      background: transparent;
-      border: 2px dashed #d1d5db;
-      border-radius: 12px;
-      color: #6b7280;
-      font-size: 16px;
-      font-weight: 500;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      transition: all 0.2s;
-    }
-
-    .add-pet-btn:hover {
-      border-color: #2563eb;
-      color: #2563eb;
-      background: rgba(37, 99, 235, 0.02);
-    }
-
-    .next-btn {
-      position: fixed;
-      bottom: 30px;
-      left: 20px;
-      right: 20px;
-      background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
-      color: white;
-      border: none;
-      border-radius: 12px;
-      padding: 16px;
-      font-size: 16px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s;
-      box-shadow: 0 4px 16px rgba(37, 99, 235, 0.2);
-    }
-
-    .next-btn:disabled {
-      background: #9ca3af;
-      cursor: not-allowed;
-      box-shadow: none;
-    }
-
-    .next-btn:not(:disabled):hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 24px rgba(37, 99, 235, 0.3);
-    }
-
-    .next-btn:not(:disabled):active {
-      transform: scale(0.98);
-    }
-
-    /* 模态框 */
-    .modal {
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.4);
-      display: flex;
-      align-items: flex-end;
-      z-index: 1000;
-      animation: fadeIn 0.2s;
-    }
-
-    .modal-content {
-      background: white;
-      width: 100%;
-      border-radius: 20px 20px 0 0;
-      padding: 24px;
-      max-height: 80vh;
-      overflow-y: auto;
-      animation: slideUp 0.3s;
-    }
-
-    @keyframes slideUp {
-      from { transform: translateY(100%); }
-      to { transform: translateY(0); }
-    }
-
-    .modal-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 20px;
-      padding-bottom: 16px;
-      border-bottom: 1px solid #f3f4f6;
-    }
-
-    .modal-title {
-      font-size: 18px;
-      font-weight: 600;
-      color: #1a1a1a;
-    }
-
-    .modal-btn {
-      background: none;
-      border: none;
-      color: #2563eb;
-      font-size: 16px;
-      font-weight: 500;
-      cursor: pointer;
-    }
-
-    .modal-btn.cancel {
-      color: #6b7280;
-    }
-
-    .local-hint {
-      background: #f0fdf4;
-      padding: 12px;
-      border-radius: 8px;
-      margin-bottom: 16px;
-      color: #16a34a;
-      font-size: 14px;
-      text-align: center;
-    }
+      color: #1d1d1f;
+    }
+    
+    @keyframes spin { 
+      to { transform: rotate(360deg); } 
+    }
+    
+    @keyframes bounce { 
+      0%, 20%, 50%, 80%, 100% { transform: translateY(0); } 
+      40% { transform: translateY(-3px); } 
+      60% { transform: translateY(-1px); } 
+    }
+    
+    @keyframes fadeInUp { 
+      from { opacity: 0; transform: translateY(30px); } 
+      to { opacity: 1; transform: translateY(0); } 
+    }
+    
+    @keyframes pulse { 
+      0%, 100% { opacity: 0.6; } 
+      50% { opacity: 1; } 
+    }
+    
+    .spin { animation: spin 1s linear infinite; }
+    .bounce { animation: bounce 2s infinite; }
+    .fade-in { animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1); }
+    .pulse { animation: pulse 2s ease-in-out infinite; }
   </style>
 </head>
 <body>
   <div id="root"></div>
   
   <script type="text/babel">
-    const { useState, useEffect, useMemo, useCallback } = React;
+    const { useState, useEffect, useMemo } = React;
 
     // 数据配置
     const CONFIG = {
-      // 当前区域（本地探索）
-      localDistricts: [
-        { id: 'futian', name: '福田区', flag: '🏢', type: 'local' },
-        { id: 'nanshan', name: '南山区', flag: '🌊', type: 'local' },
-        { id: 'luohu', name: '罗湖区', flag: '🏔️', type: 'local' },
-        { id: 'custom-local', name: '自定义', flag: '📍', type: 'local' }
+      cities: {
+        major: [
+          { name: '北京', districts: ['朝阳区', '海淀区', '西城区', '东城区'], weather: '☀️', temp: '24°C' },
+          { name: '上海', districts: ['浦东新区', '黄浦区', '静安区', '徐汇区'], weather: '⛅', temp: '26°C' },
+          { name: '广州', districts: ['天河区', '越秀区', '海珠区', '荔湾区'], weather: '🌦️', temp: '29°C' },
+          { name: '深圳', districts: ['南山区', '福田区', '罗湖区', '宝安区'], weather: '☀️', temp: '28°C' },
+          { name: '杭州', districts: ['西湖区', '拱墅区', '江干区', '下城区'], weather: '🌦️', temp: '22°C' },
+          { name: '成都', districts: ['锦江区', '青羊区', '金牛区', '武侯区'], weather: '☁️', temp: '20°C' },
+          { name: '南京', districts: ['玄武区', '秦淮区', '建邺区', '鼓楼区'], weather: '⛅', temp: '23°C' },
+          { name: '武汉', districts: ['江汉区', '江岸区', '硚口区', '汉阳区'], weather: '🌤️', temp: '25°C' }
+        ]
+      },
+      interests: [
+        { id: 'beach', label: '玩水嬉戏', icon: '🏖️' },
+        { id: 'run', label: '狗狗奔跑', icon: '🏃' },
+        { id: 'cafe', label: '喝下午茶', icon: '☕' },
+        { id: 'park', label: '公园漫步', icon: '🌳' },
+        { id: 'photo', label: '拍照打卡', icon: '📸' },
+        { id: 'food', label: '美食探店', icon: '🍽️' },
+        { id: 'mountain', label: '登山徒步', icon: '🏔️' },
+        { id: 'lake', label: '湖边休闲', icon: '🏞️' }
       ],
-      // 周边城市（自驾游）
-      nearbyCities: [
-        { id: 'guangzhou', name: '广州', country: '广东', flag: '🌺', distance: '120km', weather: '26°C 晴' },
-        { id: 'dongguan', name: '东莞', country: '广东', flag: '🏭', distance: '80km', weather: '25°C 多云' },
-        { id: 'foshan', name: '佛山', country: '广东', flag: '🏛️', distance: '140km', weather: '27°C 晴' },
-        { id: 'zhuhai', name: '珠海', country: '广东', flag: '🏖️', distance: '160km', weather: '24°C 阵雨' },
-        { id: 'huizhou', name: '惠州', country: '广东', flag: '🏞️', distance: '100km', weather: '26°C 晴' },
-        { id: 'zhongshan', name: '中山', country: '广东', flag: '🌸', distance: '130km', weather: '25°C 多云' }
-      ],
-      petTypes: ['🐕', '🐶', '🦮', '🐕‍🦺', '🐩', '🐾']
+      durations: [
+        { value: '1', label: '1天', desc: '当日往返' },
+        { value: '2-3', label: '2-3天', desc: '周末短途' },
+        { value: '4-7', label: '4-7天', desc: '小长假' },
+        { value: '7+', label: '7天以上', desc: '深度游' }
+      ]
     };
 
     const App = () => {
       // 核心状态
-      const [currentView, setCurrentView] = useState('trips');
-      const [trips, setTrips] = useState([]);
-      const [pets, setPets] = useState([
-        { id: 1, name: '小白', age: 3, breed: '金毛', weight: 25, avatar: '🐕' },
-        { id: 2, name: '球球', age: 2, breed: '泰迪', weight: 5, avatar: '🐩' }
-      ]);
-      const [isCreating, setIsCreating] = useState(false);
-      const [currentStep, setCurrentStep] = useState(1);
+      const [page, setPage] = useState('planning');
+      const [tripType, setTripType] = useState('local');
+      const [selectedCity, setSelectedCity] = useState('深圳');
+      const [selectedDistrict, setSelectedDistrict] = useState('南山区');
+      const [duration, setDuration] = useState('2-3');
+      const [pets, setPets] = useState([{ 
+        id: 1, name: '旺财', type: '金毛', emoji: '🐕', weight: '25kg' 
+      }]);
+      const [preferences, setPreferences] = useState(['海滨休闲']);
       
-      // 表单数据
-      const [formData, setFormData] = useState({
-        destination: '',
-        isLocal: false,
-        duration: 3,
-        startDate: null,
-        endDate: null,
-        selectedPets: []
-      });
+      // UI 状态
+      const [showAddPet, setShowAddPet] = useState(false);
+      const [showCustomInterest, setShowCustomInterest] = useState(false);
+      const [showCitySelect, setShowCitySelect] = useState(false);
+      const [newPet, setNewPet] = useState({ name: '', type: '', weight: '' });
+      const [customInterest, setCustomInterest] = useState('');
+      const [loading, setLoading] = useState(false);
+      const [animationClass, setAnimationClass] = useState('');
 
-      // 获取用户位置
       useEffect(() => {
-        if (navigator.geolocation) {
-          navigator.geolocation.getCurrentPosition((position) => {
-            console.log('用户位置:', position.coords);
-          });
-        }
+        setAnimationClass('fade-in');
       }, []);
 
-      // 处理创建行程
-      const handleCreateTrip = () => {
-        setIsCreating(true);
-        setCurrentStep(1);
-      };
-
-      // 计算总步数
-      const getTotalSteps = () => {
-        return formData.isLocal ? 2 : 4; // 本地只需要2步，外地需要4步
-      };
-
-      // 处理步骤导航
-      const handleNextStep = () => {
-        const totalSteps = getTotalSteps();
-        if (currentStep < totalSteps) {
-          setCurrentStep(currentStep + 1);
-        } else {
-          // 完成创建
-          const newTrip = {
-            id: Date.now(),
-            ...formData,
-            createdAt: new Date()
-          };
-          setTrips([...trips, newTrip]);
-          setIsCreating(false);
-          setCurrentStep(1);
-          setFormData({
-            destination: '',
-            isLocal: false,
-            duration: 3,
-            startDate: null,
-            endDate: null,
-            selectedPets: []
-          });
-        }
-      };
-
-      const handleBackStep = () => {
-        if (currentStep > 1) {
-          setCurrentStep(currentStep - 1);
-        } else {
-          setIsCreating(false);
-        }
-      };
-
-      // 渲染主视图
-      const renderMainView = () => {
-        if (isCreating) {
-          return <TripCreator 
-            step={currentStep}
-            formData={formData}
-            setFormData={setFormData}
-            onNext={handleNextStep}
-            onBack={handleBackStep}
-            pets={pets}
-            setPets={setPets}
-          />;
-        }
-
-        return <TripsView trips={trips} onCreateTrip={handleCreateTrip} />;
-      };
-
-      return (
-        <div className="container">
-          {renderMainView()}
-          
-          {!isCreating && (
-            <div className="bottom-nav">
-              <div className="nav-item active">
-                <span className="nav-icon">🎒</span>
-                <span>行程</span>
-              </div>
-            </div>
-          )}
-        </div>
-      );
-    };
-
-    // 行程列表视图
-    const TripsView = ({ trips, onCreateTrip }) => {
-      if (trips.length === 0) {
-        return (
-          <>
-            <div className="header">
-              <div className="logo-section">
-                <h1 className="logo-text">FunGo</h1>
-                <div className="logo-dot bounce-ball"></div>
-              </div>
-              <button className="add-btn" onClick={onCreateTrip}>+</button>
-            </div>
-            <div className="content">
-              <div className="welcome-container fade-in">
-                <div className="icon-row">
-                  <div className="icon-circle" style={{ background: '#2563eb' }}>✈️</div>
-                  <div className="icon-circle" style={{ background: '#10b981' }}>🚗</div>
-                  <div className="icon-circle" style={{ background: '#8b5cf6' }}>🎒</div>
-                  <div className="icon-circle" style={{ background: '#f59e0b' }}>📸</div>
-                  <div className="icon-circle" style={{ background: '#ef4444' }}>🍽️</div>
-                </div>
-                
-                <h2 className="welcome-title">欢迎使用 FunGo</h2>
-                <p className="welcome-desc">
-                  专为毛孩子设计的旅行规划器，无论是本地探索还是周边自驾，都能为你和毛孩子规划完美行程。
-                </p>
-                
-                <div className="paw-trail-container">
-                  <span className="paw-print">🐾</span>
-                  <span className="paw-print">🐾</span>
-                  <span className="paw-print">🐾</span>
-                  <span className="paw-print">🐾</span>
-                  <span className="paw-print">🐾</span>
-                  <span className="paw-print">🐾</span>
-                  <span className="paw-print">🐾</span>
-                  <div className="paw-end">🐕</div>
-                </div>
-                
-                <button className="create-trip-btn" onClick={onCreateTrip}>
-                  开始规划行程
-                </button>
-              </div>
-            </div>
-          </>
-        );
-      }
-
-      return (
-        <>
-          <div className="header">
-            <div className="logo-section">
-              <h1 className="logo-text">FunGo</h1>
-              <div className="logo-dot bounce-ball"></div>
-            </div>
-            <button className="add-btn" onClick={onCreateTrip}>+</button>
-          </div>
-          <div className="content">
-            {trips.map(trip => (
-              <TripCard key={trip.id} trip={trip} />
-            ))}
-          </div>
-        </>
-      );
-    };
-
-    // 行程卡片组件
-    const TripCard = ({ trip }) => {
-      const formatDate = (date) => {
-        if (!date) return '';
-        const d = new Date(date);
-        const months = ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'];
-        return `${d.getDate()} ${months[d.getMonth()]}`;
-      };
-
-      const getDestinationInfo = () => {
-        const district = CONFIG.localDistricts.find(d => d.id === trip.destination);
-        if (district) {
-          return { name: district.name, country: '深圳', flag: district.flag };
-        }
-        const city = CONFIG.nearbyCities.find(c => c.id === trip.destination);
-        return city || { name: '未知', country: '未知', flag: '📍' };
-      };
-
-      const destinationInfo = getDestinationInfo();
-
-      return (
-        <div className="trip-card fade-in">
-          <div 
-            className="trip-card-image"
-            style={{ 
-              backgroundImage: `url('https://source.unsplash.com/800x400/?${destinationInfo.name},travel,dog')`
-            }}
-          >
-            <div className="trip-card-overlay">
-              <div className="trip-date">
-                {trip.isLocal ? '本地探索' : `${formatDate(trip.startDate)} - ${formatDate(trip.endDate)}`}
-              </div>
-              <div className="trip-destination">
-                {destinationInfo.name}
-              </div>
-            </div>
-          </div>
-          
-          <div className="trip-card-content">
-            <div className="trip-tags">
-              <div className="trip-tag">
-                <span>🐾</span>
-                <span>宠物友好</span>
-              </div>
-              {!trip.isLocal && (
-                <div className="trip-tag">
-                  <span>🚗</span>
-                  <span>自驾游</span>
-                </div>
-              )}
-            </div>
-            
-            <div className="trip-info-title">{destinationInfo.name}</div>
-            {!trip.isLocal && (
-              <>
-                <div className="trip-info-detail">
-                  <span>📅</span> {formatDate(trip.startDate)}, 2025
-                </div>
-                <div className="trip-info-detail">
-                  <span>⏱️</span> {trip.duration} 天行程
-                </div>
-              </>
-            )}
-            <div className="trip-info-detail">
-              <span>🐕</span> {trip.selectedPets?.length || 0} 只毛孩子同行
-            </div>
-            
-            <button className="see-plan-btn">查看行程</button>
-          </div>
-        </div>
-      );
-    };
-
-    // 创建行程组件
-    const TripCreator = ({ step, formData, setFormData, onNext, onBack, pets, setPets }) => {
-      const totalSteps = formData.isLocal ? 2 : 4;
-      const progress = (step / totalSteps) * 100;
-
-      const renderStepContent = () => {
-        switch (step) {
-          case 1:
-            return <DestinationStep formData={formData} setFormData={setFormData} />;
-          case 2:
-            if (formData.isLocal) {
-              return <PetSelectionStep formData={formData} setFormData={setFormData} pets={pets} setPets={setPets} />;
-            } else {
-              return <DurationStep formData={formData} setFormData={setFormData} />;
-            }
-          case 3:
-            return <DateStep formData={formData} setFormData={setFormData} />;
-          case 4:
-            return <PetSelectionStep formData={formData} setFormData={setFormData} pets={pets} setPets={setPets} />;
-          default:
-            return null;
-        }
-      };
-
-      const isStepValid = () => {
-        switch (step) {
-          case 1:
-            return !!formData.destination;
-          case 2:
-            if (formData.isLocal) {
-              return formData.selectedPets.length > 0;
-            } else {
-              return formData.duration > 0;
-            }
-          case 3:
-            return !!formData.startDate;
-          case 4:
-            return formData.selectedPets.length > 0;
-          default:
-            return false;
-        }
-      };
-
-      return (
-        <>
-          <div className="form-header">
-            <div style={{ display: 'flex', alignItems: 'center' }}>
-              <button className="back-btn" onClick={onBack}>‹</button>
-            </div>
-            <div className="progress-bar">
-              <div className="progress-fill" style={{ width: `${progress}%` }}></div>
-              <span className="step-indicator">第 {step}/{totalSteps} 步</span>
-            </div>
-          </div>
-          
-          <div className="form-content">
-            {renderStepContent()}
-          </div>
-          
-          <button 
-            className="next-btn" 
-            onClick={onNext}
-            disabled={!isStepValid()}
-          >
-            {step === totalSteps ? '完成创建' : '下一步'}
-          </button>
-        </>
-      );
-    };
-
-    // Step 1: 目的地选择
-    const DestinationStep = ({ formData, setFormData }) => {
-      const [searchQuery, setSearchQuery] = useState('');
-      const [showModal, setShowModal] = useState(false);
-
-      const handleDestinationSelect = (destinationId, isLocal = false) => {
-        setFormData({ 
-          ...formData, 
-          destination: destinationId, 
-          isLocal: isLocal
-        });
-        setShowModal(false);
-      };
-
-      const getSelectedDestination = () => {
-        if (formData.isLocal) {
-          const district = CONFIG.localDistricts.find(d => d.id === formData.destination);
-          return district ? district.name : '';
-        } else {
-          const city = CONFIG.nearbyCities.find(c => c.id === formData.destination);
-          return city ? city.name : '';
-        }
-      };
-
-      return (
-        <div className="fade-in">
-          <div className="step-icon">
-            <span style={{ color: 'white' }}>📍</span>
-          </div>
-          <h2 className="step-title">选择目的地</h2>
-          <p className="step-desc">想去本地探索还是周边自驾呢？</p>
-          
-          <div className="location-hint">
-            <span>📍</span>
-            <span>已为您定位到深圳，为您推荐附近热门区域</span>
-          </div>
-          
-          <div onClick={() => setShowModal(true)}>
-            <input 
-              type="text"
-              className="search-input"
-              placeholder={getSelectedDestination() || "搜索目的地..."}
-              value={getSelectedDestination()}
-              readOnly
-            />
-          </div>
-          
-          <div className="city-section">
-            <h3 className="section-title">本地探索</h3>
-            <div className="district-grid">
-              {CONFIG.localDistricts.map(district => (
-                <div 
-                  key={district.id}
-                  className={`city-item local ${formData.destination === district.id && formData.isLocal ? 'selected' : ''}`}
-                  onClick={() => handleDestinationSelect(district.id, true)}
-                >
-                  <div className="city-flag">{district.flag}</div>
-                  <div className="city-name">{district.name}</div>
-                  <div className="city-info">当日往返</div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="city-section">
-            <h3 className="section-title">周边自驾</h3>
-            <div className="city-grid">
-              {CONFIG.nearbyCities.slice(0, 6).map(city => (
-                <div 
-                  key={city.id}
-                  className={`city-item ${formData.destination === city.id && !formData.isLocal ? 'selected' : ''}`}
-                  onClick={() => handleDestinationSelect(city.id, false)}
-                >
-                  <div className="city-flag">{city.flag}</div>
-                  <div className="city-name">{city.name}</div>
-                  <div className="city-info">{city.distance}</div>
-                  <div className="weather-info">{city.weather}</div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {showModal && (
-            <DestinationModal 
-              searchQuery={searchQuery}
-              setSearchQuery={setSearchQuery}
-              onSelect={handleDestinationSelect}
-              onClose={() => setShowModal(false)}
-              selectedId={formData.destination}
-              isLocal={formData.isLocal}
-            />
-          )}
-        </div>
-      );
-    };
-
-    // 目的地搜索模态框
-    const DestinationModal = ({ searchQuery, setSearchQuery, onSelect, onClose, selectedId, isLocal }) => {
-      const allDestinations = [
-        ...CONFIG.localDistricts.map(d => ({ ...d, type: 'local' })),
-        ...CONFIG.nearbyCities.map(c => ({ ...c, type: 'nearby' }))
-      ];
-      const filteredDestinations = allDestinations.filter(dest => 
-        dest.name.toLowerCase().includes(searchQuery.toLowerCase())
+      // 计算属性
+      const currentCityData = useMemo(() => 
+        CONFIG.cities.major.find(city => city.name === selectedCity) || CONFIG.cities.major[3], 
+        [selectedCity]
       );
 
-      return (
-        <div className="modal" onClick={(e) => e.target === e.currentTarget && onClose()}>
-          <div className="modal-content">
-            <div className="modal-header">
-              <button className="modal-btn cancel" onClick={onClose}>取消</button>
-              <div className="modal-title">选择目的地</div>
-              <button className="modal-btn" onClick={onClose}>确定</button>
-            </div>
-            
-            <input 
-              type="text"
-              className="search-input"
-              placeholder="搜索目的地..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              autoFocus
-            />
-            
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-              {filteredDestinations.map(dest => (
-                <div 
-                  key={dest.id}
-                  onClick={() => onSelect(dest.id, dest.type === 'local')}
-                  style={{
-                    padding: '12px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '12px',
-                    cursor: 'pointer',
-                    borderRadius: '8px',
-                    transition: 'background 0.2s',
-                    background: selectedId === dest.id ? '#eff6ff' : 'transparent'
-                  }}
-                  onMouseEnter={(e) => e.currentTarget.style.background = '#f9fafb'}
-                  onMouseLeave={(e) => e.currentTarget.style.background = selectedId === dest.id ? '#eff6ff' : 'transparent'}
-                >
-                  <span style={{ fontSize: '18px' }}>{dest.flag}</span>
-                  <div>
-                    <div style={{ fontSize: '16px', fontWeight: '500', color: '#1a1a1a' }}>{dest.name}</div>
-                    <div style={{ fontSize: '14px', color: '#6b7280' }}>
-                      {dest.type === 'local' ? '本地探索' : `${dest.distance} • ${dest.weather}`}
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
+      const isFormValid = useMemo(() => 
+        selectedCity && tripType && pets.length > 0 && 
+        (tripType === 'local' || duration), 
+        [selectedCity, tripType, pets.length, duration]
       );
-    };
 
-    // Step 2: 旅行天数（仅非本地）
-    const DurationStep = ({ formData, setFormData }) => {
-      const handleIncrease = () => {
-        setFormData({ ...formData, duration: formData.duration + 1 });
-      };
-
-      const handleDecrease = () => {
-        if (formData.duration > 1) {
-          setFormData({ ...formData, duration: formData.duration - 1 });
-        }
-      };
-
-      return (
-        <div className="fade-in">
-          <div className="step-icon">
-            <span style={{ color: 'white' }}>📅</span>
-          </div>
-          <h2 className="step-title">旅行天数</h2>
-          <p className="step-desc">您计划旅行几天呢？</p>
-          
-          <div className="duration-counter">
-            <button 
-              className="counter-btn" 
-              onClick={handleDecrease}
-              disabled={formData.duration <= 1}
-            >
-              −
-            </button>
-            <div className="counter-value">
-              {formData.duration} 天
-            </div>
-            <button 
-              className="counter-btn" 
-              onClick={handleIncrease}
-            >
-              +
-            </button>
-          </div>
-        </div>
-      );
-    };
-
-    // Step 3: 选择日期（仅非本地）
-    const DateStep = ({ formData, setFormData }) => {
-      const [currentMonth, setCurrentMonth] = useState(new Date());
-      const [selectedRange, setSelectedRange] = useState({
-        start: formData.startDate,
-        end: formData.endDate
-      });
-
-      const getDaysInMonth = (date) => {
-        const year = date.getFullYear();
-        const month = date.getMonth();
-        const firstDay = new Date(year, month, 1);
-        const lastDay = new Date(year, month + 1, 0);
-        const daysInMonth = lastDay.getDate();
-        const startingDayOfWeek = firstDay.getDay();
-        
-        const days = [];
-        
-        // 上个月的日期
-        const prevMonthLastDay = new Date(year, month, 0).getDate();
-        for (let i = startingDayOfWeek - 1; i >= 0; i--) {
-          days.push({
-            date: new Date(year, month - 1, prevMonthLastDay - i),
-            isOtherMonth: true
-          });
-        }
-        
-        // 当月日期
-        for (let i = 1; i <= daysInMonth; i++) {
-          days.push({
-            date: new Date(year, month, i),
-            isOtherMonth: false
-          });
-        }
-        
-        // 下个月的日期
-        const remainingDays = 42 - days.length;
-        for (let i = 1; i <= remainingDays; i++) {
-          days.push({
-            date: new Date(year, month + 1, i),
-            isOtherMonth: true
-          });
-        }
-        
-        return days;
-      };
-
-      const handleDateClick = (date) => {
-        const startDate = new Date(date);
-        const endDate = new Date(date);
-        endDate.setDate(endDate.getDate() + formData.duration - 1);
-        
-        setSelectedRange({ start: startDate, end: endDate });
-        setFormData({ 
-          ...formData, 
-          startDate: startDate.toISOString(),
-          endDate: endDate.toISOString()
-        });
-      };
-
-      const isInRange = (date) => {
-        if (!selectedRange.start || !selectedRange.end) return false;
-        const start = new Date(selectedRange.start);
-        const end = new Date(selectedRange.end);
-        return date >= start && date <= end;
-      };
-
-      const isStartDate = (date) => {
-        if (!selectedRange.start) return false;
-        return date.toDateString() === new Date(selectedRange.start).toDateString();
-      };
-
-      const isEndDate = (date) => {
-        if (!selectedRange.end) return false;
-        return date.toDateString() === new Date(selectedRange.end).toDateString();
-      };
-
-      const formatMonthYear = (date) => {
-        const months = ['1月', '2月', '3月', '4月', '5月', '6月', 
-                       '7月', '8月', '9月', '10月', '11月', '12月'];
-        return `${date.getFullYear()}年 ${months[date.getMonth()]}`;
-      };
-
-      const days = getDaysInMonth(currentMonth);
-      const today = new Date();
-
-      return (
-        <div className="fade-in">
-          <div className="step-icon">
-            <span style={{ color: 'white' }}>📅</span>
-          </div>
-          <h2 className="step-title">选择出发日期</h2>
-          <p className="step-desc">请选择您的出发日期</p>
-          
-          <div className="calendar-container">
-            <div className="calendar-header">
-              <button 
-                className="calendar-nav-btn"
-                onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1))}
-              >
-                ‹
-              </button>
-              <div className="calendar-title">{formatMonthYear(currentMonth)}</div>
-              <button 
-                className="calendar-nav-btn"
-                onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1))}
-              >
-                ›
-              </button>
-            </div>
-            
-            <div className="calendar-grid">
-              {['日', '一', '二', '三', '四', '五', '六'].map(day => (
-                <div key={day} className="calendar-day-header">{day}</div>
-              ))}
-              
-              {days.map((day, index) => {
-                const isToday = day.date.toDateString() === today.toDateString();
-                const isSelected = isStartDate(day.date) || isEndDate(day.date);
-                const inRange = isInRange(day.date);
-                const isPast = day.date < today && !isToday;
-                
-                return (
-                  <div 
-                    key={index}
-                    className={`calendar-day ${day.isOtherMonth ? 'other-month' : ''} ${isSelected ? 'selected' : ''} ${inRange && !isSelected ? 'in-range' : ''} ${isToday ? 'today' : ''}`}
-                    onClick={() => !day.isOtherMonth && !isPast && handleDateClick(day.date)}
-                    style={{ 
-                      opacity: isPast ? 0.3 : 1,
-                      cursor: isPast || day.isOtherMonth ? 'not-allowed' : 'pointer'
-                    }}
-                  >
-                    {day.date.getDate()}
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        </div>
-      );
-    };
-
-    // Step 4: 宠物选择（同行伙伴）
-    const PetSelectionStep = ({ formData, setFormData, pets, setPets }) => {
-      const [showAddModal, setShowAddModal] = useState(false);
-      const [newPet, setNewPet] = useState({
-        name: '',
-        age: 1,
-        breed: '',
-        weight: 1,
-        avatar: '🐕'
-      });
-
-      const handlePetToggle = (petId) => {
-        const selectedPets = formData.selectedPets || [];
-        if (selectedPets.includes(petId)) {
-          setFormData({
-            ...formData,
-            selectedPets: selectedPets.filter(id => id !== petId)
-          });
-        } else {
-          setFormData({
-            ...formData,
-            selectedPets: [...selectedPets, petId]
-          });
+      // 事件处理
+      const handleTripTypeChange = (type) => {
+        setTripType(type);
+        if (type === 'local') {
+          setDuration('');
         }
       };
 
       const handleAddPet = () => {
-        const pet = {
-          ...newPet,
-          id: Date.now()
-        };
-        setPets([...pets, pet]);
-        setNewPet({
-          name: '',
-          age: 1,
-          breed: '',
-          weight: 1,
-          avatar: '🐕'
-        });
-        setShowAddModal(false);
+        if (newPet.name && newPet.name.trim() && newPet.type && newPet.type.trim() && newPet.weight && newPet.weight.trim()) {
+          setPets(prev => [...prev, { 
+            ...newPet, 
+            id: Date.now(), 
+            emoji: '🐕' 
+          }]);
+          setNewPet({ name: '', type: '', weight: '' });
+          setShowAddPet(false);
+        }
       };
 
-      return (
-        <div className="fade-in">
-          <div className="step-icon">
-            <span style={{ color: 'white' }}>🐾</span>
+      const handleRemovePet = (id) => {
+        if (pets.length > 1) {
+          setPets(prev => prev.filter(p => p.id !== id));
+        }
+      };
+
+      const handleToggleInterest = (interest) => {
+        setPreferences(prev => 
+          prev.includes(interest) 
+            ? prev.filter(p => p !== interest)
+            : [...prev, interest]
+        );
+      };
+
+      const handleAddCustomInterest = () => {
+        if (customInterest.trim() && !preferences.includes(customInterest.trim())) {
+          setPreferences(prev => [...prev, customInterest.trim()]);
+          setCustomInterest('');
+          setShowCustomInterest(false);
+        }
+      };
+
+      const handleCitySelect = (city, district) => {
+        setSelectedCity(city);
+        setSelectedDistrict(district);
+        setShowCitySelect(false);
+      };
+
+      const generateTrips = () => {
+        if (!isFormValid) return;
+        setLoading(true);
+        setTimeout(() => {
+          setLoading(false);
+          setPage('results');
+        }, 1500);
+      };
+
+      // Apple风格样式系统
+      const styles = {
+        container: { 
+          background: '#f8f9fb', 
+          minHeight: '100vh',
+          paddingBottom: '120px'
+        },
+        header: { 
+          background: 'rgba(255, 255, 255, 0.8)', 
+          backdropFilter: 'saturate(180%) blur(20px)',
+          WebkitBackdropFilter: 'saturate(180%) blur(20px)',
+          padding: '16px 20px', 
+          borderBottom: '0.5px solid rgba(0,0,0,0.05)',
+          position: 'sticky', 
+          top: 0, 
+          zIndex: 10
+        },
+        logo: { 
+          fontSize: '32px', 
+          fontWeight: '700', 
+          textAlign: 'center',
+          letterSpacing: '-1px',
+          marginBottom: '4px'
+        },
+        subtitle: {
+          fontSize: '15px', 
+          color: '#86868b', 
+          textAlign: 'center', 
+          fontWeight: '400'
+        },
+        content: {
+          padding: '24px 20px 0'
+        },
+        section: {
+          marginBottom: '32px'
+        },
+        sectionTitle: {
+          fontSize: '22px',
+          fontWeight: '600',
+          color: '#1d1d1f',
+          marginBottom: '16px',
+          letterSpacing: '-0.4px'
+        },
+        button: { 
+          padding: '16px 24px', 
+          background: '#007aff', 
+          color: 'white', 
+          border: 'none', 
+          borderRadius: '12px', 
+          fontSize: '17px', 
+          fontWeight: '600', 
+          width: '100%',
+          transition: 'all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+          cursor: 'pointer',
+          fontFamily: 'inherit'
+        },
+        buttonSecondary: {
+          background: '#f2f2f7',
+          color: '#007aff',
+          border: '0.5px solid rgba(0,0,0,0.04)'
+        },
+        grid2: { 
+          display: 'grid', 
+          gridTemplateColumns: '1fr 1fr', 
+          gap: '12px' 
+        },
+        grid3: { 
+          display: 'grid', 
+          gridTemplateColumns: 'repeat(3, 1fr)', 
+          gap: '12px' 
+        },
+        modal: { 
+          position: 'fixed', 
+          top: 0, 
+          left: 0, 
+          right: 0, 
+          bottom: 0, 
+          background: 'rgba(0,0,0,0.4)', 
+          display: 'flex', 
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '20px',
+          zIndex: 1000,
+          backdropFilter: 'blur(8px)',
+          WebkitBackdropFilter: 'blur(8px)'
+        },
+        modalContent: { 
+          background: 'white', 
+          borderRadius: '20px', 
+          padding: '32px 24px', 
+          width: '100%',
+          maxWidth: '400px',
+          maxHeight: '80vh',
+          overflowY: 'auto'
+        },
+        input: { 
+          width: '100%', 
+          padding: '16px 20px', 
+          border: '0.5px solid #d1d1d6', 
+          borderRadius: '12px', 
+          fontSize: '17px', 
+          marginBottom: '16px', 
+          outline: 'none',
+          transition: 'all 0.2s ease',
+          fontFamily: 'inherit',
+          background: 'white'
+        },
+        bottomBar: { 
+          position: 'fixed', 
+          bottom: 0, 
+          left: 0, 
+          right: 0, 
+          padding: '20px', 
+          background: 'rgba(255, 255, 255, 0.8)',
+          backdropFilter: 'saturate(180%) blur(20px)',
+          WebkitBackdropFilter: 'saturate(180%) blur(20px)',
+          borderTop: '0.5px solid rgba(0,0,0,0.05)'
+        }
+      };
+
+      // Apple风格选择组件
+      const SelectableCard = ({ 
+        selected, 
+        onClick, 
+        children, 
+        size = 'medium',
+        disabled = false 
+      }) => {
+        const cardStyle = {
+          padding: size === 'large' ? '20px' : size === 'small' ? '16px' : '18px',
+          borderRadius: '12px',
+          cursor: disabled ? 'not-allowed' : 'pointer',
+          transition: 'all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+          border: '0.5px solid',
+          borderColor: selected ? '#007aff' : 'rgba(0,0,0,0.08)',
+          background: selected ? '#007aff' : 'white',
+          color: selected ? 'white' : '#1d1d1f',
+          transform: selected ? 'scale(0.98)' : 'scale(1)',
+          opacity: disabled ? 0.5 : 1
+        };
+
+        return (
+          <div 
+            onClick={disabled ? undefined : onClick}
+            style={cardStyle}
+          >
+            {children}
           </div>
-          <h2 className="step-title">选择同行伙伴</h2>
-          <p className="step-desc">哪些毛孩子会和您一起出行呢？</p>
-          
-          <div style={{ marginBottom: '20px' }}>
-            {pets.map(pet => (
-              <div 
-                key={pet.id}
-                className={`pet-card ${(formData.selectedPets || []).includes(pet.id) ? 'selected' : ''}`}
-                onClick={() => handlePetToggle(pet.id)}
-                style={{
-                  cursor: 'pointer',
-                  border: (formData.selectedPets || []).includes(pet.id) ? '2px solid #2563eb' : '1px solid #e5e7eb'
-                }}
-              >
-                <div className="pet-avatar">{pet.avatar}</div>
-                <div className="pet-info">
-                  <div className="pet-name">{pet.name}</div>
-                  <div className="pet-details">
-                    {pet.breed} • {pet.age}岁 • {pet.weight}kg
-                  </div>
+        );
+      };
+
+      // 位置卡片组件
+      const LocationCard = () => {
+        const [isHovered, setIsHovered] = useState(false);
+        
+        const cardStyle = {
+          background: 'white',
+          borderRadius: '16px',
+          padding: '20px',
+          marginBottom: '24px',
+          border: '0.5px solid rgba(0,0,0,0.04)',
+          cursor: 'pointer',
+          transition: 'all 0.2s ease',
+          position: 'relative',
+          overflow: 'hidden',
+          transform: isHovered ? 'translateY(-2px)' : 'translateY(0)',
+          boxShadow: isHovered ? '0 8px 25px rgba(0,0,0,0.1)' : 'none'
+        };
+
+        return (
+          <div 
+            onClick={() => setShowCitySelect(true)}
+            style={cardStyle}
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
+          >
+            <div style={{ position: 'relative', zIndex: 2 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                <span style={{ fontSize: '20px' }}>📍</span>
+                <span style={{ fontSize: '20px', fontWeight: '600', color: '#1d1d1f' }}>
+                  {selectedCity} · {selectedDistrict}
+                </span>
+                <div style={{ 
+                  width: '8px', 
+                  height: '8px', 
+                  background: '#30d158', 
+                  borderRadius: '50%',
+                  marginLeft: 'auto'
+                }} className="pulse"></div>
+              </div>
+              <div style={{ fontSize: '15px', color: '#86868b', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <span>{currentCityData.weather} {currentCityData.temp}</span>
+                <span>适宜出行</span>
+              </div>
+            </div>
+            <div style={{
+              position: 'absolute',
+              top: '-20px',
+              right: '-20px',
+              width: '60px',
+              height: '60px',
+              background: 'linear-gradient(135deg, rgba(0, 122, 255, 0.2), rgba(0, 122, 255, 0.1))',
+              borderRadius: '50%'
+            }}></div>
+          </div>
+        );
+      };
+
+      if (page === 'planning') {
+        return (
+          <div style={styles.container} className={animationClass}>
+            {/* 头部 */}
+            <div style={styles.header}>
+              <div style={styles.logo}>
+                <span style={{ color: '#1d1d1f' }}>Fun</span>
+                <span style={{ color: '#007aff' }}>Go</span>
+              </div>
+              <div style={styles.subtitle}>
+                和毛孩子一起探索世界
+              </div>
+            </div>
+
+            <div style={styles.content}>
+              {/* 出行类型 */}
+              <div style={styles.section}>
+                <div style={styles.sectionTitle}>出行类型</div>
+                <div style={styles.grid2}>
+                  {[
+                    { type: 'local', icon: '🏠', label: '本地游', desc: '周边游玩' },
+                    { type: 'travel', icon: '✈️', label: '长途游', desc: '跨城旅行' }
+                  ].map(item => (
+                    <SelectableCard 
+                      key={item.type}
+                      selected={tripType === item.type}
+                      onClick={() => handleTripTypeChange(item.type)}
+                      size="large"
+                    >
+                      <div style={{ textAlign: 'center' }}>
+                        <div style={{ fontSize: '32px', marginBottom: '12px' }}>{item.icon}</div>
+                        <div style={{ fontSize: '17px', fontWeight: '600', marginBottom: '4px' }}>
+                          {item.label}
+                        </div>
+                        <div style={{ fontSize: '13px', opacity: 0.7 }}>{item.desc}</div>
+                      </div>
+                    </SelectableCard>
+                  ))}
                 </div>
-                {(formData.selectedPets || []).includes(pet.id) && (
-                  <span style={{ color: '#2563eb', fontSize: '20px' }}>✓</span>
+              </div>
+
+              {/* 位置选择 */}
+              <div style={styles.section}>
+                <div style={styles.sectionTitle}>
+                  {tripType === 'local' ? '确认所在位置' : '选择目的地'}
+                </div>
+
+                {tripType === 'local' ? (
+                  <div>
+                    <LocationCard />
+                    
+                    <div style={{ marginBottom: '16px' }}>
+                      <div style={{ fontSize: '17px', fontWeight: '600', marginBottom: '16px', color: '#1d1d1f' }}>
+                        想要什么样的体验？
+                      </div>
+                      <div style={styles.grid3}>
+                        {CONFIG.interests.map(item => (
+                          <SelectableCard 
+                            key={item.id}
+                            selected={preferences.includes(item.label)}
+                            onClick={() => handleToggleInterest(item.label)}
+                            size="small"
+                          >
+                            <div style={{ textAlign: 'center' }}>
+                              <div style={{ fontSize: '24px', marginBottom: '8px' }}>{item.icon}</div>
+                              <div style={{ fontSize: '12px', fontWeight: '500', lineHeight: '1.2' }}>
+                                {item.label}
+                              </div>
+                            </div>
+                          </SelectableCard>
+                        ))}
+                        
+                        <SelectableCard 
+                          selected={false}
+                          onClick={() => setShowCustomInterest(true)}
+                          size="small"
+                        >
+                          <div style={{ textAlign: 'center' }}>
+                            <div style={{ fontSize: '24px', marginBottom: '8px', color: '#007aff' }}>➕</div>
+                            <div style={{ fontSize: '12px', fontWeight: '500', color: '#007aff', lineHeight: '1.2' }}>
+                              自定义
+                            </div>
+                          </div>
+                        </SelectableCard>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div>
+                    <div style={{ marginBottom: '24px' }}>
+                      <div style={styles.grid2}>
+                        {CONFIG.cities.major.slice(0, 6).map(city => (
+                          <SelectableCard 
+                            key={city.name}
+                            selected={selectedCity === city.name}
+                            onClick={() => setSelectedCity(city.name)}
+                          >
+                            <div>
+                              <div style={{ fontWeight: '600', fontSize: '17px', marginBottom: '4px' }}>
+                                {city.name}
+                              </div>
+                              <div style={{ fontSize: '13px', opacity: 0.7 }}>
+                                {city.weather} {city.temp}
+                              </div>
+                            </div>
+                          </SelectableCard>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div>
+                      <div style={{ fontSize: '17px', fontWeight: '600', marginBottom: '16px', color: '#1d1d1f' }}>
+                        预计出行天数
+                      </div>
+                      <div style={styles.grid2}>
+                        {CONFIG.durations.map(item => (
+                          <SelectableCard 
+                            key={item.value}
+                            selected={duration === item.value}
+                            onClick={() => setDuration(item.value)}
+                          >
+                            <div>
+                              <div style={{ fontWeight: '600', fontSize: '17px', marginBottom: '4px' }}>
+                                {item.label}
+                              </div>
+                              <div style={{ fontSize: '13px', opacity: 0.7 }}>
+                                {item.desc}
+                              </div>
+                            </div>
+                          </SelectableCard>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
                 )}
               </div>
-            ))}
-          </div>
-          
-          <button className="add-pet-btn" onClick={() => setShowAddModal(true)}>
-            <span>+</span>
-            <span>添加新伙伴</span>
-          </button>
 
-          {showAddModal && (
-            <AddPetModal 
-              newPet={newPet}
-              setNewPet={setNewPet}
-              onAdd={handleAddPet}
-              onClose={() => setShowAddModal(false)}
-            />
-          )}
-        </div>
-      );
-    };
-
-    // 添加宠物模态框
-    const AddPetModal = ({ newPet, setNewPet, onAdd, onClose }) => {
-      return (
-        <div className="modal" onClick={(e) => e.target === e.currentTarget && onClose()}>
-          <div className="modal-content">
-            <div className="modal-header">
-              <button className="modal-btn cancel" onClick={onClose}>取消</button>
-              <div className="modal-title">添加新伙伴</div>
-              <button 
-                className="modal-btn" 
-                onClick={onAdd}
-                disabled={!newPet.name || !newPet.breed}
-              >
-                添加
-              </button>
-            </div>
-            
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              <div style={{ display: 'flex', justifyContent: 'center', gap: '8px', marginBottom: '16px' }}>
-                {CONFIG.petTypes.map(avatar => (
-                  <div
-                    key={avatar}
-                    onClick={() => setNewPet({ ...newPet, avatar })}
-                    style={{
-                      width: '48px',
-                      height: '48px',
-                      borderRadius: '50%',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      fontSize: '24px',
-                      cursor: 'pointer',
-                      background: newPet.avatar === avatar ? '#eff6ff' : '#f9fafb',
-                      border: newPet.avatar === avatar ? '2px solid #2563eb' : '1px solid #e5e7eb'
-                    }}
-                  >
-                    {avatar}
+              {/* 宠物信息 */}
+              <div style={styles.section}>
+                <div style={styles.sectionTitle}>同行伙伴</div>
+                
+                {pets.map(pet => (
+                  <div key={pet.id} style={{
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    gap: '16px', 
+                    padding: '20px',
+                    background: 'white', 
+                    borderRadius: '16px', 
+                    marginBottom: '12px',
+                    border: '0.5px solid rgba(0,0,0,0.04)'
+                  }}>
+                    <div style={{
+                      fontSize: '28px', 
+                      width: '56px', 
+                      height: '56px', 
+                      background: '#f2f2f7', 
+                      borderRadius: '50%', 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      justifyContent: 'center'
+                    }}>
+                      {pet.emoji}
+                    </div>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontSize: '17px', fontWeight: '600', marginBottom: '4px', color: '#1d1d1f' }}>
+                        {pet.name}
+                      </div>
+                      <div style={{ fontSize: '15px', color: '#86868b' }}>
+                        {pet.type} · {pet.weight}
+                      </div>
+                    </div>
+                    {pets.length > 1 && (
+                      <button 
+                        onClick={() => handleRemovePet(pet.id)} 
+                        style={{ 
+                          background: 'none', 
+                          border: 'none', 
+                          color: '#ff3b30', 
+                          fontSize: '20px',
+                          cursor: 'pointer',
+                          padding: '8px',
+                          borderRadius: '8px',
+                          transition: 'background 0.2s ease'
+                        }}
+                      >
+                        ×
+                      </button>
+                    )}
                   </div>
                 ))}
-              </div>
-              
-              <input
-                type="text"
-                className="search-input"
-                placeholder="宠物名称"
-                value={newPet.name}
-                onChange={(e) => setNewPet({ ...newPet, name: e.target.value })}
-              />
-              
-              <input
-                type="text"
-                className="search-input"
-                placeholder="品种"
-                value={newPet.breed}
-                onChange={(e) => setNewPet({ ...newPet, breed: e.target.value })}
-              />
-              
-              <div style={{ display: 'flex', gap: '12px' }}>
-                <div style={{ flex: 1 }}>
-                  <input
-                    type="number"
-                    className="search-input"
-                    placeholder="年龄"
-                    min="0"
-                    max="30"
-                    value={newPet.age}
-                    onChange={(e) => setNewPet({ ...newPet, age: parseInt(e.target.value) || 1 })}
-                  />
-                </div>
-                <div style={{ flex: 1 }}>
-                  <input
-                    type="number"
-                    className="search-input"
-                    placeholder="体重(kg)"
-                    min="0.1"
-                    step="0.1"
-                    value={newPet.weight}
-                    onChange={(e) => setNewPet({ ...newPet, weight: parseFloat(e.target.value) || 1 })}
-                  />
-                </div>
+                
+                <button 
+                  onClick={() => setShowAddPet(true)} 
+                  style={{
+                    ...styles.button,
+                    ...styles.buttonSecondary
+                  }}
+                >
+                  + 添加宠物
+                </button>
               </div>
             </div>
+
+            {/* 底部操作栏 */}
+            <div style={styles.bottomBar}>
+              <button 
+                onClick={generateTrips} 
+                disabled={!isFormValid} 
+                style={{
+                  ...styles.button,
+                  background: isFormValid ? '#007aff' : '#d1d1d6',
+                  color: isFormValid ? 'white' : '#86868b',
+                  cursor: isFormValid ? 'pointer' : 'not-allowed'
+                }}
+              >
+                {loading ? (
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+                    <div style={{ 
+                      width: '16px', 
+                      height: '16px', 
+                      border: '2px solid rgba(255,255,255,0.3)', 
+                      borderTop: '2px solid white', 
+                      borderRadius: '50%' 
+                    }} className="spin"></div>
+                    生成中...
+                  </div>
+                ) : (
+                  '生成旅行方案'
+                )}
+              </button>
+            </div>
+
+            {/* 模态框：添加宠物 */}
+            {showAddPet && (
+              <div style={styles.modal} onClick={(e) => e.target === e.currentTarget && setShowAddPet(false)}>
+                <div style={styles.modalContent}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+                    <h3 style={{ fontSize: '20px', fontWeight: '600', color: '#1d1d1f' }}>添加宠物</h3>
+                    <button 
+                      onClick={() => setShowAddPet(false)} 
+                      style={{ 
+                        background: 'none', 
+                        border: 'none', 
+                        fontSize: '24px', 
+                        color: '#86868b',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      ×
+                    </button>
+                  </div>
+                  <input 
+                    type="text" 
+                    placeholder="宠物名字" 
+                    value={newPet.name} 
+                    onChange={(e) => setNewPet({...newPet, name: e.target.value})} 
+                    style={styles.input}
+                  />
+                  <input 
+                    type="text" 
+                    placeholder="品种" 
+                    value={newPet.type} 
+                    onChange={(e) => setNewPet({...newPet, type: e.target.value})} 
+                    style={styles.input}
+                  />
+                  <input 
+                    type="text" 
+                    placeholder="体重" 
+                    value={newPet.weight} 
+                    onChange={(e) => setNewPet({...newPet, weight: e.target.value})} 
+                    style={styles.input}
+                  />
+                  <button 
+                    onClick={handleAddPet} 
+                    style={styles.button}
+                  >
+                    确认添加
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* 模态框：自定义兴趣 */}
+            {showCustomInterest && (
+              <div style={styles.modal} onClick={(e) => e.target === e.currentTarget && setShowCustomInterest(false)}>
+                <div style={styles.modalContent}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+                    <h3 style={{ fontSize: '20px', fontWeight: '600', color: '#1d1d1f' }}>添加自定义体验</h3>
+                    <button 
+                      onClick={() => setShowCustomInterest(false)} 
+                      style={{ 
+                        background: 'none', 
+                        border: 'none', 
+                        fontSize: '24px', 
+                        color: '#86868b',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      ×
+                    </button>
+                  </div>
+                  <input 
+                    type="text" 
+                    placeholder="比如：温泉体验、草原奔跑..." 
+                    value={customInterest} 
+                    onChange={(e) => setCustomInterest(e.target.value)} 
+                    style={styles.input}
+                    onKeyPress={(e) => e.key === 'Enter' && handleAddCustomInterest()}
+                  />
+                  <button 
+                    onClick={handleAddCustomInterest} 
+                    style={styles.button}
+                  >
+                    添加体验
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* 模态框：城市选择 */}
+            {showCitySelect && (
+              <div style={styles.modal} onClick={(e) => e.target === e.currentTarget && setShowCitySelect(false)}>
+                <div style={styles.modalContent}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+                    <h3 style={{ fontSize: '20px', fontWeight: '600', color: '#1d1d1f' }}>选择所在位置</h3>
+                    <button 
+                      onClick={() => setShowCitySelect(false)} 
+                      style={{ 
+                        background: 'none', 
+                        border: 'none', 
+                        fontSize: '24px', 
+                        color: '#86868b',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      ×
+                    </button>
+                  </div>
+                  
+                  <div style={{ maxHeight: '60vh', overflowY: 'auto' }}>
+                    {CONFIG.cities.major.map(city => (
+                      <div key={city.name} style={{ marginBottom: '20px' }}>
+                        <div style={{ fontSize: '18px', fontWeight: '600', marginBottom: '12px', color: '#1d1d1f', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          {city.name} 
+                          <span style={{ fontSize: '14px', color: '#86868b' }}>{city.weather} {city.temp}</span>
+                        </div>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '8px' }}>
+                          {city.districts.map(district => (
+                            <button
+                              key={district}
+                              onClick={() => handleCitySelect(city.name, district)}
+                              style={{
+                                padding: '14px 16px',
+                                background: selectedCity === city.name && selectedDistrict === district 
+                                  ? '#007aff' 
+                                  : 'white',
+                                color: selectedCity === city.name && selectedDistrict === district ? 'white' : '#1d1d1f',
+                                border: '0.5px solid',
+                                borderColor: selectedCity === city.name && selectedDistrict === district ? '#007aff' : 'rgba(0,0,0,0.08)',
+                                borderRadius: '10px',
+                                fontSize: '15px',
+                                fontWeight: '500',
+                                cursor: 'pointer',
+                                transition: 'all 0.2s ease',
+                                fontFamily: 'inherit'
+                              }}
+                            >
+                              {district}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
-        </div>
-      );
+        );
+      }
+
+      // Results page
+      if (page === 'results') {
+        return (
+          <div style={styles.container}>
+            <div style={styles.header}>
+              <div style={styles.logo}>
+                <span style={{ color: '#1d1d1f' }}>Fun</span>
+                <span style={{ color: '#007aff' }}>Go</span>
+              </div>
+              <div style={styles.subtitle}>
+                为您生成的旅行方案
+              </div>
+            </div>
+            
+            <div style={{ padding: '60px 20px', textAlign: 'center' }}>
+              <div style={{ fontSize: '64px', marginBottom: '24px' }}>🎉</div>
+              <div style={{ fontSize: '24px', fontWeight: '600', marginBottom: '12px', color: '#1d1d1f' }}>
+                旅行方案生成成功！
+              </div>
+              <div style={{ fontSize: '17px', color: '#86868b', marginBottom: '40px', lineHeight: '1.4' }}>
+                基于您的需求，我们为您和{pets[0] && pets[0].name ? pets[0].name : '您的宠物'}精心规划了行程
+              </div>
+              <button 
+                onClick={() => setPage('planning')} 
+                style={{
+                  ...styles.button,
+                  maxWidth: '200px',
+                  margin: '0 auto'
+                }}
+              >
+                返回修改
+              </button>
+            </div>
+          </div>
+        );
+      }
+
+      return null;
     };
 
-    ReactDOM.render(<App />, document.getElementById('root'));
+    ReactDOM.render(React.createElement(App), document.getElementById('root'));
   </script>
 </body>
 </html>
