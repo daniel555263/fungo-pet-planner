@@ -107,96 +107,7 @@
         { value: '2-3', label: '2-3天', desc: '周末短途' },
         { value: '4-7', label: '4-7天', desc: '小长假' },
         { value: '7+', label: '7天以上', desc: '深度游' }
-      ],
-      // 智能推荐方案模板
-      smartPlans: {
-        local: {
-          morning: [
-            { 
-              id: 1, 
-              title: '清晨遛狗套餐', 
-              subtitle: '适合晨练的狗狗', 
-              petFriendly: 5, 
-              duration: '2-3小时',
-              highlights: ['宠物公园', '晨跑步道', '早餐咖啡'],
-              timeAdvice: '6:00-9:00 最佳'
-            }
-          ],
-          forenoon: [
-            { 
-              id: 2, 
-              title: '上午活力方案', 
-              subtitle: '精力充沛的完美时光', 
-              petFriendly: 5, 
-              duration: '3-4小时',
-              highlights: ['室内宠物乐园', '宠物友好商场', '互动体验'],
-              timeAdvice: '9:00-12:00 推荐'
-            }
-          ],
-          afternoon: [
-            { 
-              id: 3, 
-              title: '下午悠闲计划', 
-              subtitle: '慢节奏享受时光', 
-              petFriendly: 4, 
-              duration: '2-3小时',
-              highlights: ['宠物咖啡厅', '公园野餐', '拍照打卡'],
-              timeAdvice: '14:00-17:00 舒适'
-            }
-          ],
-          evening: [
-            { 
-              id: 4, 
-              title: '傍晚漫步套餐', 
-              subtitle: '最美黄昏时刻', 
-              petFriendly: 5, 
-              duration: '2小时',
-              highlights: ['海边栈道', '落日观景', '户外晚餐'],
-              timeAdvice: '17:00-19:00 绝佳'
-            }
-          ],
-          night: [
-            { 
-              id: 5, 
-              title: '夜晚温馨方案', 
-              subtitle: '适合夜猫子的选择', 
-              petFriendly: 4, 
-              duration: '2-3小时',
-              highlights: ['宠物友好餐厅', '夜市漫步', '星空露营'],
-              timeAdvice: '19:00-22:00 推荐'
-            }
-          ]
-        },
-        travel: [
-          {
-            id: 10,
-            title: '舒适度假型',
-            subtitle: '五星享受，宠物也是VIP',
-            petFriendly: 5,
-            duration: '3-7天',
-            highlights: ['宠物度假村', '专属SPA', '管家服务'],
-            type: 'luxury'
-          },
-          {
-            id: 11,
-            title: '自驾探索型',
-            subtitle: '自由随心，发现未知美景',
-            petFriendly: 4,
-            duration: '2-5天',
-            highlights: ['宠物友好酒店', '沿途景点', '自驾路线'],
-            type: 'adventure'
-          },
-          {
-            id: 12,
-            title: '文化体验型',
-            subtitle: '深度游览，感受当地文化',
-            petFriendly: 4,
-            duration: '4-7天',
-            highlights: ['特色民宿', '文化景点', '当地美食'],
-            type: 'culture'
-          }
-        ]
-      }
+      ]
     };
 
     const App = () => {
@@ -241,34 +152,71 @@
 
       // 获取智能推荐方案
       const getSmartPlans = () => {
-        if (tripType === 'local') {
-          const timeSlotPlans = CONFIG.smartPlans.local[currentTimeSlot.slot] || CONFIG.smartPlans.local.afternoon;
+        const basePlans = [
+          { 
+            id: 1, 
+            title: `${currentTimeSlot.label}遛狗套餐`, 
+            subtitle: `适合${currentTimeSlot.label}的狗狗活动`, 
+            petFriendly: 5, 
+            duration: '2-3小时',
+            highlights: ['宠物公园', '遛狗步道', '宠物友好咖啡厅'],
+            timeAdvice: `${currentTimeSlot.label}推荐`,
+            isRecommended: true
+          },
+          { 
+            id: 2, 
+            title: '个性化推荐', 
+            subtitle: '基于您的偏好定制', 
+            petFriendly: 4, 
+            duration: '2-4小时',
+            highlights: preferences.slice(0, 3),
+            timeAdvice: '灵活安排',
+            isPersonalized: true
+          },
+          { 
+            id: 3, 
+            title: '附近热门', 
+            subtitle: `${selectedCity}${selectedDistrict}周边精选`, 
+            petFriendly: 4, 
+            duration: '1-3小时',
+            highlights: ['网红景点', '当地特色', '宠物友好'],
+            timeAdvice: '全天开放'
+          }
+        ];
+
+        if (tripType === 'travel') {
           return [
-            ...timeSlotPlans,
-            // 添加基于偏好的推荐
             {
-              id: 6,
-              title: '个性化推荐',
-              subtitle: '基于您的偏好定制',
-              petFriendly: 4,
-              duration: '2-4小时',
-              highlights: preferences.slice(0, 3),
-              timeAdvice: '灵活安排',
-              isPersonalized: true
+              id: 10,
+              title: '舒适度假型',
+              subtitle: '五星享受，宠物也是VIP',
+              petFriendly: 5,
+              duration: `${duration}天`,
+              highlights: ['宠物度假村', '专属SPA', '管家服务'],
+              type: 'luxury'
             },
             {
-              id: 7,
-              title: '附近热门',
-              subtitle: `${selectedCity}${selectedDistrict}周边精选`,
+              id: 11,
+              title: '自驾探索型',
+              subtitle: '自由随心，发现未知美景',
               petFriendly: 4,
-              duration: '1-3小时',
-              highlights: ['网红景点', '当地特色', '宠物友好'],
-              timeAdvice: '全天开放'
+              duration: `${duration}天`,
+              highlights: ['宠物友好酒店', '沿途景点', '自驾路线'],
+              type: 'adventure'
+            },
+            {
+              id: 12,
+              title: '文化体验型',
+              subtitle: '深度游览，感受当地文化',
+              petFriendly: 4,
+              duration: `${duration}天`,
+              highlights: ['特色民宿', '文化景点', '当地美食'],
+              type: 'culture'
             }
           ];
-        } else {
-          return CONFIG.smartPlans.travel;
         }
+
+        return basePlans;
       };
 
       // 事件处理
@@ -598,7 +546,7 @@
             )}
             
             {/* 时段推荐标识 */}
-            {plan.timeAdvice && plan.timeAdvice.includes(currentTimeSlot.label) && (
+            {plan.isRecommended && (
               <div style={{
                 position: 'absolute',
                 top: '12px',
@@ -1264,7 +1212,7 @@
                   </div>
                   <div style={{ textAlign: 'center' }}>
                     <div style={{ fontSize: '24px', fontWeight: '700', color: '#30d158' }}>
-                      {Math.max(...selectedPlans.map(p => p.petFriendly))}★
+                      {selectedPlans.length > 0 ? Math.max(...selectedPlans.map(p => p.petFriendly)) : 5}★
                     </div>
                     <div style={{ fontSize: '12px', color: '#86868b' }}>宠物友好</div>
                   </div>
@@ -1297,374 +1245,6 @@
                         🚀
                       </div>
                       <h3 style={{ fontSize: '20px', fontWeight: '600', color: '#1d1d1f' }}>
-                        专属活动
-                      </h3>
-                    </div>
-
-                    {selectedPlans.map(plan => (
-                      <div key={`activity-${plan.id}`} style={{
-                        background: 'white',
-                        borderRadius: '12px',
-                        padding: '16px',
-                        marginBottom: '12px',
-                        border: '0.5px solid rgba(0,0,0,0.04)'
-                      }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
-                          <div style={{ fontSize: '20px' }}>🎯</div>
-                          <div>
-                            <h4 style={{ fontSize: '16px', fontWeight: '600', color: '#1d1d1f' }}>
-                              {plan.title} - 宠物专享
-                            </h4>
-                            <p style={{ fontSize: '13px', color: '#86868b' }}>
-                              建议游玩时间：{plan.duration}
-                            </p>
-                          </div>
-                        </div>
-                        
-                        <div style={{ background: 'rgba(0, 122, 255, 0.05)', padding: '12px', borderRadius: '8px' }}>
-                          <div style={{ fontSize: '12px', color: '#007aff', fontWeight: '600', marginBottom: '6px' }}>
-                            🐕 {pets[0]?.name || '您的宠物'}可以体验：
-                          </div>
-                          <ul style={{ fontSize: '11px', color: '#86868b', lineHeight: '1.4', paddingLeft: '16px' }}>
-                            <li>自由奔跑和社交</li>
-                            <li>专业宠物训练师指导</li>
-                            <li>宠物友好设施体验</li>
-                            <li>安全围栏区域游玩</li>
-                          </ul>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              ) : (
-                // 长途游：按行程安排分类
-                <div>
-                  {/* 住宿安排 */}
-                  <div style={styles.section}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
-                      <div style={{
-                        width: '32px',
-                        height: '32px',
-                        background: '#ff9500',
-                        borderRadius: '8px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        fontSize: '16px'
-                      }}>
-                        🏨
-                      </div>
-                      <h3 style={{ fontSize: '20px', fontWeight: '600', color: '#1d1d1f' }}>
-                        住宿安排
-                      </h3>
-                      <span style={{ fontSize: '12px', color: '#ff9500', background: 'rgba(255, 149, 0, 0.1)', padding: '4px 8px', borderRadius: '6px' }}>
-                        优先推荐
-                      </span>
-                    </div>
-
-                    {selectedPlans.map((plan, index) => (
-                      <div key={`hotel-${plan.id}`} style={{
-                        background: 'white',
-                        borderRadius: '12px',
-                        padding: '18px',
-                        marginBottom: '12px',
-                        border: '0.5px solid rgba(0,0,0,0.04)',
-                        position: 'relative'
-                      }}>
-                        <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
-                          <div style={{
-                            width: '40px',
-                            height: '40px',
-                            background: 'linear-gradient(135deg, #ff9500, #ffb340)',
-                            borderRadius: '10px',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            fontSize: '16px',
-                            color: 'white',
-                            fontWeight: '600'
-                          }}>
-                            {index + 1}
-                          </div>
-                          <div style={{ flex: 1 }}>
-                            <h4 style={{ fontSize: '16px', fontWeight: '600', color: '#1d1d1f', marginBottom: '4px' }}>
-                              {plan.type === 'luxury' ? '五星宠物度假村' : 
-                               plan.type === 'adventure' ? '宠物友好度假酒店' : 
-                               '特色宠物民宿'}
-                            </h4>
-                            <p style={{ fontSize: '13px', color: '#86868b', marginBottom: '8px' }}>
-                              {plan.subtitle} · 宠物友好度 {plan.petFriendly}⭐
-                            </p>
-                            
-                            <div style={{ background: 'rgba(255, 149, 0, 0.1)', padding: '8px', borderRadius: '6px', marginBottom: '8px' }}>
-                              <div style={{ fontSize: '11px', color: '#ff9500', fontWeight: '600', marginBottom: '4px' }}>
-                                🏨 住宿特色：
-                              </div>
-                              <div style={{ fontSize: '11px', color: '#86868b', lineHeight: '1.3' }}>
-                                • 宠物专用床具和用品<br/>
-                                • 24小时宠物照护服务<br/>
-                                • 室内外宠物活动区域<br/>
-                                • 宠物洗澡和美容服务
-                              </div>
-                            </div>
-
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                              <span style={{
-                                background: '#30d158',
-                                color: 'white',
-                                padding: '3px 6px',
-                                borderRadius: '4px',
-                                fontSize: '10px',
-                                fontWeight: '600'
-                              }}>
-                                可直接入住
-                              </span>
-                              <span style={{ fontSize: '11px', color: '#86868b' }}>
-                                预计 {duration} 晚住宿
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-
-                  {/* 必游景点 */}
-                  <div style={styles.section}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
-                      <div style={{
-                        width: '32px',
-                        height: '32px',
-                        background: '#30d158',
-                        borderRadius: '8px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        fontSize: '16px'
-                      }}>
-                        📍
-                      </div>
-                      <h3 style={{ fontSize: '20px', fontWeight: '600', color: '#1d1d1f' }}>
-                        必游景点
-                      </h3>
-                    </div>
-
-                    {selectedPlans.map((plan, index) => (
-                      <div key={`attraction-${plan.id}`} style={{
-                        background: 'white',
-                        borderRadius: '12px',
-                        padding: '16px',
-                        marginBottom: '12px',
-                        border: '0.5px solid rgba(0,0,0,0.04)'
-                      }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}>
-                          <div style={{ fontSize: '20px' }}>🗺️</div>
-                          <div>
-                            <h4 style={{ fontSize: '16px', fontWeight: '600', color: '#1d1d1f' }}>
-                              第{index + 1}天行程安排
-                            </h4>
-                            <p style={{ fontSize: '13px', color: '#86868b' }}>
-                              基于 "{plan.title}" 的精选路线
-                            </p>
-                          </div>
-                        </div>
-
-                        <div style={{ display: 'grid', gap: '8px' }}>
-                          {['上午景点', '下午景点', '傍晚活动'].map((timeSlot, timeIndex) => (
-                            <div key={timeIndex} style={{
-                              display: 'flex',
-                              alignItems: 'center',
-                              gap: '8px',
-                              padding: '8px',
-                              background: 'rgba(48, 209, 88, 0.05)',
-                              borderRadius: '6px'
-                            }}>
-                              <div style={{
-                                width: '6px',
-                                height: '6px',
-                                background: '#30d158',
-                                borderRadius: '50%'
-                              }}></div>
-                              <span style={{ fontSize: '12px', fontWeight: '500', color: '#30d158' }}>
-                                {timeSlot}:
-                              </span>
-                              <span style={{ fontSize: '12px', color: '#86868b' }}>
-                                {plan.highlights[timeIndex] || '宠物友好景点'}
-                              </span>
-                              <span style={{ fontSize: '10px', color: '#30d158', marginLeft: 'auto' }}>
-                                🐕 适宜
-                              </span>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-
-                  {/* 交通方案 */}
-                  <div style={styles.section}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
-                      <div style={{
-                        width: '32px',
-                        height: '32px',
-                        background: '#007aff',
-                        borderRadius: '8px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        fontSize: '16px'
-                      }}>
-                        🚗
-                      </div>
-                      <h3 style={{ fontSize: '20px', fontWeight: '600', color: '#1d1d1f' }}>
-                        交通方案
-                      </h3>
-                    </div>
-
-                    <div style={{
-                      background: 'white',
-                      borderRadius: '12px',
-                      padding: '18px',
-                      border: '0.5px solid rgba(0,0,0,0.04)'
-                    }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
-                        <div style={{ fontSize: '24px' }}>✈️</div>
-                        <div>
-                          <h4 style={{ fontSize: '16px', fontWeight: '600', color: '#1d1d1f' }}>
-                            推荐交通方式
-                          </h4>
-                          <p style={{ fontSize: '13px', color: '#86868b' }}>
-                            基于您的出行天数和宠物需求
-                          </p>
-                        </div>
-                      </div>
-
-                      <div style={{ display: 'grid', gap: '12px' }}>
-                        {duration === '1' ? (
-                          <div style={{ background: 'rgba(0, 122, 255, 0.1)', padding: '12px', borderRadius: '8px' }}>
-                            <div style={{ fontSize: '12px', color: '#007aff', fontWeight: '600', marginBottom: '6px' }}>
-                              🚗 当日往返 - 自驾推荐
-                            </div>
-                            <div style={{ fontSize: '11px', color: '#86868b', lineHeight: '1.4' }}>
-                              • 宠物可舒适乘坐，无托运压力<br/>
-                              • 行程时间灵活，可随时休息<br/>
-                              • 携带宠物用品方便
-                            </div>
-                          </div>
-                        ) : duration === '2-3' ? (
-                          <>
-                            <div style={{ background: 'rgba(0, 122, 255, 0.1)', padding: '12px', borderRadius: '8px' }}>
-                              <div style={{ fontSize: '12px', color: '#007aff', fontWeight: '600', marginBottom: '6px' }}>
-                                🚗 自驾出行（首选）
-                              </div>
-                              <div style={{ fontSize: '11px', color: '#86868b', lineHeight: '1.4' }}>
-                                • 最适合短途游的方式<br/>
-                                • {pets[0]?.name || '宠物'}可享受舒适旅程
-                              </div>
-                            </div>
-                            <div style={{ background: 'rgba(255, 149, 0, 0.1)', padding: '12px', borderRadius: '8px' }}>
-                              <div style={{ fontSize: '12px', color: '#ff9500', fontWeight: '600', marginBottom: '6px' }}>
-                                🚄 高铁+接驳（备选）
-                              </div>
-                              <div style={{ fontSize: '11px', color: '#86868b', lineHeight: '1.4' }}>
-                                • 需要宠物运输证明<br/>
-                                • 到达后租车或打车接驳
-                              </div>
-                            </div>
-                          </>
-                        ) : (
-                          <>
-                            <div style={{ background: 'rgba(0, 122, 255, 0.1)', padding: '12px', borderRadius: '8px' }}>
-                              <div style={{ fontSize: '12px', color: '#007aff', fontWeight: '600', marginBottom: '6px' }}>
-                                ✈️ 飞机出行（推荐）
-                              </div>
-                              <div style={{ fontSize: '11px', color: '#86868b', lineHeight: '1.4' }}>
-                                • 节省时间，适合长途旅行<br/>
-                                • 需提前办理宠物托运手续<br/>
-                                • 目的地租车自驾游览
-                              </div>
-                            </div>
-                            <div style={{ background: 'rgba(255, 149, 0, 0.1)', padding: '12px', borderRadius: '8px' }}>
-                              <div style={{ fontSize: '12px', color: '#ff9500', fontWeight: '600', marginBottom: '6px' }}>
-                                🚗 自驾长途（体验型）
-                              </div>
-                              <div style={{ fontSize: '11px', color: '#86868b', lineHeight: '1.4' }}>
-                                • 路途即是风景，深度体验<br/>
-                                • 需要合理安排休息点
-                              </div>
-                            </div>
-                          </>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* 温馨提示 */}
-              <div style={{
-                background: 'linear-gradient(135deg, rgba(255, 149, 0, 0.1), rgba(255, 179, 64, 0.1))',
-                borderRadius: '16px',
-                padding: '20px',
-                marginTop: '24px',
-                border: '1px solid rgba(255, 149, 0, 0.2)'
-              }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}>
-                  <span style={{ fontSize: '20px' }}>💡</span>
-                  <h3 style={{ fontSize: '16px', fontWeight: '600', color: '#1d1d1f' }}>
-                    贴心提醒
-                  </h3>
-                </div>
-                <div style={{ fontSize: '13px', color: '#86868b', lineHeight: '1.5' }}>
-                  • 出行前请确认宠物疫苗接种情况<br/>
-                  • 携带宠物健康证明和身份证明<br/>
-                  • 准备充足的宠物食物、水和常用药品<br/>
-                  • 关注天气变化，适时调整行程安排<br/>
-                  • 保持宠物在陌生环境中的情绪稳定
-                </div>
-              </div>
-            </div>
-
-            {/* 底部操作栏 */}
-            <div style={styles.bottomBar}>
-              <div style={{ display: 'flex', gap: '12px' }}>
-                <button 
-                  onClick={() => setPage('plans')}
-                  style={{
-                    ...styles.button,
-                    ...styles.buttonSecondary,
-                    width: 'auto',
-                    minWidth: '100px'
-                  }}
-                >
-                  修改方案
-                </button>
-                <button 
-                  onClick={() => {
-                    // 这里可以添加分享或保存功能
-                    alert('行程已保存到您的计划中！');
-                  }}
-                  style={{
-                    ...styles.button,
-                    background: '#007aff',
-                    flex: 1
-                  }}
-                >
-                  保存行程计划
-                </button>
-              </div>
-            </div>
-          </div>
-        );
-      }
-
-      return null;
-    };
-
-    ReactDOM.render(React.createElement(App), document.getElementById('root'));
-  </script>
-</body>
-</html>: '600', color: '#1d1d1f' }}>
                         立即出发
                       </h3>
                       <span style={{ fontSize: '12px', color: '#30d158', background: 'rgba(48, 209, 88, 0.1)', padding: '4px 8px', borderRadius: '6px' }}>
@@ -1672,7 +1252,7 @@
                       </span>
                     </div>
 
-                    {selectedPlans.filter(plan => plan.timeAdvice && plan.timeAdvice.includes('推荐')).map(plan => (
+                    {selectedPlans.filter(plan => plan.isRecommended).map(plan => (
                       <div key={plan.id} style={{
                         background: 'white',
                         borderRadius: '12px',
@@ -1746,7 +1326,7 @@
                       </h3>
                     </div>
 
-                    {selectedPlans.filter(plan => plan.highlights.some(h => h.includes('餐厅') || h.includes('美食') || h.includes('咖啡'))).map(plan => (
+                    {selectedPlans.map(plan => (
                       <div key={`food-${plan.id}`} style={{
                         background: 'white',
                         borderRadius: '12px',
@@ -1789,4 +1369,152 @@
                       }}>
                         🎾
                       </div>
-                      <h3 style={{ fontSize: '20px', fontWeight
+                      <h3 style={{ fontSize: '20px', fontWeight: '600', color: '#1d1d1f' }}>
+                        专属活动
+                      </h3>
+                    </div>
+
+                    {selectedPlans.map(plan => (
+                      <div key={`activity-${plan.id}`} style={{
+                        background: 'white',
+                        borderRadius: '12px',
+                        padding: '16px',
+                        marginBottom: '12px',
+                        border: '0.5px solid rgba(0,0,0,0.04)'
+                      }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
+                          <div style={{ fontSize: '20px' }}>🎯</div>
+                          <div>
+                            <h4 style={{ fontSize: '16px', fontWeight: '600', color: '#1d1d1f' }}>
+                              {plan.title} - 宠物专享
+                            </h4>
+                            <p style={{ fontSize: '13px', color: '#86868b' }}>
+                              建议游玩时间：{plan.duration}
+                            </p>
+                          </div>
+                        </div>
+                        
+                        <div style={{ background: 'rgba(0, 122, 255, 0.05)', padding: '12px', borderRadius: '8px' }}>
+                          <div style={{ fontSize: '12px', color: '#007aff', fontWeight: '600', marginBottom: '6px' }}>
+                            🐕 {pets[0]?.name || '您的宠物'}可以体验：
+                          </div>
+                          <ul style={{ fontSize: '11px', color: '#86868b', lineHeight: '1.4', paddingLeft: '16px' }}>
+                            <li>自由奔跑和社交</li>
+                            <li>专业宠物训练师指导</li>
+                            <li>宠物友好设施体验</li>
+                            <li>安全围栏区域游玩</li>
+                          </ul>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                // 长途游内容（简化版本）
+                <div style={{
+                  background: 'white',
+                  borderRadius: '16px',
+                  padding: '24px',
+                  textAlign: 'center'
+                }}>
+                  <div style={{ fontSize: '48px', marginBottom: '16px' }}>🏨</div>
+                  <h3 style={{ fontSize: '18px', fontWeight: '600', color: '#1d1d1f', marginBottom: '8px' }}>
+                    长途游详细规划
+                  </h3>
+                  <p style={{ fontSize: '14px', color: '#86868b', marginBottom: '20px' }}>
+                    为您和{pets[0]?.name || '宠物'}规划完美的{duration}天旅程
+                  </p>
+                  
+                  {selectedPlans.map((plan, index) => (
+                    <div key={plan.id} style={{
+                      background: '#f8f9fb',
+                      borderRadius: '12px',
+                      padding: '16px',
+                      marginBottom: '12px',
+                      textAlign: 'left'
+                    }}>
+                      <h4 style={{ fontSize: '16px', fontWeight: '600', color: '#1d1d1f', marginBottom: '8px' }}>
+                        方案 {index + 1}: {plan.title}
+                      </h4>
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                        {plan.highlights.map((highlight, idx) => (
+                          <span key={idx} style={{
+                            background: 'rgba(0, 122, 255, 0.1)',
+                            color: '#007aff',
+                            padding: '4px 8px',
+                            borderRadius: '6px',
+                            fontSize: '12px'
+                          }}>
+                            {highlight}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* 温馨提示 */}
+              <div style={{
+                background: 'linear-gradient(135deg, rgba(255, 149, 0, 0.1), rgba(255, 179, 64, 0.1))',
+                borderRadius: '16px',
+                padding: '20px',
+                marginTop: '24px',
+                border: '1px solid rgba(255, 149, 0, 0.2)'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}>
+                  <span style={{ fontSize: '20px' }}>💡</span>
+                  <h3 style={{ fontSize: '16px', fontWeight: '600', color: '#1d1d1f' }}>
+                    贴心提醒
+                  </h3>
+                </div>
+                <div style={{ fontSize: '13px', color: '#86868b', lineHeight: '1.5' }}>
+                  • 出行前请确认宠物疫苗接种情况<br/>
+                  • 携带宠物健康证明和身份证明<br/>
+                  • 准备充足的宠物食物、水和常用药品<br/>
+                  • 关注天气变化，适时调整行程安排<br/>
+                  • 保持宠物在陌生环境中的情绪稳定
+                </div>
+              </div>
+            </div>
+
+            {/* 底部操作栏 */}
+            <div style={styles.bottomBar}>
+              <div style={{ display: 'flex', gap: '12px' }}>
+                <button 
+                  onClick={() => setPage('plans')}
+                  style={{
+                    ...styles.button,
+                    ...styles.buttonSecondary,
+                    width: 'auto',
+                    minWidth: '100px'
+                  }}
+                >
+                  修改方案
+                </button>
+                <button 
+                  onClick={() => {
+                    // 这里可以添加分享或保存功能
+                    alert('行程已保存到您的计划中！');
+                  }}
+                  style={{
+                    ...styles.button,
+                    background: '#007aff',
+                    flex: 1
+                  }}
+                >
+                  保存行程计划
+                </button>
+              </div>
+            </div>
+          </div>
+        );
+      }
+
+      return null;
+    };
+
+    ReactDOM.render(React.createElement(App), document.getElementById('root'));
+  </script>
+</body>
+</html>
