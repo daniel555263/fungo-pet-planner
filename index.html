@@ -1,4 +1,694 @@
-{!isLast && (
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FunGo 宠物旅行规划器</title>
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    * { 
+      margin: 0; 
+      padding: 0; 
+      box-sizing: border-box; 
+    }
+    
+    body { 
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", sans-serif; 
+      background: #f8f9fb;
+      min-height: 100vh;
+      color: #1d1d1f;
+      line-height: 1.4;
+    }
+    
+    @keyframes spin { 
+      to { transform: rotate(360deg); } 
+    }
+    
+    @keyframes fadeInUp { 
+      from { opacity: 0; transform: translateY(30px); } 
+      to { opacity: 1; transform: translateY(0); } 
+    }
+    
+    @keyframes slideInLeft {
+      from { opacity: 0; transform: translateX(-20px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+    
+    .spin { animation: spin 1s linear infinite; }
+    .fade-in { animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1); }
+    .slide-in { animation: slideInLeft 0.6s cubic-bezier(0.16, 1, 0.3, 1); }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  
+  <script type="text/babel">
+    const { useState, useEffect, useMemo } = React;
+
+    // 获取当前时段
+    const getCurrentTimeSlot = () => {
+      const hour = new Date().getHours();
+      if (hour >= 6 && hour < 9) return { slot: 'morning', label: '早晨', icon: '🌅' };
+      if (hour >= 9 && hour < 12) return { slot: 'forenoon', label: '上午', icon: '☀️' };
+      if (hour >= 12 && hour < 14) return { slot: 'noon', label: '中午', icon: '🌞' };
+      if (hour >= 14 && hour < 17) return { slot: 'afternoon', label: '下午', icon: '🌤️' };
+      if (hour >= 17 && hour < 19) return { slot: 'evening', label: '傍晚', icon: '🌆' };
+      if (hour >= 19 && hour < 22) return { slot: 'night', label: '夜晚', icon: '🌃' };
+      return { slot: 'late', label: '深夜', icon: '🌙' };
+    };
+
+    // 数据配置
+    const CONFIG = {
+      cities: {
+        major: [
+          { name: '北京', districts: ['朝阳区', '海淀区', '西城区', '东城区'], weather: '☀️', temp: '24°C' },
+          { name: '上海', districts: ['浦东新区', '黄浦区', '静安区', '徐汇区'], weather: '⛅', temp: '26°C' },
+          { name: '广州', districts: ['天河区', '越秀区', '海珠区', '荔湾区'], weather: '🌦️', temp: '29°C' },
+          { name: '深圳', districts: ['南山区', '福田区', '罗湖区', '宝安区'], weather: '☀️', temp: '28°C' },
+          { name: '杭州', districts: ['西湖区', '拱墅区', '江干区', '下城区'], weather: '🌦️', temp: '22°C' },
+          { name: '成都', districts: ['锦江区', '青羊区', '金牛区', '武侯区'], weather: '☁️', temp: '20°C' },
+          { name: '南京', districts: ['玄武区', '秦淮区', '建邺区', '鼓楼区'], weather: '⛅', temp: '23°C' },
+          { name: '武汉', districts: ['江汉区', '江岸区', '硚口区', '汉阳区'], weather: '🌤️', temp: '25°C' }
+        ]
+      },
+      interests: [
+        { id: 'beach', label: '玩水嬉戏', icon: '🏖️' },
+        { id: 'run', label: '狗狗奔跑', icon: '🏃' },
+        { id: 'cafe', label: '喝下午茶', icon: '☕' },
+        { id: 'park', label: '公园漫步', icon: '🌳' },
+        { id: 'photo', label: '拍照打卡', icon: '📸' },
+        { id: 'food', label: '美食探店', icon: '🍽️' },
+        { id: 'mountain', label: '登山徒步', icon: '🏔️' },
+        { id: 'lake', label: '湖边休闲', icon: '🏞️' }
+      ],
+      durations: [
+        { value: '1', label: '1天', desc: '当日往返' },
+        { value: '2-3', label: '2-3天', desc: '周末短途' },
+        { value: '4-7', label: '4-7天', desc: '小长假' },
+        { value: '7+', label: '7天以上', desc: '深度游' }
+      ],
+      // 模拟行程数据
+      itineraryData: [
+        {
+          id: 1,
+          category: '住宿安排',
+          categoryIcon: '🏨',
+          categoryColor: '#007aff',
+          items: [
+            {
+              id: 11,
+              name: '宠物友好度假酒店',
+              description: '提供专业宠物服务的五星酒店',
+              rating: 4.8,
+              reviews: 2156,
+              duration: '2晚',
+              distance: '距离市中心 5km',
+              features: ['宠物SPA', '专属房间', '24h服务']
+            }
+          ]
+        },
+        {
+          id: 2,
+          category: '必游景点',
+          categoryIcon: '📍',
+          categoryColor: '#30d158',
+          items: [
+            {
+              id: 21,
+              name: '深圳湾公园宠物乐园',
+              description: '最受欢迎的宠物互动空间',
+              rating: 4.9,
+              reviews: 8532,
+              duration: '2-3小时',
+              distance: '距离您 1.2km',
+              features: ['宠物友好', '户外活动', '拍照圣地']
+            },
+            {
+              id: 22,
+              name: '海上世界宠物咖啡厅',
+              description: '人宠共享的温馨空间',
+              rating: 4.7,
+              reviews: 1824,
+              duration: '1-2小时',
+              distance: '距离您 800m',
+              features: ['宠物餐具', '室内舒适', '美食体验']
+            }
+          ]
+        },
+        {
+          id: 3,
+          category: '交通方案',
+          categoryIcon: '🚗',
+          categoryColor: '#ff9500',
+          items: [
+            {
+              id: 31,
+              name: '宠物友好出租车',
+              description: '专业宠物运输服务',
+              rating: 4.6,
+              reviews: 964,
+              duration: '按需',
+              distance: '全城覆盖',
+              features: ['安全座椅', '专业司机', '实时定位']
+            }
+          ]
+        }
+      ]
+    };
+
+    const App = () => {
+      // 核心状态
+      const [page, setPage] = useState('planning');
+      const [tripType, setTripType] = useState('local');
+      const [selectedCity, setSelectedCity] = useState('深圳');
+      const [selectedDistrict, setSelectedDistrict] = useState('南山区');
+      const [duration, setDuration] = useState('2-3');
+      const [pets, setPets] = useState([{ 
+        id: 1, name: '旺财', type: '金毛', emoji: '🐕', weight: '25kg' 
+      }]);
+      const [preferences, setPreferences] = useState(['玩水嬉戏']);
+      const [selectedPlans, setSelectedPlans] = useState([]);
+      
+      // UI 状态
+      const [showAddPet, setShowAddPet] = useState(false);
+      const [showCustomInterest, setShowCustomInterest] = useState(false);
+      const [showCitySelect, setShowCitySelect] = useState(false);
+      const [newPet, setNewPet] = useState({ name: '', type: '', weight: '' });
+      const [customInterest, setCustomInterest] = useState('');
+      const [loading, setLoading] = useState(false);
+      const [animationClass, setAnimationClass] = useState('');
+
+      const currentTimeSlot = getCurrentTimeSlot();
+
+      useEffect(() => {
+        setAnimationClass('fade-in');
+      }, []);
+
+      // 计算属性
+      const currentCityData = useMemo(() => 
+        CONFIG.cities.major.find(city => city.name === selectedCity) || CONFIG.cities.major[3], 
+        [selectedCity]
+      );
+
+      const isFormValid = useMemo(() => 
+        selectedCity && tripType && pets.length > 0 && 
+        (tripType === 'local' || duration), 
+        [selectedCity, tripType, pets.length, duration]
+      );
+
+      // 获取智能推荐方案
+      const getSmartPlans = () => {
+        const basePlans = [
+          { 
+            id: 1, 
+            title: `${currentTimeSlot.label}遛狗套餐`, 
+            subtitle: `适合${currentTimeSlot.label}的狗狗活动`, 
+            petFriendly: 5, 
+            duration: '2-3小时',
+            highlights: ['宠物公园', '遛狗步道', '宠物友好咖啡厅'],
+            timeAdvice: `${currentTimeSlot.label}推荐`,
+            isRecommended: true
+          },
+          { 
+            id: 2, 
+            title: '个性化推荐', 
+            subtitle: '基于您的偏好定制', 
+            petFriendly: 4, 
+            duration: '2-4小时',
+            highlights: preferences.slice(0, 3),
+            timeAdvice: '灵活安排',
+            isPersonalized: true
+          },
+          { 
+            id: 3, 
+            title: '附近热门', 
+            subtitle: `${selectedCity}${selectedDistrict}周边精选`, 
+            petFriendly: 4, 
+            duration: '1-3小时',
+            highlights: ['网红景点', '当地特色', '宠物友好'],
+            timeAdvice: '全天开放'
+          }
+        ];
+
+        if (tripType === 'travel') {
+          return [
+            {
+              id: 10,
+              title: '舒适度假型',
+              subtitle: '五星享受，宠物也是VIP',
+              petFriendly: 5,
+              duration: `${duration}天`,
+              highlights: ['宠物度假村', '专属SPA', '管家服务'],
+              type: 'luxury'
+            },
+            {
+              id: 11,
+              title: '自驾探索型',
+              subtitle: '自由随心，发现未知美景',
+              petFriendly: 4,
+              duration: `${duration}天`,
+              highlights: ['宠物友好酒店', '沿途景点', '自驾路线'],
+              type: 'adventure'
+            },
+            {
+              id: 12,
+              title: '文化体验型',
+              subtitle: '深度游览，感受当地文化',
+              petFriendly: 4,
+              duration: `${duration}天`,
+              highlights: ['特色民宿', '文化景点', '当地美食'],
+              type: 'culture'
+            }
+          ];
+        }
+
+        return basePlans;
+      };
+
+      // 事件处理
+      const handleTripTypeChange = (type) => {
+        setTripType(type);
+        if (type === 'local') {
+          setDuration('');
+        }
+      };
+
+      const handleAddPet = () => {
+        if (newPet.name && newPet.name.trim() && newPet.type && newPet.type.trim() && newPet.weight && newPet.weight.trim()) {
+          setPets(prev => [...prev, { 
+            ...newPet, 
+            id: Date.now(), 
+            emoji: '🐕' 
+          }]);
+          setNewPet({ name: '', type: '', weight: '' });
+          setShowAddPet(false);
+        }
+      };
+
+      const handleRemovePet = (id) => {
+        if (pets.length > 1) {
+          setPets(prev => prev.filter(p => p.id !== id));
+        }
+      };
+
+      const handleToggleInterest = (interest) => {
+        setPreferences(prev => 
+          prev.includes(interest) 
+            ? prev.filter(p => p !== interest)
+            : [...prev, interest]
+        );
+      };
+
+      const handleAddCustomInterest = () => {
+        if (customInterest.trim() && !preferences.includes(customInterest.trim())) {
+          setPreferences(prev => [...prev, customInterest.trim()]);
+          setCustomInterest('');
+          setShowCustomInterest(false);
+        }
+      };
+
+      const handleCitySelect = (city, district) => {
+        setSelectedCity(city);
+        setSelectedDistrict(district);
+        setShowCitySelect(false);
+      };
+
+      const handlePlanSelect = (plan) => {
+        setSelectedPlans(prev => {
+          const exists = prev.find(p => p.id === plan.id);
+          if (exists) {
+            return prev.filter(p => p.id !== plan.id);
+          } else {
+            return [...prev, plan];
+          }
+        });
+      };
+
+      const generateTrips = () => {
+        if (!isFormValid) return;
+        setLoading(true);
+        setTimeout(() => {
+          setLoading(false);
+          setPage('plans');
+        }, 1500);
+      };
+
+      // Apple风格样式系统
+      const styles = {
+        container: { 
+          background: '#f8f9fb', 
+          minHeight: '100vh',
+          paddingBottom: '120px'
+        },
+        header: { 
+          background: 'rgba(255, 255, 255, 0.8)', 
+          backdropFilter: 'saturate(180%) blur(20px)',
+          WebkitBackdropFilter: 'saturate(180%) blur(20px)',
+          padding: '16px 20px', 
+          borderBottom: '0.5px solid rgba(0,0,0,0.05)',
+          position: 'sticky', 
+          top: 0, 
+          zIndex: 10
+        },
+        logo: { 
+          fontSize: '32px', 
+          fontWeight: '700', 
+          textAlign: 'center',
+          letterSpacing: '-1px',
+          marginBottom: '4px'
+        },
+        subtitle: {
+          fontSize: '15px', 
+          color: '#86868b', 
+          textAlign: 'center', 
+          fontWeight: '400'
+        },
+        content: {
+          padding: '24px 20px 0'
+        },
+        section: {
+          marginBottom: '32px'
+        },
+        sectionTitle: {
+          fontSize: '22px',
+          fontWeight: '600',
+          color: '#1d1d1f',
+          marginBottom: '16px',
+          letterSpacing: '-0.4px'
+        },
+        button: { 
+          padding: '16px 24px', 
+          background: '#007aff', 
+          color: 'white', 
+          border: 'none', 
+          borderRadius: '12px', 
+          fontSize: '17px', 
+          fontWeight: '600', 
+          width: '100%',
+          transition: 'all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+          cursor: 'pointer',
+          fontFamily: 'inherit'
+        },
+        buttonSecondary: {
+          background: '#f2f2f7',
+          color: '#007aff',
+          border: '0.5px solid rgba(0,0,0,0.04)'
+        },
+        grid2: { 
+          display: 'grid', 
+          gridTemplateColumns: '1fr 1fr', 
+          gap: '12px' 
+        },
+        grid3: { 
+          display: 'grid', 
+          gridTemplateColumns: 'repeat(3, 1fr)', 
+          gap: '12px' 
+        },
+        modal: { 
+          position: 'fixed', 
+          top: 0, 
+          left: 0, 
+          right: 0, 
+          bottom: 0, 
+          background: 'rgba(0,0,0,0.4)', 
+          display: 'flex', 
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '20px',
+          zIndex: 1000,
+          backdropFilter: 'blur(8px)',
+          WebkitBackdropFilter: 'blur(8px)'
+        },
+        modalContent: { 
+          background: 'white', 
+          borderRadius: '20px', 
+          padding: '32px 24px', 
+          width: '100%',
+          maxWidth: '400px',
+          maxHeight: '80vh',
+          overflowY: 'auto'
+        },
+        input: { 
+          width: '100%', 
+          padding: '16px 20px', 
+          border: '0.5px solid #d1d1d6', 
+          borderRadius: '12px', 
+          fontSize: '17px', 
+          marginBottom: '16px', 
+          outline: 'none',
+          transition: 'all 0.2s ease',
+          fontFamily: 'inherit',
+          background: 'white'
+        },
+        bottomBar: { 
+          position: 'fixed', 
+          bottom: 0, 
+          left: 0, 
+          right: 0, 
+          padding: '20px', 
+          background: 'rgba(255, 255, 255, 0.8)',
+          backdropFilter: 'saturate(180%) blur(20px)',
+          WebkitBackdropFilter: 'saturate(180%) blur(20px)',
+          borderTop: '0.5px solid rgba(0,0,0,0.05)'
+        }
+      };
+
+      // Apple风格选择组件
+      const SelectableCard = ({ 
+        selected, 
+        onClick, 
+        children, 
+        size = 'medium',
+        disabled = false 
+      }) => {
+        const cardStyle = {
+          padding: size === 'large' ? '20px' : size === 'small' ? '16px' : '18px',
+          borderRadius: '12px',
+          cursor: disabled ? 'not-allowed' : 'pointer',
+          transition: 'all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+          border: '0.5px solid',
+          borderColor: selected ? '#007aff' : 'rgba(0,0,0,0.08)',
+          background: selected ? '#007aff' : 'white',
+          color: selected ? 'white' : '#1d1d1f',
+          transform: selected ? 'scale(0.98)' : 'scale(1)',
+          opacity: disabled ? 0.5 : 1
+        };
+
+        return (
+          <div 
+            onClick={disabled ? undefined : onClick}
+            style={cardStyle}
+          >
+            {children}
+          </div>
+        );
+      };
+
+      // 位置卡片组件
+      const LocationCard = () => {
+        const [isHovered, setIsHovered] = useState(false);
+        
+        const cardStyle = {
+          background: 'white',
+          borderRadius: '16px',
+          padding: '20px',
+          marginBottom: '24px',
+          border: '0.5px solid rgba(0,0,0,0.04)',
+          cursor: 'pointer',
+          transition: 'all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+          position: 'relative',
+          overflow: 'hidden',
+          transform: isHovered ? 'translateY(-2px)' : 'translateY(0)',
+          boxShadow: isHovered ? '0 8px 25px rgba(0,0,0,0.1)' : '0 2px 8px rgba(0,0,0,0.04)'
+        };
+
+        return (
+          <div 
+            onClick={() => setShowCitySelect(true)}
+            style={cardStyle}
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <div style={{ fontSize: '20px' }}>📍</div>
+                <div>
+                  <div style={{ fontSize: '18px', fontWeight: '600', color: '#1d1d1f' }}>
+                    {selectedCity} · {selectedDistrict}
+                  </div>
+                  <div style={{ fontSize: '14px', color: '#86868b', marginTop: '2px' }}>
+                    {currentTimeSlot.icon} {currentTimeSlot.label} · 当前位置
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div style={{ 
+              padding: '12px 16px',
+              background: 'rgba(0, 122, 255, 0.1)',
+              borderRadius: '10px',
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: '12px' 
+            }}>
+              <span style={{ fontSize: '16px' }}>{currentCityData.weather}</span>
+              <span style={{ fontSize: '15px', fontWeight: '500', color: '#007aff' }}>{currentCityData.temp}</span>
+              <span style={{ fontSize: '14px', color: '#86868b' }}>适宜出行</span>
+            </div>
+          </div>
+        );
+      };
+
+      // 方案卡片组件
+      const PlanCard = ({ plan, onSelect, selected }) => {
+        const isSelected = selected;
+        
+        return (
+          <div style={{
+            background: 'white',
+            borderRadius: '16px',
+            padding: '20px',
+            marginBottom: '16px',
+            border: `2px solid ${isSelected ? '#007aff' : 'rgba(0,0,0,0.04)'}`,
+            cursor: 'pointer',
+            transition: 'all 0.2s ease',
+            position: 'relative',
+            overflow: 'hidden'
+          }} onClick={() => onSelect(plan)}>
+            
+            {/* 智能推荐标识 */}
+            {plan.isPersonalized && (
+              <div style={{
+                position: 'absolute',
+                top: '12px',
+                right: '12px',
+                background: 'linear-gradient(135deg, #ff6b6b, #ffa726)',
+                color: 'white',
+                padding: '4px 8px',
+                borderRadius: '6px',
+                fontSize: '11px',
+                fontWeight: '600'
+              }}>
+                🤖 AI推荐
+              </div>
+            )}
+            
+            {/* 时段推荐标识 */}
+            {plan.isRecommended && (
+              <div style={{
+                position: 'absolute',
+                top: '12px',
+                right: plan.isPersonalized ? '85px' : '12px',
+                background: '#30d158',
+                color: 'white',
+                padding: '4px 8px',
+                borderRadius: '6px',
+                fontSize: '11px',
+                fontWeight: '600'
+              }}>
+                {currentTimeSlot.icon} 当前推荐
+              </div>
+            )}
+            
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
+              <div style={{ flex: 1 }}>
+                <h3 style={{ fontSize: '18px', fontWeight: '600', color: '#1d1d1f', marginBottom: '4px' }}>
+                  {plan.title}
+                </h3>
+                <p style={{ fontSize: '14px', color: '#86868b', marginBottom: '12px' }}>
+                  {plan.subtitle}
+                </p>
+                
+                {/* 宠物友好度 */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                  <span style={{ fontSize: '14px', color: '#86868b' }}>宠物友好度</span>
+                  <div style={{ display: 'flex', gap: '2px' }}>
+                    {[1,2,3,4,5].map(i => (
+                      <span key={i} style={{ 
+                        fontSize: '14px', 
+                        color: i <= plan.petFriendly ? '#ffa726' : '#e0e0e0' 
+                      }}>
+                        ⭐
+                      </span>
+                    ))}
+                  </div>
+                  <span style={{ fontSize: '14px', color: '#007aff', fontWeight: '500' }}>
+                    {plan.duration}
+                  </span>
+                </div>
+              </div>
+              
+              {/* 选择按钮 */}
+              <div style={{
+                width: '24px',
+                height: '24px',
+                borderRadius: '50%',
+                border: `2px solid ${isSelected ? '#007aff' : '#d1d1d6'}`,
+                background: isSelected ? '#007aff' : 'white',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                marginLeft: '12px'
+              }}>
+                {isSelected && (
+                  <span style={{ color: 'white', fontSize: '12px' }}>✓</span>
+                )}
+              </div>
+            </div>
+            
+            {/* 亮点标签 */}
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '12px' }}>
+              {plan.highlights.map((highlight, index) => (
+                <span key={index} style={{
+                  background: 'rgba(0, 122, 255, 0.1)',
+                  color: '#007aff',
+                  padding: '4px 8px',
+                  borderRadius: '6px',
+                  fontSize: '12px',
+                  fontWeight: '500'
+                }}>
+                  {highlight}
+                </span>
+              ))}
+            </div>
+            
+            {/* 时间建议 */}
+            {plan.timeAdvice && (
+              <div style={{ 
+                fontSize: '13px', 
+                color: '#86868b',
+                fontStyle: 'italic'
+              }}>
+                💡 {plan.timeAdvice}
+              </div>
+            )}
+          </div>
+        );
+      };
+
+      // 行程项目卡片
+      const ItineraryItemCard = ({ item, index, isLast }) => {
+        return (
+          <div style={{ display: 'flex', gap: '16px', marginBottom: isLast ? '0' : '24px' }}>
+            {/* 左侧时间轴 */}
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: '40px' }}>
+              <div style={{
+                width: '32px',
+                height: '32px',
+                borderRadius: '50%',
+                background: '#007aff',
+                color: 'white',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '16px',
+                fontWeight: '600',
+                marginBottom: '8px'
+              }}>
+                {index + 1}
+              </div>
+              {!isLast && (
                 <div style={{
                   width: '2px',
                   height: '100px',
@@ -105,6 +795,7 @@
         );
       };
 
+      // 页面渲染逻辑
       if (page === 'planning') {
         return (
           <div style={styles.container} className={animationClass}>
@@ -487,7 +1178,7 @@
         );
       }
 
-      // 方案选择页面 - 修复Logo居中和简化时光推荐
+      // 方案选择页面
       if (page === 'plans') {
         const smartPlans = getSmartPlans();
         
@@ -521,7 +1212,7 @@
             </div>
 
             <div style={styles.content}>
-              {/* 简化的时段提示 */}
+              {/* 时段提示 */}
               <div style={{
                 background: 'linear-gradient(135deg, rgba(0, 122, 255, 0.1), rgba(90, 200, 250, 0.1))',
                 borderRadius: '12px',
@@ -607,7 +1298,7 @@
         );
       }
 
-      // 详情页面 - 按照参考图设计的时间轴风格
+      // 详情页面
       if (page === 'details') {
         return (
           <div style={styles.container} className="fade-in">
@@ -678,7 +1369,7 @@
                 </div>
               </div>
 
-              {/* 按类型分类的行程安排 - 采用参考图的时间轴设计 */}
+              {/* 按类型分类的行程安排 */}
               {CONFIG.itineraryData.map((category, categoryIndex) => (
                 <div key={category.id} style={{ marginBottom: '32px' }}>
                   {/* 分类标题 */}
@@ -713,7 +1404,7 @@
                     )}
                   </div>
 
-                  {/* 行程项目 - 参考图风格的时间轴卡片 */}
+                  {/* 行程项目 */}
                   {category.items.map((item, itemIndex) => (
                     <ItineraryItemCard 
                       key={item.id}
@@ -760,726 +1451,3 @@
                     minWidth: '100px'
                   }}
                 >
-                  修改方案
-                </button>
-                <button 
-                  onClick={() => {
-                    alert('行程已保存到您的计划中！');
-                  }}
-                  style={{
-                    ...styles.button,
-                    background: '#007aff',
-                    flex: 1
-                  }}
-                >
-                  保存行程计划
-                </button>
-              </div>
-            </div>
-          </div>
-        );
-      }
-
-      return null;
-    };
-
-    ReactDOM.render(React.createElement(App), document.getElementById('root'));
-  </script>
-</body>
-</html><!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>FunGo 宠物旅行规划器</title>
-  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-  <style>
-    * { 
-      margin: 0; 
-      padding: 0; 
-      box-sizing: border-box; 
-    }
-    
-    body { 
-      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", sans-serif; 
-      background: #f8f9fb;
-      min-height: 100vh;
-      color: #1d1d1f;
-      line-height: 1.4;
-    }
-    
-    @keyframes spin { 
-      to { transform: rotate(360deg); } 
-    }
-    
-    @keyframes fadeInUp { 
-      from { opacity: 0; transform: translateY(30px); } 
-      to { opacity: 1; transform: translateY(0); } 
-    }
-    
-    @keyframes slideInLeft {
-      from { opacity: 0; transform: translateX(-20px); }
-      to { opacity: 1; transform: translateX(0); }
-    }
-    
-    .spin { animation: spin 1s linear infinite; }
-    .fade-in { animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1); }
-    .slide-in { animation: slideInLeft 0.6s cubic-bezier(0.16, 1, 0.3, 1); }
-  </style>
-</head>
-<body>
-  <div id="root"></div>
-  
-  <script type="text/babel">
-    const { useState, useEffect, useMemo } = React;
-
-    // 获取当前时段
-    const getCurrentTimeSlot = () => {
-      const hour = new Date().getHours();
-      if (hour >= 6 && hour < 9) return { slot: 'morning', label: '早晨', icon: '🌅' };
-      if (hour >= 9 && hour < 12) return { slot: 'forenoon', label: '上午', icon: '☀️' };
-      if (hour >= 12 && hour < 14) return { slot: 'noon', label: '中午', icon: '🌞' };
-      if (hour >= 14 && hour < 17) return { slot: 'afternoon', label: '下午', icon: '🌤️' };
-      if (hour >= 17 && hour < 19) return { slot: 'evening', label: '傍晚', icon: '🌆' };
-      if (hour >= 19 && hour < 22) return { slot: 'night', label: '夜晚', icon: '🌃' };
-      return { slot: 'late', label: '深夜', icon: '🌙' };
-    };
-
-    // 数据配置
-    const CONFIG = {
-      cities: {
-        major: [
-          { name: '北京', districts: ['朝阳区', '海淀区', '西城区', '东城区'], weather: '☀️', temp: '24°C' },
-          { name: '上海', districts: ['浦东新区', '黄浦区', '静安区', '徐汇区'], weather: '⛅', temp: '26°C' },
-          { name: '广州', districts: ['天河区', '越秀区', '海珠区', '荔湾区'], weather: '🌦️', temp: '29°C' },
-          { name: '深圳', districts: ['南山区', '福田区', '罗湖区', '宝安区'], weather: '☀️', temp: '28°C' },
-          { name: '杭州', districts: ['西湖区', '拱墅区', '江干区', '下城区'], weather: '🌦️', temp: '22°C' },
-          { name: '成都', districts: ['锦江区', '青羊区', '金牛区', '武侯区'], weather: '☁️', temp: '20°C' },
-          { name: '南京', districts: ['玄武区', '秦淮区', '建邺区', '鼓楼区'], weather: '⛅', temp: '23°C' },
-          { name: '武汉', districts: ['江汉区', '江岸区', '硚口区', '汉阳区'], weather: '🌤️', temp: '25°C' }
-        ]
-      },
-      interests: [
-        { id: 'beach', label: '玩水嬉戏', icon: '🏖️' },
-        { id: 'run', label: '狗狗奔跑', icon: '🏃' },
-        { id: 'cafe', label: '喝下午茶', icon: '☕' },
-        { id: 'park', label: '公园漫步', icon: '🌳' },
-        { id: 'photo', label: '拍照打卡', icon: '📸' },
-        { id: 'food', label: '美食探店', icon: '🍽️' },
-        { id: 'mountain', label: '登山徒步', icon: '🏔️' },
-        { id: 'lake', label: '湖边休闲', icon: '🏞️' }
-      ],
-      durations: [
-        { value: '1', label: '1天', desc: '当日往返' },
-        { value: '2-3', label: '2-3天', desc: '周末短途' },
-        { value: '4-7', label: '4-7天', desc: '小长假' },
-        { value: '7+', label: '7天以上', desc: '深度游' }
-      ],
-      // 模拟行程数据
-      itineraryData: [
-        {
-          id: 1,
-          category: '住宿安排',
-          categoryIcon: '🏨',
-          categoryColor: '#007aff',
-          items: [
-            {
-              id: 11,
-              name: '宠物友好度假酒店',
-              description: '提供专业宠物服务的五星酒店',
-              image: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=400',
-              rating: 4.8,
-              reviews: 2156,
-              duration: '2晚',
-              distance: '距离市中心 5km',
-              features: ['宠物SPA', '专属房间', '24h服务']
-            }
-          ]
-        },
-        {
-          id: 2,
-          category: '必游景点',
-          categoryIcon: '📍',
-          categoryColor: '#30d158',
-          items: [
-            {
-              id: 21,
-              name: '深圳湾公园宠物乐园',
-              description: '最受欢迎的宠物互动空间',
-              image: 'https://images.unsplash.com/photo-1544568100-847a948585b9?w=400',
-              rating: 4.9,
-              reviews: 8532,
-              duration: '2-3小时',
-              distance: '距离您 1.2km',
-              features: ['宠物友好', '户外活动', '拍照圣地']
-            },
-            {
-              id: 22,
-              name: '海上世界宠物咖啡厅',
-              description: '人宠共享的温馨空间',
-              image: 'https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=400',
-              rating: 4.7,
-              reviews: 1824,
-              duration: '1-2小时',
-              distance: '距离您 800m',
-              features: ['宠物餐具', '室内舒适', '美食体验']
-            }
-          ]
-        },
-        {
-          id: 3,
-          category: '交通方案',
-          categoryIcon: '🚗',
-          categoryColor: '#ff9500',
-          items: [
-            {
-              id: 31,
-              name: '宠物友好出租车',
-              description: '专业宠物运输服务',
-              image: 'https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=400',
-              rating: 4.6,
-              reviews: 964,
-              duration: '按需',
-              distance: '全城覆盖',
-              features: ['安全座椅', '专业司机', '实时定位']
-            }
-          ]
-        }
-      ]
-    };
-
-    const App = () => {
-      // 核心状态
-      const [page, setPage] = useState('planning');
-      const [tripType, setTripType] = useState('local');
-      const [selectedCity, setSelectedCity] = useState('深圳');
-      const [selectedDistrict, setSelectedDistrict] = useState('南山区');
-      const [duration, setDuration] = useState('2-3');
-      const [pets, setPets] = useState([{ 
-        id: 1, name: '旺财', type: '金毛', emoji: '🐕', weight: '25kg' 
-      }]);
-      const [preferences, setPreferences] = useState(['海滩休闲']);
-      const [selectedPlans, setSelectedPlans] = useState([]);
-      
-      // UI 状态
-      const [showAddPet, setShowAddPet] = useState(false);
-      const [showCustomInterest, setShowCustomInterest] = useState(false);
-      const [showCitySelect, setShowCitySelect] = useState(false);
-      const [newPet, setNewPet] = useState({ name: '', type: '', weight: '' });
-      const [customInterest, setCustomInterest] = useState('');
-      const [loading, setLoading] = useState(false);
-      const [animationClass, setAnimationClass] = useState('');
-
-      const currentTimeSlot = getCurrentTimeSlot();
-
-      useEffect(() => {
-        setAnimationClass('fade-in');
-      }, []);
-
-      // 计算属性
-      const currentCityData = useMemo(() => 
-        CONFIG.cities.major.find(city => city.name === selectedCity) || CONFIG.cities.major[3], 
-        [selectedCity]
-      );
-
-      const isFormValid = useMemo(() => 
-        selectedCity && tripType && pets.length > 0 && 
-        (tripType === 'local' || duration), 
-        [selectedCity, tripType, pets.length, duration]
-      );
-
-      // 获取智能推荐方案
-      const getSmartPlans = () => {
-        const basePlans = [
-          { 
-            id: 1, 
-            title: `${currentTimeSlot.label}遛狗套餐`, 
-            subtitle: `适合${currentTimeSlot.label}的狗狗活动`, 
-            petFriendly: 5, 
-            duration: '2-3小时',
-            highlights: ['宠物公园', '遛狗步道', '宠物友好咖啡厅'],
-            timeAdvice: `${currentTimeSlot.label}推荐`,
-            isRecommended: true
-          },
-          { 
-            id: 2, 
-            title: '个性化推荐', 
-            subtitle: '基于您的偏好定制', 
-            petFriendly: 4, 
-            duration: '2-4小时',
-            highlights: preferences.slice(0, 3),
-            timeAdvice: '灵活安排',
-            isPersonalized: true
-          },
-          { 
-            id: 3, 
-            title: '附近热门', 
-            subtitle: `${selectedCity}${selectedDistrict}周边精选`, 
-            petFriendly: 4, 
-            duration: '1-3小时',
-            highlights: ['网红景点', '当地特色', '宠物友好'],
-            timeAdvice: '全天开放'
-          }
-        ];
-
-        if (tripType === 'travel') {
-          return [
-            {
-              id: 10,
-              title: '舒适度假型',
-              subtitle: '五星享受，宠物也是VIP',
-              petFriendly: 5,
-              duration: `${duration}天`,
-              highlights: ['宠物度假村', '专属SPA', '管家服务'],
-              type: 'luxury'
-            },
-            {
-              id: 11,
-              title: '自驾探索型',
-              subtitle: '自由随心，发现未知美景',
-              petFriendly: 4,
-              duration: `${duration}天`,
-              highlights: ['宠物友好酒店', '沿途景点', '自驾路线'],
-              type: 'adventure'
-            },
-            {
-              id: 12,
-              title: '文化体验型',
-              subtitle: '深度游览，感受当地文化',
-              petFriendly: 4,
-              duration: `${duration}天`,
-              highlights: ['特色民宿', '文化景点', '当地美食'],
-              type: 'culture'
-            }
-          ];
-        }
-
-        return basePlans;
-      };
-
-      // 事件处理
-      const handleTripTypeChange = (type) => {
-        setTripType(type);
-        if (type === 'local') {
-          setDuration('');
-        }
-      };
-
-      const handleAddPet = () => {
-        if (newPet.name && newPet.name.trim() && newPet.type && newPet.type.trim() && newPet.weight && newPet.weight.trim()) {
-          setPets(prev => [...prev, { 
-            ...newPet, 
-            id: Date.now(), 
-            emoji: '🐕' 
-          }]);
-          setNewPet({ name: '', type: '', weight: '' });
-          setShowAddPet(false);
-        }
-      };
-
-      const handleRemovePet = (id) => {
-        if (pets.length > 1) {
-          setPets(prev => prev.filter(p => p.id !== id));
-        }
-      };
-
-      const handleToggleInterest = (interest) => {
-        setPreferences(prev => 
-          prev.includes(interest) 
-            ? prev.filter(p => p !== interest)
-            : [...prev, interest]
-        );
-      };
-
-      const handleAddCustomInterest = () => {
-        if (customInterest.trim() && !preferences.includes(customInterest.trim())) {
-          setPreferences(prev => [...prev, customInterest.trim()]);
-          setCustomInterest('');
-          setShowCustomInterest(false);
-        }
-      };
-
-      const handleCitySelect = (city, district) => {
-        setSelectedCity(city);
-        setSelectedDistrict(district);
-        setShowCitySelect(false);
-      };
-
-      const handlePlanSelect = (plan) => {
-        setSelectedPlans(prev => {
-          const exists = prev.find(p => p.id === plan.id);
-          if (exists) {
-            return prev.filter(p => p.id !== plan.id);
-          } else {
-            return [...prev, plan];
-          }
-        });
-      };
-
-      const generateTrips = () => {
-        if (!isFormValid) return;
-        setLoading(true);
-        setTimeout(() => {
-          setLoading(false);
-          setPage('plans');
-        }, 1500);
-      };
-
-      // Apple风格样式系统
-      const styles = {
-        container: { 
-          background: '#f8f9fb', 
-          minHeight: '100vh',
-          paddingBottom: '120px'
-        },
-        header: { 
-          background: 'rgba(255, 255, 255, 0.8)', 
-          backdropFilter: 'saturate(180%) blur(20px)',
-          WebkitBackdropFilter: 'saturate(180%) blur(20px)',
-          padding: '16px 20px', 
-          borderBottom: '0.5px solid rgba(0,0,0,0.05)',
-          position: 'sticky', 
-          top: 0, 
-          zIndex: 10
-        },
-        logo: { 
-          fontSize: '32px', 
-          fontWeight: '700', 
-          textAlign: 'center',
-          letterSpacing: '-1px',
-          marginBottom: '4px'
-        },
-        subtitle: {
-          fontSize: '15px', 
-          color: '#86868b', 
-          textAlign: 'center', 
-          fontWeight: '400'
-        },
-        content: {
-          padding: '24px 20px 0'
-        },
-        section: {
-          marginBottom: '32px'
-        },
-        sectionTitle: {
-          fontSize: '22px',
-          fontWeight: '600',
-          color: '#1d1d1f',
-          marginBottom: '16px',
-          letterSpacing: '-0.4px'
-        },
-        button: { 
-          padding: '16px 24px', 
-          background: '#007aff', 
-          color: 'white', 
-          border: 'none', 
-          borderRadius: '12px', 
-          fontSize: '17px', 
-          fontWeight: '600', 
-          width: '100%',
-          transition: 'all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
-          cursor: 'pointer',
-          fontFamily: 'inherit'
-        },
-        buttonSecondary: {
-          background: '#f2f2f7',
-          color: '#007aff',
-          border: '0.5px solid rgba(0,0,0,0.04)'
-        },
-        grid2: { 
-          display: 'grid', 
-          gridTemplateColumns: '1fr 1fr', 
-          gap: '12px' 
-        },
-        grid3: { 
-          display: 'grid', 
-          gridTemplateColumns: 'repeat(3, 1fr)', 
-          gap: '12px' 
-        },
-        modal: { 
-          position: 'fixed', 
-          top: 0, 
-          left: 0, 
-          right: 0, 
-          bottom: 0, 
-          background: 'rgba(0,0,0,0.4)', 
-          display: 'flex', 
-          alignItems: 'center',
-          justifyContent: 'center',
-          padding: '20px',
-          zIndex: 1000,
-          backdropFilter: 'blur(8px)',
-          WebkitBackdropFilter: 'blur(8px)'
-        },
-        modalContent: { 
-          background: 'white', 
-          borderRadius: '20px', 
-          padding: '32px 24px', 
-          width: '100%',
-          maxWidth: '400px',
-          maxHeight: '80vh',
-          overflowY: 'auto'
-        },
-        input: { 
-          width: '100%', 
-          padding: '16px 20px', 
-          border: '0.5px solid #d1d1d6', 
-          borderRadius: '12px', 
-          fontSize: '17px', 
-          marginBottom: '16px', 
-          outline: 'none',
-          transition: 'all 0.2s ease',
-          fontFamily: 'inherit',
-          background: 'white'
-        },
-        bottomBar: { 
-          position: 'fixed', 
-          bottom: 0, 
-          left: 0, 
-          right: 0, 
-          padding: '20px', 
-          background: 'rgba(255, 255, 255, 0.8)',
-          backdropFilter: 'saturate(180%) blur(20px)',
-          WebkitBackdropFilter: 'saturate(180%) blur(20px)',
-          borderTop: '0.5px solid rgba(0,0,0,0.05)'
-        }
-      };
-
-      // Apple风格选择组件
-      const SelectableCard = ({ 
-        selected, 
-        onClick, 
-        children, 
-        size = 'medium',
-        disabled = false 
-      }) => {
-        const cardStyle = {
-          padding: size === 'large' ? '20px' : size === 'small' ? '16px' : '18px',
-          borderRadius: '12px',
-          cursor: disabled ? 'not-allowed' : 'pointer',
-          transition: 'all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
-          border: '0.5px solid',
-          borderColor: selected ? '#007aff' : 'rgba(0,0,0,0.08)',
-          background: selected ? '#007aff' : 'white',
-          color: selected ? 'white' : '#1d1d1f',
-          transform: selected ? 'scale(0.98)' : 'scale(1)',
-          opacity: disabled ? 0.5 : 1
-        };
-
-        return (
-          <div 
-            onClick={disabled ? undefined : onClick}
-            style={cardStyle}
-          >
-            {children}
-          </div>
-        );
-      };
-
-      // 优化后的位置卡片组件 - 修复小绿点和图标
-      const LocationCard = () => {
-        const [isHovered, setIsHovered] = useState(false);
-        
-        const cardStyle = {
-          background: 'white',
-          borderRadius: '16px',
-          padding: '20px',
-          marginBottom: '24px',
-          border: '0.5px solid rgba(0,0,0,0.04)',
-          cursor: 'pointer',
-          transition: 'all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
-          position: 'relative',
-          overflow: 'hidden',
-          transform: isHovered ? 'translateY(-2px)' : 'translateY(0)',
-          boxShadow: isHovered ? '0 8px 25px rgba(0,0,0,0.1)' : '0 2px 8px rgba(0,0,0,0.04)'
-        };
-
-        return (
-          <div 
-            onClick={() => setShowCitySelect(true)}
-            style={cardStyle}
-            onMouseEnter={() => setIsHovered(true)}
-            onMouseLeave={() => setIsHovered(false)}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <div style={{ fontSize: '20px' }}>📍</div>
-                <div>
-                  <div style={{ fontSize: '18px', fontWeight: '600', color: '#1d1d1f' }}>
-                    {selectedCity} · {selectedDistrict}
-                  </div>
-                  <div style={{ fontSize: '14px', color: '#86868b', marginTop: '2px' }}>
-                    {currentTimeSlot.icon} {currentTimeSlot.label} · 当前位置
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div style={{ 
-              padding: '12px 16px',
-              background: 'rgba(0, 122, 255, 0.1)',
-              borderRadius: '10px',
-              display: 'flex', 
-              alignItems: 'center', 
-              gap: '12px' 
-            }}>
-              <span style={{ fontSize: '16px' }}>{currentCityData.weather}</span>
-              <span style={{ fontSize: '15px', fontWeight: '500', color: '#007aff' }}>{currentCityData.temp}</span>
-              <span style={{ fontSize: '14px', color: '#86868b' }}>适宜出行</span>
-            </div>
-          </div>
-        );
-      };
-
-      // 方案卡片组件
-      const PlanCard = ({ plan, onSelect, selected }) => {
-        const isSelected = selected;
-        
-        return (
-          <div style={{
-            background: 'white',
-            borderRadius: '16px',
-            padding: '20px',
-            marginBottom: '16px',
-            border: `2px solid ${isSelected ? '#007aff' : 'rgba(0,0,0,0.04)'}`,
-            cursor: 'pointer',
-            transition: 'all 0.2s ease',
-            position: 'relative',
-            overflow: 'hidden'
-          }} onClick={() => onSelect(plan)}>
-            
-            {/* 智能推荐标识 */}
-            {plan.isPersonalized && (
-              <div style={{
-                position: 'absolute',
-                top: '12px',
-                right: '12px',
-                background: 'linear-gradient(135deg, #ff6b6b, #ffa726)',
-                color: 'white',
-                padding: '4px 8px',
-                borderRadius: '6px',
-                fontSize: '11px',
-                fontWeight: '600'
-              }}>
-                🤖 AI推荐
-              </div>
-            )}
-            
-            {/* 时段推荐标识 */}
-            {plan.isRecommended && (
-              <div style={{
-                position: 'absolute',
-                top: '12px',
-                right: plan.isPersonalized ? '85px' : '12px',
-                background: '#30d158',
-                color: 'white',
-                padding: '4px 8px',
-                borderRadius: '6px',
-                fontSize: '11px',
-                fontWeight: '600'
-              }}>
-                {currentTimeSlot.icon} 当前推荐
-              </div>
-            )}
-            
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
-              <div style={{ flex: 1 }}>
-                <h3 style={{ fontSize: '18px', fontWeight: '600', color: '#1d1d1f', marginBottom: '4px' }}>
-                  {plan.title}
-                </h3>
-                <p style={{ fontSize: '14px', color: '#86868b', marginBottom: '12px' }}>
-                  {plan.subtitle}
-                </p>
-                
-                {/* 宠物友好度 */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-                  <span style={{ fontSize: '14px', color: '#86868b' }}>宠物友好度</span>
-                  <div style={{ display: 'flex', gap: '2px' }}>
-                    {[1,2,3,4,5].map(i => (
-                      <span key={i} style={{ 
-                        fontSize: '14px', 
-                        color: i <= plan.petFriendly ? '#ffa726' : '#e0e0e0' 
-                      }}>
-                        ⭐
-                      </span>
-                    ))}
-                  </div>
-                  <span style={{ fontSize: '14px', color: '#007aff', fontWeight: '500' }}>
-                    {plan.duration}
-                  </span>
-                </div>
-              </div>
-              
-              {/* 选择按钮 */}
-              <div style={{
-                width: '24px',
-                height: '24px',
-                borderRadius: '50%',
-                border: `2px solid ${isSelected ? '#007aff' : '#d1d1d6'}`,
-                background: isSelected ? '#007aff' : 'white',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                marginLeft: '12px'
-              }}>
-                {isSelected && (
-                  <span style={{ color: 'white', fontSize: '12px' }}>✓</span>
-                )}
-              </div>
-            </div>
-            
-            {/* 亮点标签 */}
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '12px' }}>
-              {plan.highlights.map((highlight, index) => (
-                <span key={index} style={{
-                  background: 'rgba(0, 122, 255, 0.1)',
-                  color: '#007aff',
-                  padding: '4px 8px',
-                  borderRadius: '6px',
-                  fontSize: '12px',
-                  fontWeight: '500'
-                }}>
-                  {highlight}
-                </span>
-              ))}
-            </div>
-            
-            {/* 时间建议 */}
-            {plan.timeAdvice && (
-              <div style={{ 
-                fontSize: '13px', 
-                color: '#86868b',
-                fontStyle: 'italic'
-              }}>
-                💡 {plan.timeAdvice}
-              </div>
-            )}
-          </div>
-        );
-      };
-
-      // 参考图风格的行程项目卡片
-      const ItineraryItemCard = ({ item, index, isLast }) => {
-        return (
-          <div style={{ display: 'flex', gap: '16px', marginBottom: isLast ? '0' : '24px' }}>
-            {/* 左侧时间轴 */}
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: '40px' }}>
-              <div style={{
-                width: '32px',
-                height: '32px',
-                borderRadius: '50%',
-                background: '#007aff',
-                color: 'white',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: '16px',
-                fontWeight: '600',
-                marginBottom: '8px'
-              }}>
-                {index + 1}
-              </div>
-              {!isLast && (
-                <div style={{
-                  width: '2
