@@ -20,6 +20,11 @@
       min-height: 100vh;
       color: #1d1d1f;
       line-height: 1.4;
+      overflow-x: hidden;
+    }
+    
+    #root {
+      min-height: 100vh;
     }
     
     @keyframes spin { 
@@ -39,6 +44,27 @@
     .spin { animation: spin 1s linear infinite; }
     .fade-in { animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1); }
     .slide-in { animation: slideInLeft 0.6s cubic-bezier(0.16, 1, 0.3, 1); }
+
+    /* 响应式设计 */
+    @media (max-width: 768px) {
+      body {
+        font-size: 16px;
+      }
+    }
+
+    /* 滚动条样式 */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+    
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    
+    ::-webkit-scrollbar-thumb {
+      background: rgba(0, 0, 0, 0.1);
+      border-radius: 3px;
+    }
   </style>
 </head>
 <body>
@@ -89,7 +115,7 @@
         { value: '4-7', label: '4-7天', desc: '小长假' },
         { value: '7+', label: '7天以上', desc: '深度游' }
       ],
-      // 模拟行程数据
+      // 行程数据
       itineraryData: [
         {
           id: 1,
@@ -178,13 +204,8 @@
       const [newPet, setNewPet] = useState({ name: '', type: '', weight: '' });
       const [customInterest, setCustomInterest] = useState('');
       const [loading, setLoading] = useState(false);
-      const [animationClass, setAnimationClass] = useState('');
 
       const currentTimeSlot = getCurrentTimeSlot();
-
-      useEffect(() => {
-        setAnimationClass('fade-in');
-      }, []);
 
       // 计算属性
       const currentCityData = useMemo(() => 
@@ -707,7 +728,7 @@
                 border: '0.5px solid rgba(0,0,0,0.04)',
                 boxShadow: '0 2px 8px rgba(0,0,0,0.04)'
               }}>
-                {/* 图片 */}
+                {/* 图片区域 */}
                 <div style={{
                   width: '100%',
                   height: '180px',
@@ -735,7 +756,7 @@
                   </div>
                 </div>
 
-                {/* 内容 */}
+                {/* 内容区域 */}
                 <div style={{ padding: '16px' }}>
                   <h3 style={{
                     fontSize: '16px',
@@ -795,10 +816,10 @@
         );
       };
 
-      // 页面渲染逻辑
+      // 主渲染逻辑
       if (page === 'planning') {
         return (
-          <div style={styles.container} className={animationClass}>
+          <div style={styles.container} className="fade-in">
             {/* 头部 */}
             <div style={styles.header}>
               <div style={styles.logo}>
@@ -1369,7 +1390,7 @@
                 </div>
               </div>
 
-              {/* 按类型分类的行程安排 */}
+              {/* 行程安排 */}
               {CONFIG.itineraryData.map((category, categoryIndex) => (
                 <div key={category.id} style={{ marginBottom: '32px' }}>
                   {/* 分类标题 */}
@@ -1408,7 +1429,7 @@
                   {category.items.map((item, itemIndex) => (
                     <ItineraryItemCard 
                       key={item.id}
-                      item={item}
+                      item={{...item, categoryColor: category.categoryColor}}
                       index={itemIndex}
                       isLast={itemIndex === category.items.length - 1}
                     />
@@ -1451,3 +1472,32 @@
                     minWidth: '100px'
                   }}
                 >
+                  修改方案
+                </button>
+                <button 
+                  onClick={() => {
+                    alert('行程已保存到您的计划中！');
+                  }}
+                  style={{
+                    ...styles.button,
+                    background: '#007aff',
+                    flex: 1
+                  }}
+                >
+                  保存行程计划
+                </button>
+              </div>
+            </div>
+          </div>
+        );
+      }
+
+      return null;
+    };
+
+    // 渲染应用
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(React.createElement(App));
+  </script>
+</body>
+</html>
