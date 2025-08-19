@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>FunGo 宠物旅行规划器</title>
+  <title>FunGo 宠物旅行规划器 - 信任增强版</title>
   <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -40,11 +40,21 @@
       0%, 100% { transform: scale(1); }
       50% { transform: scale(1.05); }
     }
+
+    @keyframes shimmer {
+      0% { background-position: -468px 0; }
+      100% { background-position: 468px 0; }
+    }
     
     .spin { animation: spin 1s linear infinite; }
     .fade-in { animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1); }
     .slide-in { animation: slideInLeft 0.6s cubic-bezier(0.16, 1, 0.3, 1); }
     .pulse { animation: pulse 2s infinite; }
+    .shimmer {
+      background: linear-gradient(to right, #f6f7f8 0%, #edeef1 20%, #f6f7f8 40%, #f6f7f8 100%);
+      background-size: 800px 104px;
+      animation: shimmer 1s linear infinite;
+    }
     
     ::-webkit-scrollbar {
       width: 6px;
@@ -63,6 +73,32 @@
     
     ::-webkit-scrollbar-thumb:hover {
       background: #555;
+    }
+
+    .trust-badge {
+      background: linear-gradient(135deg, rgba(48, 209, 88, 0.1), rgba(52, 199, 89, 0.05));
+      border: 1px solid rgba(48, 209, 88, 0.3);
+      border-radius: 6px;
+      padding: 4px 8px;
+      font-size: 10px;
+      font-weight: 600;
+      color: #30d158;
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+    }
+
+    .verification-indicator {
+      width: 12px;
+      height: 12px;
+      background: linear-gradient(135deg, #30d158, #34c759);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 8px;
+      font-weight: bold;
     }
   </style>
 </head>
@@ -84,7 +120,7 @@
       return { slot: 'late', label: '深夜', icon: '🌙', activity: '安静休息' };
     };
 
-    // 数据配置
+    // 增强的数据配置
     const CONFIG = {
       cities: {
         major: [
@@ -114,14 +150,34 @@
       ],
       dataSources: {
         external: [
-          { name: '小红书', logo: '🌺', weight: 30, freshness: 95 },
-          { name: '大众点评', logo: '🍽️', weight: 25, freshness: 88 },
-          { name: '美团', logo: '🛍️', weight: 20, freshness: 92 }
+          { name: '小红书', logo: '🌺', weight: 30, freshness: 95, trustScore: 4.8, sampleSize: '12万+' },
+          { name: '大众点评', logo: '🍽️', weight: 25, freshness: 88, trustScore: 4.6, sampleSize: '8万+' },
+          { name: '美团', logo: '🛍️', weight: 20, freshness: 92, trustScore: 4.7, sampleSize: '15万+' }
         ],
         internal: [
-          { name: 'FunGo踩点', logo: '👥', weight: 15, freshness: 98 },
-          { name: '用户评价', logo: '⭐', weight: 10, freshness: 90 }
+          { name: 'FunGo踩点', logo: '👥', weight: 15, freshness: 98, trustScore: 4.9, sampleSize: '专业团队' },
+          { name: '用户评价', logo: '⭐', weight: 10, freshness: 90, trustScore: 4.5, sampleSize: '5万+' }
         ]
+      },
+      // 新增：信任度相关配置
+      trustIndicators: {
+        realTimeVerification: {
+          enabled: true,
+          interval: 300000, // 5分钟更新一次
+          lastCheck: null
+        },
+        expertVerification: {
+          team: [
+            { name: '李晓萌', role: '宠物行为专家', cert: '国际宠物行为师认证', years: 8 },
+            { name: '张明华', role: '旅游规划师', cert: 'CTA旅游顾问认证', years: 12 },
+            { name: '王雅琪', role: '宠物医师', cert: '执业兽医师', years: 6 }
+          ]
+        },
+        userFeedback: {
+          totalUsers: 158642,
+          satisfaction: 96.8,
+          monthlyActive: 45230
+        }
       },
       recommendReasons: {
         timeMatch: ['适合当前时段', '正值活跃时间', '现在去正合适'],
@@ -129,7 +185,8 @@
         petFriendly: ['宠物超级友好', '毛孩子们的天堂', '专为宠物设计'],
         popular: ['最近很受欢迎', '用户好评如潮', '热门推荐地点'],
         distance: ['距离适中', '就在附近', '步行可达'],
-        weather: ['适合当前天气', '天气条件完美', '户外体验佳']
+        weather: ['适合当前天气', '天气条件完美', '户外体验佳'],
+        verified: ['专家实地验证', '团队亲测推荐', '权威认证场所']
       },
       mockPlaces: {
         '深圳-南山区': [
@@ -137,19 +194,26 @@
             id: 1, name: '深圳湾公园', type: 'park', distance: 1.2, rating: 4.8, petFriendly: 5, 
             time: '全天', features: ['宠物专区', '海滨步道'], aiScore: 94,
             dataSources: ['小红书', 'FunGo踩点', '用户评价'], popularity: 'high',
-            lastUpdated: '2分钟前', userFeedback: { likes: 1247, dislikes: 23 }, staffVerified: true
+            lastUpdated: '2分钟前', userFeedback: { likes: 1247, dislikes: 23 }, 
+            staffVerified: true, realTimeStatus: 'open', crowdLevel: 'moderate',
+            expertReview: { reviewer: '李晓萌', date: '2024-08-15', score: 9.2 },
+            safetyChecks: { lastInspection: '2024-08-18', issues: 0, certified: true }
           },
           { 
             id: 2, name: 'MUJI咖啡', type: 'cafe', distance: 0.8, rating: 4.6, petFriendly: 4, 
             time: '10:00-22:00', features: ['宠物友好', '下午茶'], aiScore: 87,
             dataSources: ['大众点评', '小红书'], popularity: 'medium',
-            lastUpdated: '5分钟前', userFeedback: { likes: 892, dislikes: 45 }, staffVerified: false
+            lastUpdated: '5分钟前', userFeedback: { likes: 892, dislikes: 45 }, 
+            staffVerified: false, realTimeStatus: 'open', crowdLevel: 'low',
+            businessLicense: 'verified', healthRating: 'A级'
           },
           { 
             id: 3, name: '欢乐海岸', type: 'food', distance: 2.1, rating: 4.7, petFriendly: 4, 
             time: '10:00-22:00', features: ['户外座位', '美食街'], aiScore: 91,
             dataSources: ['美团', '大众点评', 'FunGo踩点'], popularity: 'high',
-            lastUpdated: '1分钟前', userFeedback: { likes: 2156, dislikes: 67 }, staffVerified: true
+            lastUpdated: '1分钟前', userFeedback: { likes: 2156, dislikes: 67 }, 
+            staffVerified: true, realTimeStatus: 'open', crowdLevel: 'high',
+            expertReview: { reviewer: '张明华', date: '2024-08-16', score: 8.9 }
           }
         ],
         '北京-朝阳区': [
@@ -157,14 +221,27 @@
             id: 11, name: '朝阳公园', type: 'park', distance: 1.5, rating: 4.7, petFriendly: 5, 
             time: '全天', features: ['大草坪', '宠物训练区'], aiScore: 89,
             dataSources: ['大众点评', 'FunGo踩点'], popularity: 'high',
-            lastUpdated: '3分钟前', userFeedback: { likes: 1876, dislikes: 34 }, staffVerified: true
+            lastUpdated: '3分钟前', userFeedback: { likes: 1876, dislikes: 34 }, 
+            staffVerified: true, realTimeStatus: 'open', crowdLevel: 'moderate'
           }
         ]
       },
       mockHotels: [
-        { id: 'h1', name: '深圳湾宠物友好酒店', price: 688, rating: 4.8, petFee: 100, features: ['宠物SPA', '专属房间', '24h服务'], image: '🏨' },
-        { id: 'h2', name: '希尔顿欢朋酒店', price: 528, rating: 4.6, petFee: 80, features: ['宠物床垫', '遛狗区域', '宠物餐具'], image: '🏢' },
-        { id: 'h3', name: '民宿·毛孩子之家', price: 398, rating: 4.9, petFee: 0, features: ['独栋别墅', '私人花园', '宠物游泳池'], image: '🏡' }
+        { 
+          id: 'h1', name: '深圳湾宠物友好酒店', price: 688, rating: 4.8, petFee: 100, 
+          features: ['宠物SPA', '专属房间', '24h服务'], image: '🏨',
+          license: 'verified', insurance: '全覆盖', staffTrained: true
+        },
+        { 
+          id: 'h2', name: '希尔顿欢朋酒店', price: 528, rating: 4.6, petFee: 80, 
+          features: ['宠物床垫', '遛狗区域', '宠物餐具'], image: '🏢',
+          license: 'verified', insurance: '标准覆盖', staffTrained: true
+        },
+        { 
+          id: 'h3', name: '民宿·毛孩子之家', price: 398, rating: 4.9, petFee: 0, 
+          features: ['独栋别墅', '私人花园', '宠物游泳池'], image: '🏡',
+          license: 'verified', hostVerified: true, superhost: true
+        }
       ]
     };
 
@@ -182,17 +259,26 @@
       const [showAddPet, setShowAddPet] = useState(false);
       const [showCitySelect, setShowCitySelect] = useState(false);
       const [showMapView, setShowMapView] = useState(false);
+      const [showTrustDetails, setShowTrustDetails] = useState(false);
       const [newPet, setNewPet] = useState({ name: '', type: '', weight: '' });
       const [loading, setLoading] = useState(false);
       const [animationClass, setAnimationClass] = useState('');
       const [aiAnalyzing, setAiAnalyzing] = useState(false);
       const [lastAnalysisTime, setLastAnalysisTime] = useState(null);
+      const [realTimeData, setRealTimeData] = useState({ lastUpdate: new Date(), isLive: true });
 
       const currentTimeSlot = getCurrentTimeSlot();
 
       useEffect(() => {
         setAnimationClass('fade-in');
         setLastAnalysisTime(new Date());
+        
+        // 模拟实时数据更新
+        const interval = setInterval(() => {
+          setRealTimeData({ lastUpdate: new Date(), isLive: true });
+        }, 30000);
+        
+        return () => clearInterval(interval);
       }, []);
 
       // 计算属性
@@ -223,6 +309,10 @@
           reasons.push(recommendReasons.petFriendly[Math.floor(Math.random() * recommendReasons.petFriendly.length)]);
         }
         
+        if (place.staffVerified) {
+          reasons.push(recommendReasons.verified[Math.floor(Math.random() * recommendReasons.verified.length)]);
+        }
+        
         if (place.aiScore >= 90) {
           reasons.push(recommendReasons.popular[Math.floor(Math.random() * recommendReasons.popular.length)]);
         }
@@ -231,7 +321,7 @@
           reasons.push(recommendReasons.distance[Math.floor(Math.random() * recommendReasons.distance.length)]);
         }
         
-        return reasons.slice(0, 2);
+        return reasons.slice(0, 3);
       }, [preferences]);
 
       // 智能重新分析
@@ -286,7 +376,11 @@
           lastUpdated: place.lastUpdated,
           userFeedback: place.userFeedback,
           staffVerified: place.staffVerified,
-          recommendReasons: generateRecommendReason(place, index)
+          recommendReasons: generateRecommendReason(place, index),
+          realTimeStatus: place.realTimeStatus,
+          crowdLevel: place.crowdLevel,
+          expertReview: place.expertReview,
+          safetyChecks: place.safetyChecks
         }));
       }, [selectedCity, selectedDistrict, preferences, currentTimeSlot, generateRecommendReason]);
 
@@ -455,40 +549,125 @@
             <span>{currentCityData.weather}</span>
             <span style={{ fontWeight: '500', color: '#007aff' }}>{currentCityData.temp}</span>
             <span style={{ color: '#86868b' }}>适宜出行</span>
+            <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '4px' }}>
+              <div className="verification-indicator">✓</div>
+              <span style={{ fontSize: '12px', color: '#30d158' }}>实时验证</span>
+            </div>
           </div>
         </div>
       );
 
-      const DataSourceBadges = ({ dataSources, lastUpdated }) => {
+      const TrustIndicatorBar = () => (
+        <div style={{
+          background: 'white',
+          borderRadius: '12px',
+          padding: '16px',
+          marginBottom: '20px',
+          border: '0.5px solid rgba(0,0,0,0.04)',
+          cursor: 'pointer'
+        }}
+        onClick={() => setShowTrustDetails(true)}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <div style={{ fontSize: '16px' }}>🛡️</div>
+              <div>
+                <div style={{ fontSize: '16px', fontWeight: '600', color: '#1d1d1f' }}>
+                  信任保障体系
+                </div>
+                <div style={{ fontSize: '12px', color: '#86868b' }}>
+                  多重验证 · 实时监控 · 专家认证
+                </div>
+              </div>
+            </div>
+            <div style={{ fontSize: '14px', color: '#007aff' }}>查看详情 ›</div>
+          </div>
+          
+          <div style={{ display: 'flex', gap: '8px', marginBottom: '10px' }}>
+            <div className="trust-badge">
+              <span>🔴</span> 实时监控
+            </div>
+            <div className="trust-badge">
+              <span>👥</span> 专家验证
+            </div>
+            <div className="trust-badge">
+              <span>📊</span> 数据透明
+            </div>
+          </div>
+          
+          <div style={{ 
+            background: 'rgba(48, 209, 88, 0.1)', 
+            borderRadius: '6px', 
+            padding: '8px 12px',
+            fontSize: '12px',
+            color: '#30d158',
+            fontWeight: '500'
+          }}>
+            🌟 用户满意度 {CONFIG.trustIndicators.userFeedback.satisfaction}% · 月活跃用户 {CONFIG.trustIndicators.userFeedback.monthlyActive.toLocaleString()}
+          </div>
+        </div>
+      );
+
+      const DataSourceBadges = ({ dataSources, lastUpdated, realTimeStatus }) => {
         const sourceConfig = CONFIG.dataSources;
         const allSources = [...sourceConfig.external, ...sourceConfig.internal];
         
         return (
-          <div style={{ marginBottom: '8px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
+          <div style={{ marginBottom: '10px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '6px' }}>
               <span style={{ fontSize: '11px', color: '#86868b' }}>数据来源:</span>
               {dataSources.map(sourceName => {
                 const source = allSources.find(s => s.name === sourceName);
                 return source ? (
                   <div key={sourceName} style={{
-                    display: 'flex', alignItems: 'center', gap: '2px',
+                    display: 'flex', alignItems: 'center', gap: '3px',
                     background: 'rgba(0, 122, 255, 0.08)', padding: '2px 6px',
                     borderRadius: '10px', fontSize: '10px', color: '#007aff'
                   }}>
                     <span>{source.logo}</span>
                     <span>{source.name}</span>
+                    <span style={{ 
+                      fontSize: '8px', 
+                      background: '#30d158', 
+                      color: 'white', 
+                      padding: '1px 3px', 
+                      borderRadius: '2px',
+                      marginLeft: '2px'
+                    }}>
+                      {source.trustScore}
+                    </span>
                   </div>
                 ) : null;
               })}
             </div>
-            <div style={{ fontSize: '10px', color: '#86868b' }}>
-              🔄 更新于 {lastUpdated}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '10px', color: '#86868b' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '2px' }}>
+                <span style={{ 
+                  width: '6px', 
+                  height: '6px', 
+                  borderRadius: '50%', 
+                  background: realTimeStatus === 'open' ? '#30d158' : '#ff3b30' 
+                }}></span>
+                📄 更新于 {lastUpdated}
+              </div>
+              {realTimeStatus && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '2px' }}>
+                  <span style={{ 
+                    width: '6px', 
+                    height: '6px', 
+                    borderRadius: '50%', 
+                    background: '#30d158',
+                    animation: 'pulse 2s infinite'
+                  }}></span>
+                  实时状态: {realTimeStatus === 'open' ? '正常营业' : '暂停营业'}
+                </div>
+              )}
             </div>
           </div>
         );
       };
 
-      const AiScoreDisplay = ({ aiScore, userFeedback, staffVerified }) => {
+      const AiScoreDisplay = ({ aiScore, userFeedback, staffVerified, expertReview, safetyChecks }) => {
         const getScoreColor = (score) => {
           if (score >= 90) return '#30d158';
           if (score >= 80) return '#ff9500';
@@ -504,34 +683,61 @@
         return (
           <div style={{
             background: 'linear-gradient(135deg, rgba(0, 122, 255, 0.05), rgba(0, 122, 255, 0.1))',
-            borderRadius: '8px', padding: '8px', marginBottom: '10px',
+            borderRadius: '8px', padding: '10px', marginBottom: '12px',
             border: '0.5px solid rgba(0, 122, 255, 0.2)'
           }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '4px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                 <span style={{ fontSize: '12px', fontWeight: '600', color: '#007aff' }}>🤖 FunGo AI评分</span>
                 {staffVerified && (
-                  <span style={{
-                    background: '#30d158', color: 'white', padding: '1px 4px',
-                    borderRadius: '4px', fontSize: '9px', fontWeight: '500'
-                  }}>
+                  <span className="trust-badge">
                     ✓ 员工认证
                   </span>
                 )}
+                {expertReview && (
+                  <span className="trust-badge">
+                    👨‍⚕️ 专家验证
+                  </span>
+                )}
               </div>
-              <div style={{ fontSize: '16px', fontWeight: '700', color: getScoreColor(aiScore) }}>
+              <div style={{ fontSize: '18px', fontWeight: '700', color: getScoreColor(aiScore) }}>
                 {aiScore}
               </div>
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
               <span style={{ fontSize: '11px', color: getScoreColor(aiScore), fontWeight: '500' }}>
                 {getScoreLevel(aiScore)}
               </span>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '10px', color: '#86868b' }}>
                 <span>👍 {userFeedback.likes}</span>
                 <span>👎 {userFeedback.dislikes}</span>
+                <span style={{ color: '#30d158' }}>
+                  {Math.round((userFeedback.likes / (userFeedback.likes + userFeedback.dislikes)) * 100)}% 好评
+                </span>
               </div>
             </div>
+
+            {expertReview && (
+              <div style={{ 
+                background: 'rgba(48, 209, 88, 0.1)', 
+                borderRadius: '4px', 
+                padding: '6px 8px',
+                fontSize: '10px',
+                color: '#30d158',
+                marginBottom: '6px'
+              }}>
+                👨‍⚕️ 专家 {expertReview.reviewer} 评分: {expertReview.score}/10 ({expertReview.date})
+              </div>
+            )}
+
+            {safetyChecks && (
+              <div style={{ fontSize: '9px', color: '#86868b', lineHeight: '1.3' }}>
+                🛡️ 安全检查: {safetyChecks.lastInspection} · 
+                {safetyChecks.issues === 0 ? ' 无安全隐患' : ` ${safetyChecks.issues}个隐患`} · 
+                {safetyChecks.certified ? ' 安全认证' : ' 待认证'}
+              </div>
+            )}
           </div>
         );
       };
@@ -558,6 +764,37 @@
           </div>
         );
       };
+
+      const RealTimeStatusIndicator = ({ status, crowdLevel, lastUpdate }) => (
+        <div style={{
+          background: status === 'open' ? 'rgba(48, 209, 88, 0.1)' : 'rgba(255, 59, 48, 0.1)',
+          border: `0.5px solid ${status === 'open' ? 'rgba(48, 209, 88, 0.3)' : 'rgba(255, 59, 48, 0.3)'}`,
+          borderRadius: '6px',
+          padding: '6px 8px',
+          marginBottom: '8px',
+          fontSize: '11px'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <div style={{
+              width: '6px',
+              height: '6px',
+              borderRadius: '50%',
+              background: status === 'open' ? '#30d158' : '#ff3b30',
+              animation: 'pulse 2s infinite'
+            }}></div>
+            <span style={{ fontWeight: '600', color: status === 'open' ? '#30d158' : '#ff3b30' }}>
+              {status === 'open' ? '🟢 正常营业' : '🔴 暂停营业'}
+            </span>
+            <span style={{ color: '#86868b' }}>·</span>
+            <span style={{ color: '#86868b' }}>
+              人流: {crowdLevel === 'low' ? '较少' : crowdLevel === 'moderate' ? '适中' : '较多'}
+            </span>
+          </div>
+          <div style={{ fontSize: '9px', color: '#86868b', marginTop: '2px' }}>
+            实时数据更新于 {lastUpdate || '刚刚'}
+          </div>
+        </div>
+      );
 
       const LocalPlanCard = ({ plan, onSave, isSaved, onPreview }) => (
         <div style={{
@@ -593,15 +830,33 @@
               </p>
             </div>
 
-            <DataSourceBadges dataSources={plan.dataSources} lastUpdated={plan.lastUpdated} />
-            <AiScoreDisplay aiScore={plan.aiScore} userFeedback={plan.userFeedback} staffVerified={plan.staffVerified} />
+            <RealTimeStatusIndicator 
+              status={plan.realTimeStatus} 
+              crowdLevel={plan.crowdLevel}
+              lastUpdate={plan.lastUpdated}
+            />
+
+            <DataSourceBadges 
+              dataSources={plan.dataSources} 
+              lastUpdated={plan.lastUpdated}
+              realTimeStatus={plan.realTimeStatus}
+            />
+            
+            <AiScoreDisplay 
+              aiScore={plan.aiScore} 
+              userFeedback={plan.userFeedback} 
+              staffVerified={plan.staffVerified}
+              expertReview={plan.expertReview}
+              safetyChecks={plan.safetyChecks}
+            />
+            
             <RecommendReasons reasons={plan.recommendReasons} />
             
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '10px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                 <span style={{ fontSize: '13px', color: '#86868b' }}>用户评分</span>
                 <span style={{ fontSize: '14px', fontWeight: '500', color: '#1d1d1f' }}>{plan.rating}</span>
-                <span style={{ fontSize: '12px', color: '#ffa726' }}>★</span>
+                <span style={{ fontSize: '12px', color: '#ffa726' }}>⭐</span>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                 <span style={{ fontSize: '13px', color: '#86868b' }}>宠物友好</span>
@@ -670,6 +925,153 @@
         </div>
       );
 
+      const TrustDetailsModal = () => (
+        <div style={styles.modal} onClick={(e) => e.target === e.currentTarget && setShowTrustDetails(false)}>
+          <div style={{...styles.modalContent, maxWidth: '500px'}}>
+            <div style={{ 
+              display: 'flex', 
+              justifyContent: 'space-between', 
+              alignItems: 'center', 
+              marginBottom: '20px',
+              paddingBottom: '12px',
+              borderBottom: '0.5px solid rgba(0,0,0,0.05)'
+            }}>
+              <h3 style={{ fontSize: '18px', fontWeight: '600', color: '#1d1d1f' }}>信任保障体系</h3>
+              <button 
+                onClick={() => setShowTrustDetails(false)} 
+                style={{ 
+                  background: 'none', 
+                  border: 'none', 
+                  fontSize: '24px', 
+                  color: '#86868b',
+                  cursor: 'pointer'
+                }}
+              >
+                ×
+              </button>
+            </div>
+            
+            <div style={{ maxHeight: '70vh', overflowY: 'auto' }}>
+              {/* 实时监控 */}
+              <div style={{ marginBottom: '20px' }}>
+                <h4 style={{ fontSize: '16px', fontWeight: '600', marginBottom: '8px', color: '#1d1d1f' }}>
+                  🔴 实时监控系统
+                </h4>
+                <div style={{ fontSize: '14px', color: '#86868b', lineHeight: '1.5', marginBottom: '8px' }}>
+                  24/7 监控所有推荐场所的营业状态、人流密度、天气影响等实时信息
+                </div>
+                <div style={{ background: '#f8f9fb', borderRadius: '6px', padding: '8px', fontSize: '12px' }}>
+                  <div>• 营业状态: 每5分钟更新</div>
+                  <div>• 人流监控: 基于多平台数据实时分析</div>
+                  <div>• 天气预警: 自动提醒不适宜户外活动</div>
+                  <div>• 安全提醒: 发现问题立即推送警告</div>
+                </div>
+              </div>
+
+              {/* 专家团队 */}
+              <div style={{ marginBottom: '20px' }}>
+                <h4 style={{ fontSize: '16px', fontWeight: '600', marginBottom: '8px', color: '#1d1d1f' }}>
+                  👥 专家验证团队
+                </h4>
+                <div style={{ fontSize: '14px', color: '#86868b', lineHeight: '1.5', marginBottom: '8px' }}>
+                  由专业宠物专家、旅游规划师实地验证每个推荐场所
+                </div>
+                {CONFIG.trustIndicators.expertVerification.team.map((expert, index) => (
+                  <div key={index} style={{ 
+                    background: '#f8f9fb', 
+                    borderRadius: '6px', 
+                    padding: '8px', 
+                    marginBottom: '6px',
+                    fontSize: '12px'
+                  }}>
+                    <div style={{ fontWeight: '600', marginBottom: '2px' }}>
+                      {expert.name} - {expert.role}
+                    </div>
+                    <div style={{ color: '#86868b' }}>
+                      {expert.cert} · {expert.years}年经验
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* 数据透明 */}
+              <div style={{ marginBottom: '20px' }}>
+                <h4 style={{ fontSize: '16px', fontWeight: '600', marginBottom: '8px', color: '#1d1d1f' }}>
+                  📊 数据来源透明
+                </h4>
+                <div style={{ fontSize: '14px', color: '#86868b', lineHeight: '1.5', marginBottom: '8px' }}>
+                  清楚展示每个推荐的数据来源、更新时间、可信度评分
+                </div>
+                <div style={{ display: 'grid', gap: '6px' }}>
+                  {[...CONFIG.dataSources.external, ...CONFIG.dataSources.internal].map((source, index) => (
+                    <div key={index} style={{ 
+                      background: '#f8f9fb', 
+                      borderRadius: '6px', 
+                      padding: '8px',
+                      fontSize: '12px',
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center'
+                    }}>
+                      <div>
+                        <span>{source.logo}</span> {source.name} 
+                        <span style={{ color: '#86868b', marginLeft: '6px' }}>
+                          ({source.sampleSize})
+                        </span>
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <span style={{ color: '#30d158', fontWeight: '600' }}>
+                          {source.trustScore}
+                        </span>
+                        <span style={{ fontSize: '10px', color: '#86868b' }}>
+                          权重{source.weight}%
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* 用户反馈 */}
+              <div style={{ marginBottom: '20px' }}>
+                <h4 style={{ fontSize: '16px', fontWeight: '600', marginBottom: '8px', color: '#1d1d1f' }}>
+                  ⭐ 用户满意度
+                </h4>
+                <div style={{
+                  background: 'linear-gradient(135deg, rgba(48, 209, 88, 0.1), rgba(52, 199, 89, 0.05))',
+                  borderRadius: '8px',
+                  padding: '12px',
+                  textAlign: 'center'
+                }}>
+                  <div style={{ fontSize: '24px', fontWeight: '700', color: '#30d158', marginBottom: '4px' }}>
+                    {CONFIG.trustIndicators.userFeedback.satisfaction}%
+                  </div>
+                  <div style={{ fontSize: '14px', color: '#1d1d1f', fontWeight: '500' }}>
+                    用户满意度
+                  </div>
+                  <div style={{ fontSize: '12px', color: '#86868b', marginTop: '6px' }}>
+                    基于 {CONFIG.trustIndicators.userFeedback.totalUsers.toLocaleString()} 用户反馈
+                  </div>
+                </div>
+              </div>
+
+              {/* 安全保障 */}
+              <div>
+                <h4 style={{ fontSize: '16px', fontWeight: '600', marginBottom: '8px', color: '#1d1d1f' }}>
+                  🛡️ 安全保障承诺
+                </h4>
+                <div style={{ fontSize: '13px', color: '#86868b', lineHeight: '1.5' }}>
+                  <div>• 所有推荐场所均经过安全检查认证</div>
+                  <div>• 宠物友好度由专业兽医团队评估</div>
+                  <div>• 提供24小时客服支持和应急联系</div>
+                  <div>• 发现问题立即下架并补偿用户损失</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+
       const TravelPlanCard = ({ plan, onSave, isSaved, onPreview, onBookHotel }) => (
         <div style={{
           background: 'white',
@@ -698,6 +1100,22 @@
           </div>
           
           <div style={{ padding: '16px' }}>
+            {/* 酒店认证信息 */}
+            <div style={{ display: 'flex', gap: '6px', marginBottom: '12px' }}>
+              {plan.hotel.license === 'verified' && (
+                <span className="trust-badge">✓ 营业执照</span>
+              )}
+              {plan.hotel.insurance && (
+                <span className="trust-badge">🛡️ {plan.hotel.insurance}保险</span>
+              )}
+              {plan.hotel.staffTrained && (
+                <span className="trust-badge">👨‍🎓 员工培训</span>
+              )}
+              {plan.hotel.superhost && (
+                <span className="trust-badge">⭐ 超级房东</span>
+              )}
+            </div>
+
             <div style={{
               background: 'rgba(255, 149, 0, 0.1)',
               borderRadius: '8px',
@@ -720,7 +1138,7 @@
                   <span key={i} style={{ 
                     fontSize: '12px', 
                     color: i <= plan.rating ? '#ffa726' : '#e0e0e0' 
-                  }}>★</span>
+                  }}>⭐</span>
                 ))}
               </div>
             </div>
@@ -969,12 +1387,67 @@
                   <h4 style={{ fontSize: '16px', fontWeight: '600', marginBottom: '8px' }}>
                     {plan.place.name}
                   </h4>
+                  
+                  {/* 信任指标展示 */}
+                  <div style={{ marginBottom: '12px' }}>
+                    {plan.place.staffVerified && (
+                      <div className="trust-badge" style={{ marginRight: '6px', marginBottom: '4px' }}>
+                        ✓ 员工实地验证
+                      </div>
+                    )}
+                    {plan.place.expertReview && (
+                      <div className="trust-badge" style={{ marginRight: '6px', marginBottom: '4px' }}>
+                        👨‍⚕️ 专家认证
+                      </div>
+                    )}
+                    {plan.place.safetyChecks?.certified && (
+                      <div className="trust-badge" style={{ marginBottom: '4px' }}>
+                        🛡️ 安全认证
+                      </div>
+                    )}
+                  </div>
+
                   <div style={{ fontSize: '13px', color: '#86868b', lineHeight: '1.5', marginBottom: '12px' }}>
                     <div>📍 距离: {plan.place.distance}km</div>
                     <div>⏰ 开放时间: {plan.place.time}</div>
                     <div>⭐ 评分: {plan.place.rating}</div>
                     <div>🐾 宠物友好度: {'🐾'.repeat(plan.place.petFriendly)}</div>
+                    {plan.place.realTimeStatus && (
+                      <div style={{ marginTop: '6px' }}>
+                        <span style={{ 
+                          color: plan.place.realTimeStatus === 'open' ? '#30d158' : '#ff3b30',
+                          fontWeight: '500'
+                        }}>
+                          🔴 {plan.place.realTimeStatus === 'open' ? '正常营业' : '暂停营业'}
+                        </span>
+                        <span style={{ marginLeft: '8px' }}>
+                          人流: {plan.place.crowdLevel === 'low' ? '较少' : 
+                               plan.place.crowdLevel === 'moderate' ? '适中' : '较多'}
+                        </span>
+                      </div>
+                    )}
                   </div>
+                  
+                  {plan.place.expertReview && (
+                    <div style={{
+                      background: 'rgba(48, 209, 88, 0.1)',
+                      borderRadius: '6px',
+                      padding: '8px',
+                      marginBottom: '12px',
+                      fontSize: '12px'
+                    }}>
+                      <div style={{ fontWeight: '600', color: '#30d158', marginBottom: '2px' }}>
+                        👨‍⚕️ 专家评价
+                      </div>
+                      <div style={{ color: '#86868b' }}>
+                        {plan.place.expertReview.reviewer} 评分: {plan.place.expertReview.score}/10
+                      </div>
+                      <div style={{ color: '#86868b' }}>
+                        评价日期: {plan.place.expertReview.date}
+                      </div>
+                    </div>
+                  )}
+
                   <div style={{ marginBottom: '12px' }}>
                     <div style={{ fontSize: '14px', fontWeight: '500', marginBottom: '6px' }}>特色</div>
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
@@ -1126,6 +1599,9 @@
             </div>
 
             <div style={styles.content}>
+              {/* 信任指标展示 */}
+              <TrustIndicatorBar />
+
               <div style={styles.section}>
                 <div style={styles.sectionTitle}>今天想做什么？</div>
                 <div style={styles.grid2}>
@@ -1378,6 +1854,9 @@
 
             {/* 城市选择模态框 */}
             {showCitySelect && <CitySelectModal />}
+
+            {/* 信任详情模态框 */}
+            {showTrustDetails && <TrustDetailsModal />}
           </div>
         );
       }
@@ -1570,6 +2049,26 @@
                   我们的推荐基于多维度数据：外部平台用户评价(75%)、FunGo员工实地踩点(15%)、用户反馈(10%)。
                   所有数据实时更新，确保推荐的准确性和时效性。
                 </div>
+                <div style={{ marginTop: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <button
+                    onClick={() => setShowTrustDetails(true)}
+                    style={{
+                      background: 'rgba(0, 122, 255, 0.1)',
+                      color: '#007aff',
+                      border: 'none',
+                      borderRadius: '6px',
+                      padding: '4px 8px',
+                      fontSize: '10px',
+                      fontWeight: '500',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    查看详细保障体系
+                  </button>
+                  <div style={{ fontSize: '10px', color: '#30d158' }}>
+                    🟢 实时监控中 · 最后更新: {realTimeData.lastUpdate.toLocaleTimeString()}
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -1587,6 +2086,10 @@
                   <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '12px', color: '#007aff' }}>
                     <span>🤖</span>
                     <span>AI推荐</span>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '12px', color: '#30d158' }}>
+                    <span>🛡️</span>
+                    <span>信任保障</span>
                   </div>
                 </div>
                 {savedPlans.length > 0 && (
@@ -1628,6 +2131,9 @@
                 onClose={() => setShowMapView(false)}
               />
             )}
+
+            {/* 信任详情模态框 */}
+            {showTrustDetails && <TrustDetailsModal />}
           </div>
         );
       }
