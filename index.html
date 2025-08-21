@@ -2,669 +2,671 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>宠物友好地图 - 交互原型</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>妞子的探索地图</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-        
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', sans-serif;
+            font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            height: 100vh;
             overflow: hidden;
             position: relative;
-            height: 100vh;
         }
-        
-        /* 地图容器 */
+
         .map-container {
             width: 100%;
-            height: 100vh;
+            height: 100%;
             position: relative;
-            background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
-            overflow: hidden;
+            perspective: 1000px;
         }
-        
-        /* 模拟地图网格 */
-        .map-grid {
+
+        .map-view {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            transform-style: preserve-3d;
+        }
+
+        .map-view.view-3d {
+            transform: rotateX(45deg) rotateY(0deg);
+        }
+
+        /* 建筑物基础层 */
+        .buildings-layer {
             position: absolute;
-            width: 200%;
-            height: 200%;
-            background-image: 
-                linear-gradient(rgba(255,255,255,.1) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(255,255,255,.1) 1px, transparent 1px);
-            background-size: 50px 50px;
-            transform: translate(-25%, -25%);
-            transition: transform 0.3s ease;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0.3;
         }
-        
-        /* 顶部搜索栏 */
-        .search-bar {
+
+        .building {
+            position: absolute;
+            background: linear-gradient(135deg, #2d3748, #4a5568);
+            border-radius: 4px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .building:hover {
+            opacity: 0.6;
+            transform: translateZ(10px);
+        }
+
+        /* POI侧边栏 */
+        .poi-sidebar {
             position: absolute;
             top: 20px;
             left: 20px;
-            right: 20px;
-            background: white;
-            border-radius: 25px;
-            padding: 12px 20px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            display: flex;
-            align-items: center;
+            width: 280px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
             z-index: 100;
         }
-        
-        .search-icon {
-            width: 20px;
-            height: 20px;
-            margin-right: 10px;
-            opacity: 0.5;
-        }
-        
-        .search-input {
-            flex: 1;
-            border: none;
-            outline: none;
-            font-size: 14px;
-        }
-        
-        /* 用户位置标记 */
-        .user-location {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 40px;
-            height: 40px;
-            z-index: 50;
-        }
-        
-        .user-marker {
-            width: 40px;
-            height: 40px;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            border-radius: 50%;
+
+        .poi-header {
             display: flex;
             align-items: center;
-            justify-content: center;
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
-            animation: pulse 2s infinite;
-        }
-        
-        @keyframes pulse {
-            0% { box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4); }
-            50% { box-shadow: 0 4px 20px rgba(102, 126, 234, 0.6); }
-            100% { box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4); }
-        }
-        
-        /* 地点标记 */
-        .location-marker {
-            position: absolute;
-            width: 36px;
-            height: 36px;
-            cursor: pointer;
-            transition: transform 0.2s;
-            z-index: 30;
-        }
-        
-        .location-marker:hover {
-            transform: scale(1.1);
-        }
-        
-        .marker-icon {
-            width: 100%;
-            height: 100%;
-            background: white;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 3px 8px rgba(0,0,0,0.2);
-            font-size: 20px;
-        }
-        
-        .marker-park { background: #4ade80; }
-        .marker-cafe { background: #fb923c; }
-        .marker-restaurant { background: #f472b6; }
-        .marker-store { background: #60a5fa; }
-        .marker-treasure { 
-            background: linear-gradient(135deg, #fbbf24, #f59e0b);
-            animation: bounce 1s infinite;
-        }
-        
-        @keyframes bounce {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-5px); }
-        }
-        
-        /* 地点信息卡片 */
-        .location-card {
-            position: absolute;
-            bottom: -300px;
-            left: 20px;
-            right: 20px;
-            background: white;
-            border-radius: 20px 20px 0 0;
-            padding: 20px;
-            box-shadow: 0 -4px 20px rgba(0,0,0,0.1);
-            transition: bottom 0.3s ease;
-            z-index: 200;
-        }
-        
-        .location-card.active {
-            bottom: 0;
-        }
-        
-        .card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: start;
-            margin-bottom: 15px;
-        }
-        
-        .card-title {
-            font-size: 18px;
-            font-weight: 600;
+            margin-bottom: 20px;
             color: #2d3748;
         }
-        
-        .card-distance {
-            color: #667eea;
-            font-size: 14px;
-            font-weight: 500;
+
+        .poi-header h2 {
+            font-size: 18px;
+            font-weight: 600;
+            margin-left: 8px;
         }
-        
-        .card-type {
-            display: inline-block;
-            padding: 4px 12px;
-            background: #f3f4f6;
-            border-radius: 12px;
-            font-size: 12px;
-            color: #4b5563;
-            margin-top: 8px;
-        }
-        
-        .card-rating {
+
+        .poi-item {
             display: flex;
             align-items: center;
-            margin: 10px 0;
-        }
-        
-        .star {
-            color: #fbbf24;
-            margin-right: 2px;
-        }
-        
-        .card-actions {
-            display: flex;
-            gap: 10px;
-            margin-top: 15px;
-        }
-        
-        .btn {
-            flex: 1;
-            padding: 12px;
-            border: none;
-            border-radius: 12px;
-            font-size: 14px;
-            font-weight: 600;
+            padding: 15px;
+            margin-bottom: 12px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
             cursor: pointer;
-            transition: all 0.2s;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
         }
-        
-        .btn-primary {
-            background: linear-gradient(135deg, #667eea, #764ba2);
+
+        .poi-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.6s;
+        }
+
+        .poi-item:hover::before {
+            left: 100%;
+        }
+
+        .poi-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .poi-icon {
+            width: 45px;
+            height: 45px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            margin-right: 15px;
+        }
+
+        .poi-info {
+            flex: 1;
+        }
+
+        .poi-name {
+            font-size: 16px;
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 4px;
+        }
+
+        .poi-distance {
+            font-size: 13px;
+            color: #718096;
+            margin-bottom: 2px;
+        }
+
+        .poi-status {
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .status-completed { color: #38a169; }
+        .status-points { color: #ed8936; }
+
+        .navigate-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
         }
-        
-        .btn-secondary {
-            background: #f3f4f6;
-            color: #4b5563;
+
+        .navigate-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
         }
-        
-        .btn:active {
-            transform: scale(0.95);
+
+        /* 地图上的POI标记 */
+        .map-poi {
+            position: absolute;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 10;
         }
-        
-        /* 底部导航 */
-        .bottom-nav {
+
+        .poi-marker {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            position: relative;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            animation: pulse 2s infinite;
+        }
+
+        .poi-marker::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: inherit;
+            opacity: 0.3;
+            animation: ripple 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        @keyframes ripple {
+            0% { transform: scale(1); opacity: 0.3; }
+            100% { transform: scale(1.8); opacity: 0; }
+        }
+
+        .poi-label {
+            position: absolute;
+            top: -40px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 15px;
+            font-size: 12px;
+            white-space: nowrap;
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+
+        .map-poi:hover .poi-label {
+            opacity: 1;
+            transform: translateX(-50%) translateY(-5px);
+        }
+
+        /* 宠物角色 */
+        .pet-character {
+            position: absolute;
+            bottom: 45%;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 20;
+            transition: all 0.5s ease;
+        }
+
+        .pet-avatar {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 35px;
+            box-shadow: 0 8px 30px rgba(102, 126, 234, 0.4);
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .pet-name {
+            text-align: center;
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            margin-top: 10px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        /* 控制面板 */
+        .control-panel {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            z-index: 100;
+        }
+
+        .view-toggle {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border: none;
+            padding: 12px 20px;
+            border-radius: 25px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .view-toggle:hover {
+            background: white;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        /* 探索提示 */
+        .exploration-hint {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #ffd89b 0%, #19547b 100%);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 25px;
+            font-size: 14px;
+            font-weight: 500;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            animation: glow 2s ease-in-out infinite alternate;
+            max-width: 300px;
+        }
+
+        @keyframes glow {
+            0% { box-shadow: 0 4px 20px rgba(255, 216, 155, 0.3); }
+            100% { box-shadow: 0 4px 30px rgba(255, 216, 155, 0.6); }
+        }
+
+        /* 开始按钮 */
+        .start-button {
             position: absolute;
             bottom: 20px;
             left: 50%;
             transform: translateX(-50%);
-            background: white;
-            border-radius: 25px;
-            padding: 8px;
-            display: flex;
-            gap: 5px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            z-index: 100;
-        }
-        
-        .nav-item {
-            padding: 10px 20px;
-            border-radius: 20px;
-            font-size: 14px;
-            cursor: pointer;
-            transition: all 0.2s;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-        
-        .nav-item.active {
-            background: linear-gradient(135deg, #667eea, #764ba2);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-        }
-        
-        /* 悬浮按钮 */
-        .float-buttons {
-            position: absolute;
-            right: 20px;
-            top: 50%;
-            transform: translateY(-50%);
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            z-index: 90;
-        }
-        
-        .float-btn {
-            width: 48px;
-            height: 48px;
-            background: white;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            cursor: pointer;
-            font-size: 20px;
-            transition: all 0.2s;
-        }
-        
-        .float-btn:hover {
-            transform: scale(1.1);
-        }
-        
-        /* 任务提示 */
-        .task-hint {
-            position: absolute;
-            top: 80px;
-            left: 20px;
-            right: 20px;
-            background: linear-gradient(135deg, #fbbf24, #f59e0b);
-            color: white;
-            padding: 12px 16px;
-            border-radius: 12px;
-            font-size: 14px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            z-index: 80;
-            animation: slideDown 0.5s ease;
-        }
-        
-        @keyframes slideDown {
-            from { transform: translateY(-100%); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
-        
-        .task-text {
-            flex: 1;
-        }
-        
-        .task-reward {
-            background: rgba(255,255,255,0.2);
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-weight: 600;
-        }
-        
-        /* 积分动画 */
-        .points-animation {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 48px;
-            font-weight: bold;
-            color: #667eea;
-            opacity: 0;
-            z-index: 300;
-            pointer-events: none;
-        }
-        
-        .points-animation.active {
-            animation: pointsFloat 2s ease-out;
-        }
-        
-        @keyframes pointsFloat {
-            0% {
-                opacity: 0;
-                transform: translate(-50%, -50%) scale(0.5);
-            }
-            50% {
-                opacity: 1;
-                transform: translate(-50%, -80%) scale(1.2);
-            }
-            100% {
-                opacity: 0;
-                transform: translate(-50%, -100%) scale(1);
-            }
-        }
-        
-        /* 其他用户标记 */
-        .other-user {
-            position: absolute;
-            width: 32px;
-            height: 32px;
-            background: #10b981;
-            border: 3px solid white;
-            border-radius: 50%;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-            z-index: 40;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            border: none;
+            padding: 18px 40px;
+            border-radius: 30px;
             font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 30px rgba(102, 126, 234, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
-        
-        .other-user::after {
-            content: '';
+
+        .start-button:hover {
+            transform: translateX(-50%) translateY(-3px);
+            box-shadow: 0 12px 40px rgba(102, 126, 234, 0.5);
+        }
+
+        /* 距离指示器 */
+        .distance-indicator {
             position: absolute;
-            width: 60px;
-            height: 60px;
-            border: 2px solid #10b981;
-            border-radius: 50%;
-            opacity: 0.3;
-            animation: ripple 2s infinite;
+            top: 50%;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            padding: 10px 15px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
         }
-        
-        @keyframes ripple {
-            0% { transform: scale(0.8); opacity: 0.3; }
-            100% { transform: scale(1.5); opacity: 0; }
-        }
-        
-        /* 响应式 */
-        @media (max-width: 380px) {
-            .search-bar { top: 10px; left: 10px; right: 10px; }
-            .bottom-nav { bottom: 10px; }
-            .float-buttons { right: 10px; }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .poi-sidebar {
+                width: calc(100vw - 40px);
+                max-width: 300px;
+            }
+            
+            .exploration-hint {
+                right: 20px;
+                left: 20px;
+                max-width: none;
+                text-align: center;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="map-container" id="mapContainer">
-        <div class="map-grid" id="mapGrid"></div>
-        
-        <!-- 搜索栏 -->
-        <div class="search-bar">
-            <span class="search-icon">🔍</span>
-            <input type="text" class="search-input" placeholder="搜索宠物友好地点...">
-        </div>
-        
-        <!-- 任务提示 -->
-        <div class="task-hint" id="taskHint">
-            <span class="task-text">📍 每日任务：探索3个新地点 (1/3)</span>
-            <span class="task-reward">+50积分</span>
-        </div>
-        
-        <!-- 用户位置 -->
-        <div class="user-location">
-            <div class="user-marker">🐕</div>
-        </div>
-        
-        <!-- 其他用户 -->
-        <div class="other-user" style="top: 35%; left: 30%;" onclick="showUserInfo('小柴柴的主人')">🐶</div>
-        <div class="other-user" style="top: 65%; left: 70%;" onclick="showUserInfo('金毛奔奔')">🦮</div>
-        
-        <!-- 地点标记 -->
-        <div class="location-marker" style="top: 25%; left: 45%;" onclick="showLocation('中央公园', 'park', '200m', 4.8)">
-            <div class="marker-icon marker-park">🌳</div>
-        </div>
-        
-        <div class="location-marker" style="top: 40%; left: 20%;" onclick="showLocation('萌宠咖啡', 'cafe', '350m', 4.5)">
-            <div class="marker-icon marker-cafe">☕</div>
-        </div>
-        
-        <div class="location-marker" style="top: 60%; left: 60%;" onclick="showLocation('狗狗友好餐厅', 'restaurant', '500m', 4.6)">
-            <div class="marker-icon marker-restaurant">🍽️</div>
-        </div>
-        
-        <div class="location-marker" style="top: 70%; left: 35%;" onclick="showLocation('宠物用品店', 'store', '450m', 4.3)">
-            <div class="marker-icon marker-store">🛍️</div>
-        </div>
-        
-        <div class="location-marker" style="top: 30%; left: 65%;" onclick="showTreasure()">
-            <div class="marker-icon marker-treasure">💎</div>
-        </div>
-        
-        <!-- 地点信息卡片 -->
-        <div class="location-card" id="locationCard">
-            <div class="card-header">
-                <div>
-                    <div class="card-title" id="cardTitle">中央公园</div>
-                    <span class="card-type" id="cardType">宠物公园</span>
+    <div class="map-container">
+        <div class="map-view" id="mapView">
+            <!-- 建筑物层 -->
+            <div class="buildings-layer">
+                <div class="building" style="top: 20%; left: 15%; width: 80px; height: 60px;"></div>
+                <div class="building" style="top: 35%; left: 25%; width: 100px; height: 80px;"></div>
+                <div class="building" style="top: 15%; right: 20%; width: 90px; height: 70px;"></div>
+                <div class="building" style="top: 45%; right: 15%; width: 120px; height: 90px;"></div>
+                <div class="building" style="bottom: 30%; left: 20%; width: 110px; height: 85px;"></div>
+                <div class="building" style="bottom: 25%; right: 25%; width: 95px; height: 75px;"></div>
+            </div>
+
+            <!-- POI侧边栏 -->
+            <div class="poi-sidebar">
+                <div class="poi-header">
+                    <span>📍</span>
+                    <h2>附近宝藏点</h2>
                 </div>
-                <div class="card-distance" id="cardDistance">200m</div>
+
+                <div class="poi-item" onclick="navigateTo('central-park')">
+                    <div class="poi-icon" style="background: linear-gradient(135deg, #48bb78, #38a169);">🌳</div>
+                    <div class="poi-info">
+                        <div class="poi-name">中央公园</div>
+                        <div class="poi-distance">📏 120m</div>
+                        <div class="poi-status status-completed">✅ 已打卡</div>
+                    </div>
+                    <button class="navigate-btn">导航</button>
+                </div>
+
+                <div class="poi-item" onclick="navigateTo('coffee-shop')">
+                    <div class="poi-icon" style="background: linear-gradient(135deg, #8b4513, #a0522d);">☕</div>
+                    <div class="poi-info">
+                        <div class="poi-name">萌宠咖啡</div>
+                        <div class="poi-distance">📏 85m</div>
+                        <div class="poi-status status-completed">✅ 已打卡</div>
+                    </div>
+                    <button class="navigate-btn">导航</button>
+                </div>
+
+                <div class="poi-item" onclick="navigateTo('pet-store')">
+                    <div class="poi-icon" style="background: linear-gradient(135deg, #4299e1, #2b6cb0);">🛒</div>
+                    <div class="poi-info">
+                        <div class="poi-name">汪汪宠物店</div>
+                        <div class="poi-distance">📏 156m</div>
+                        <div class="poi-status status-points">+80积分</div>
+                    </div>
+                    <button class="navigate-btn">导航</button>
+                </div>
+
+                <div class="poi-item" onclick="navigateTo('hospital')">
+                    <div class="poi-icon" style="background: linear-gradient(135deg, #f56565, #e53e3e);">🏥</div>
+                    <div class="poi-info">
+                        <div class="poi-name">爱心宠物医院</div>
+                        <div class="poi-distance">📏 210m</div>
+                        <div class="poi-status status-points">+100积分 (首次发现)</div>
+                    </div>
+                    <button class="navigate-btn">导航</button>
+                </div>
+
+                <div class="poi-item" onclick="navigateTo('treasure')">
+                    <div class="poi-icon" style="background: linear-gradient(135deg, #4fd1c7, #38b2ac);">💎</div>
+                    <div class="poi-info">
+                        <div class="poi-name">神秘宝箱</div>
+                        <div class="poi-distance">📏 68m</div>
+                        <div class="poi-status status-completed">✅ 已打卡</div>
+                    </div>
+                    <button class="navigate-btn">导航</button>
+                </div>
             </div>
-            <div class="card-rating">
-                <span class="star">⭐</span>
-                <span class="star">⭐</span>
-                <span class="star">⭐</span>
-                <span class="star">⭐</span>
-                <span class="star">⭐</span>
-                <span style="margin-left: 8px; color: #6b7280;" id="cardRating">4.8分</span>
+
+            <!-- 地图POI标记 -->
+            <div class="map-poi" style="top: 25%; right: 35%;" data-poi="central-park">
+                <div class="poi-marker" style="background: linear-gradient(135deg, #48bb78, #38a169);">🌳</div>
+                <div class="poi-label">中央公园<br>✅ 已打卡</div>
             </div>
-            <div style="color: #6b7280; font-size: 14px; margin: 10px 0;">
-                🕐 全天开放 | 👥 现有15只狗狗 | 🚰 有饮水设施
+
+            <div class="map-poi" style="bottom: 35%; right: 25%;" data-poi="coffee-shop">
+                <div class="poi-marker" style="background: linear-gradient(135deg, #8b4513, #a0522d);">☕</div>
+                <div class="poi-label">萌宠咖啡<br>✅ 已打卡</div>
             </div>
-            <div class="card-actions">
-                <button class="btn btn-primary" onclick="checkIn()">
-                    📸 打卡 (+30积分)
-                </button>
-                <button class="btn btn-secondary" onclick="navigate()">
-                    🧭 导航
-                </button>
+
+            <div class="map-poi" style="bottom: 20%; left: 30%;" data-poi="pet-store">
+                <div class="poi-marker" style="background: linear-gradient(135deg, #4299e1, #2b6cb0);">🛒</div>
+                <div class="poi-label">汪汪宠物店<br>+80积分 (急需更新)</div>
+            </div>
+
+            <div class="map-poi" style="top: 30%; right: 20%;" data-poi="hospital">
+                <div class="poi-marker" style="background: linear-gradient(135deg, #f56565, #e53e3e);">🏥</div>
+                <div class="poi-label">爱心宠物医院<br>+100积分 (首次发现)</div>
+            </div>
+
+            <div class="map-poi" style="bottom: 40%; left: 45%;" data-poi="treasure">
+                <div class="poi-marker" style="background: linear-gradient(135deg, #4fd1c7, #38b2ac);">💎</div>
+                <div class="poi-label">神秘宝箱<br>✅ 已打卡</div>
+            </div>
+
+            <!-- 宠物角色 -->
+            <div class="pet-character">
+                <div class="pet-avatar">🐕</div>
+                <div class="pet-name">妞子</div>
+            </div>
+
+            <!-- 距离指示器 -->
+            <div class="distance-indicator">
+                <span>📍</span>
+                <span>280m</span>
+            </div>
+
+            <div class="distance-indicator" style="top: 60%; right: 20px;">
+                <span>📍</span>
+                <span>450m</span>
             </div>
         </div>
-        
-        <!-- 底部导航 -->
-        <div class="bottom-nav">
-            <div class="nav-item active">
-                <span>🗺️</span>
-                <span>地图</span>
-            </div>
-            <div class="nav-item" onclick="showFeature('任务')">
-                <span>🎯</span>
-                <span>任务</span>
-            </div>
-            <div class="nav-item" onclick="showFeature('排行')">
-                <span>🏆</span>
-                <span>排行</span>
-            </div>
+
+        <!-- 探索提示 -->
+        <div class="exploration-hint">
+            📍 前方有更多宝藏点！继续探索解锁新区域
         </div>
-        
-        <!-- 悬浮按钮 -->
-        <div class="float-buttons">
-            <div class="float-btn" onclick="centerLocation()">📍</div>
-            <div class="float-btn" onclick="addLocation()">➕</div>
-            <div class="float-btn" onclick="toggleOtherUsers()">👥</div>
+
+        <!-- 控制面板 -->
+        <div class="control-panel">
+            <button class="view-toggle" onclick="toggleView()">
+                <span id="viewIcon">🌐</span>
+                <span id="viewText">3D视角</span>
+            </button>
         </div>
-        
-        <!-- 积分动画 -->
-        <div class="points-animation" id="pointsAnimation">+30</div>
+
+        <!-- 开始按钮 -->
+        <button class="start-button" onclick="startExploration()">
+            🐾 开始遛狗
+        </button>
     </div>
-    
+
     <script>
-        let currentCard = null;
-        let othersVisible = true;
-        let totalPoints = 280;
-        
-        function showLocation(name, type, distance, rating) {
-            const card = document.getElementById('locationCard');
-            const typeMap = {
-                'park': '宠物公园',
-                'cafe': '宠物友好咖啡厅',
-                'restaurant': '宠物友好餐厅',
-                'store': '宠物用品店'
-            };
+        let is3D = false;
+        let currentTarget = null;
+
+        function toggleView() {
+            const mapView = document.getElementById('mapView');
+            const viewIcon = document.getElementById('viewIcon');
+            const viewText = document.getElementById('viewText');
             
-            document.getElementById('cardTitle').textContent = name;
-            document.getElementById('cardType').textContent = typeMap[type];
-            document.getElementById('cardDistance').textContent = distance;
-            document.getElementById('cardRating').textContent = rating + '分';
+            is3D = !is3D;
             
-            card.classList.add('active');
-            currentCard = name;
-        }
-        
-        function showTreasure() {
-            const card = document.getElementById('locationCard');
-            document.getElementById('cardTitle').textContent = '神秘宝箱';
-            document.getElementById('cardType').textContent = '限时活动';
-            document.getElementById('cardDistance').textContent = '180m';
-            document.getElementById('cardRating').textContent = '稀有奖励';
-            
-            card.classList.add('active');
-            currentCard = '宝箱';
-        }
-        
-        function checkIn() {
-            // 关闭卡片
-            document.getElementById('locationCard').classList.remove('active');
-            
-            // 显示积分动画
-            const pointsAnim = document.getElementById('pointsAnimation');
-            pointsAnim.classList.add('active');
-            
-            // 震动反馈（如果支持）
-            if (navigator.vibrate) {
-                navigator.vibrate(100);
-            }
-            
-            // 更新任务进度
-            setTimeout(() => {
-                const taskHint = document.getElementById('taskHint');
-                taskHint.innerHTML = `
-                    <span class="task-text">📍 每日任务：探索3个新地点 (2/3)</span>
-                    <span class="task-reward">+50积分</span>
-                `;
+            if (is3D) {
+                mapView.classList.add('view-3d');
+                viewIcon.textContent = '🗺️';
+                viewText.textContent = '俯视视角';
                 
-                // 显示提示
-                setTimeout(() => {
-                    alert(`✅ 打卡成功！\n📍 ${currentCard}\n💰 获得30积分\n\n当前积分：${totalPoints + 30}`);
-                    totalPoints += 30;
-                }, 500);
-            }, 1000);
+                // 3D模式下增加建筑物高度效果
+                const buildings = document.querySelectorAll('.building');
+                buildings.forEach((building, index) => {
+                    building.style.transform = `translateZ(${20 + index * 10}px)`;
+                    building.style.opacity = '0.6';
+                });
+                
+                // POI标记也添加3D效果
+                const pois = document.querySelectorAll('.map-poi');
+                pois.forEach((poi, index) => {
+                    poi.style.transform = `translateZ(${30}px)`;
+                });
+                
+            } else {
+                mapView.classList.remove('view-3d');
+                viewIcon.textContent = '🌐';
+                viewText.textContent = '3D视角';
+                
+                // 重置建筑物效果
+                const buildings = document.querySelectorAll('.building');
+                buildings.forEach(building => {
+                    building.style.transform = '';
+                    building.style.opacity = '0.3';
+                });
+                
+                // 重置POI效果
+                const pois = document.querySelectorAll('.map-poi');
+                pois.forEach(poi => {
+                    poi.style.transform = '';
+                });
+            }
+        }
+
+        function navigateTo(poiId) {
+            // 移除之前的高亮
+            document.querySelectorAll('.map-poi').forEach(poi => {
+                poi.style.transform = poi.style.transform.replace('scale(1.3)', '');
+            });
             
-            // 重置动画
+            // 高亮目标POI
+            const targetPoi = document.querySelector(`[data-poi="${poiId}"]`);
+            if (targetPoi) {
+                targetPoi.style.transform += ' scale(1.3)';
+                currentTarget = poiId;
+                
+                // 播放导航动画
+                animateNavigation(targetPoi);
+            }
+        }
+
+        function animateNavigation(targetElement) {
+            // 创建导航路径动画
+            const pet = document.querySelector('.pet-character');
+            const petRect = pet.getBoundingClientRect();
+            const targetRect = targetElement.getBoundingClientRect();
+            
+            // 创建虚线路径
+            const path = document.createElement('div');
+            path.style.position = 'absolute';
+            path.style.left = '50%';
+            path.style.bottom = '45%';
+            path.style.width = '2px';
+            path.style.height = '100px';
+            path.style.background = 'linear-gradient(to top, #667eea 0%, transparent 100%)';
+            path.style.animation = 'pathGlow 2s infinite';
+            path.style.zIndex = '5';
+            
+            document.querySelector('.map-view').appendChild(path);
+            
+            // 2秒后移除路径
             setTimeout(() => {
-                pointsAnim.classList.remove('active');
+                path.remove();
             }, 2000);
         }
-        
-        function navigate() {
-            alert('🧭 正在打开导航...\n将跳转至高德地图');
+
+        function startExploration() {
+            const pet = document.querySelector('.pet-avatar');
+            const petName = document.querySelector('.pet-name');
+            
+            // 开始探索动画
+            pet.style.animation = 'bounce 0.5s ease-in-out 3';
+            petName.style.color = '#ffd89b';
+            petName.textContent = '妞子正在探索...';
+            
+            setTimeout(() => {
+                petName.style.color = 'white';
+                petName.textContent = '妞子';
+                pet.style.animation = 'float 3s ease-in-out infinite';
+            }, 2000);
         }
-        
-        function showUserInfo(userName) {
-            alert(`🐕 ${userName}\n⏰ 正在遛狗中\n📍 距离你120米\n\n点击"打招呼"可以认识新朋友！`);
-        }
-        
-        function centerLocation() {
-            alert('📍 已回到当前位置');
-            // 模拟地图回中
-            document.getElementById('mapGrid').style.transform = 'translate(-25%, -25%)';
-        }
-        
-        function addLocation() {
-            const name = prompt('发现新的宠物友好地点？\n请输入地点名称：');
-            if (name) {
-                alert(`✅ 感谢贡献！\n"${name}" 已提交审核\n\n审核通过后你将获得：\n💰 100积分\n🏅 "城市探索者"徽章`);
+
+        // 添加CSS动画
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes bounce {
+                0%, 100% { transform: translateY(0); }
+                50% { transform: translateY(-20px); }
             }
-        }
-        
-        function toggleOtherUsers() {
-            const others = document.querySelectorAll('.other-user');
-            othersVisible = !othersVisible;
-            others.forEach(user => {
-                user.style.display = othersVisible ? 'flex' : 'none';
+            
+            @keyframes pathGlow {
+                0%, 100% { opacity: 0; }
+                50% { opacity: 1; }
+            }
+        `;
+        document.head.appendChild(style);
+
+        // 添加交互效果
+        document.querySelectorAll('.map-poi').forEach(poi => {
+            poi.addEventListener('click', () => {
+                const poiId = poi.getAttribute('data-poi');
+                navigateTo(poiId);
             });
-            alert(othersVisible ? '👥 已显示附近狗友' : '👤 已隐藏附近狗友');
-        }
-        
-        function showFeature(feature) {
-            const features = {
-                '任务': '📋 今日任务\n\n✅ 早安打卡 (已完成) +20积分\n⭕ 探索3个新地点 (1/3) +50积分\n⭕ 遛狗30分钟 (15/30) +30积分\n⭕ 上传一张照片 (0/1) +20积分\n\n💰 当前积分：' + totalPoints,
-                '排行': '🏆 本周排行榜\n\n🥇 柴犬小七 - 2,580积分\n🥈 金毛豆豆 - 2,340积分\n🥉 边牧Lucky - 2,120积分\n\n你的排名：第8位 - ' + totalPoints + '积分'
-            };
-            alert(features[feature]);
-        }
-        
-        // 模拟地图拖动
-        let isDragging = false;
-        let startX, startY;
-        let currentX = -25, currentY = -25;
-        
-        const mapContainer = document.getElementById('mapContainer');
-        const mapGrid = document.getElementById('mapGrid');
-        
-        mapContainer.addEventListener('mousedown', (e) => {
-            if (e.target.classList.contains('location-marker') || e.target.closest('.location-marker')) return;
-            isDragging = true;
-            startX = e.clientX;
-            startY = e.clientY;
         });
-        
-        mapContainer.addEventListener('mousemove', (e) => {
-            if (!isDragging) return;
-            const deltaX = (e.clientX - startX) / 5;
-            const deltaY = (e.clientY - startY) / 5;
-            mapGrid.style.transform = `translate(${currentX + deltaX}%, ${currentY + deltaY}%)`;
-        });
-        
-        mapContainer.addEventListener('mouseup', (e) => {
-            if (isDragging) {
-                currentX += (e.clientX - startX) / 5;
-                currentY += (e.clientY - startY) / 5;
-            }
-            isDragging = false;
-        });
-        
-        // 触摸支持
-        mapContainer.addEventListener('touchstart', (e) => {
-            if (e.target.classList.contains('location-marker') || e.target.closest('.location-marker')) return;
-            isDragging = true;
-            startX = e.touches[0].clientX;
-            startY = e.touches[0].clientY;
-        });
-        
-        mapContainer.addEventListener('touchmove', (e) => {
-            if (!isDragging) return;
-            const deltaX = (e.touches[0].clientX - startX) / 5;
-            const deltaY = (e.touches[0].clientY - startY) / 5;
-            mapGrid.style.transform = `translate(${currentX + deltaX}%, ${currentY + deltaY}%)`;
-        });
-        
-        mapContainer.addEventListener('touchend', (e) => {
-            isDragging = false;
-        });
-        
-        // 点击空白处关闭卡片
-        mapContainer.addEventListener('click', (e) => {
-            if (!e.target.closest('.location-marker') && !e.target.closest('.location-card') && !e.target.closest('.other-user')) {
-                document.getElementById('locationCard').classList.remove('active');
+
+        // 鼠标移动视差效果
+        document.addEventListener('mousemove', (e) => {
+            if (is3D) {
+                const x = (e.clientX / window.innerWidth - 0.5) * 10;
+                const y = (e.clientY / window.innerHeight - 0.5) * 10;
+                
+                const mapView = document.getElementById('mapView');
+                mapView.style.transform = `rotateX(${45 + y}deg) rotateY(${x}deg)`;
             }
         });
-        
-        // 初始化提示
-        setTimeout(() => {
-            alert('🎉 欢迎来到宠物友好地图！\n\n🗺️ 点击地图上的标记查看地点\n💎 金色宝箱是限时奖励\n📸 到达地点后可以打卡获得积分\n🐶 绿色标记是附近的狗友\n\n祝你遛狗愉快！');
-        }, 500);
+
+        // 初始化动画
+        window.addEventListener('load', () => {
+            const pois = document.querySelectorAll('.map-poi');
+            pois.forEach((poi, index) => {
+                setTimeout(() => {
+                    poi.style.opacity = '1';
+                    poi.style.transform = 'scale(1)';
+                }, index * 200);
+            });
+        });
     </script>
 </body>
 </html>
