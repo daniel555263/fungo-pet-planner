@@ -2,671 +2,1121 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>妞子的探索地图</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>狗狗城市 - 游戏化地图Demo</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-
+        
         body {
-            font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
-            height: 100vh;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', sans-serif;
             overflow: hidden;
+            background: #0a0f1c;
             position: relative;
+            height: 100vh;
         }
-
-        .map-container {
-            width: 100%;
-            height: 100%;
-            position: relative;
-            perspective: 1000px;
-        }
-
-        .map-view {
-            width: 100%;
-            height: 100%;
-            position: relative;
-            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
-            transform-style: preserve-3d;
-        }
-
-        .map-view.view-3d {
-            transform: rotateX(45deg) rotateY(0deg);
-        }
-
-        /* 建筑物基础层 */
-        .buildings-layer {
-            position: absolute;
+        
+        /* 加载画面 */
+        .loading-screen {
+            position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            opacity: 0.3;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            transition: opacity 0.5s ease;
         }
-
-        .building {
+        
+        .loading-screen.hide {
+            opacity: 0;
+            pointer-events: none;
+        }
+        
+        .dog-intro {
+            animation: bounce 1s infinite;
+        }
+        
+        .dog-intro .dog-3d {
+            width: 120px;
+            height: 120px;
+            position: relative;
+            transform-style: preserve-3d;
+            animation: rotate3d 3s infinite linear;
+        }
+        
+        @keyframes rotate3d {
+            from { transform: rotateY(0deg); }
+            to { transform: rotateY(360deg); }
+        }
+        
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+        
+        .loading-text {
+            color: white;
+            font-size: 18px;
+            margin-top: 20px;
+            font-weight: 600;
+        }
+        
+        /* 游戏主界面 */
+        .game-container {
+            width: 100%;
+            height: 100vh;
+            position: relative;
+            background: #0a0f1c;
+        }
+        
+        /* 模拟地图 - 暗色主题 */
+        .map-container {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            background: 
+                linear-gradient(0deg, transparent 24%, rgba(32, 45, 65, 0.05) 25%, rgba(32, 45, 65, 0.05) 26%, transparent 27%, transparent 74%, rgba(32, 45, 65, 0.05) 75%, rgba(32, 45, 65, 0.05) 76%, transparent 77%, transparent),
+                linear-gradient(90deg, transparent 24%, rgba(32, 45, 65, 0.05) 25%, rgba(32, 45, 65, 0.05) 26%, transparent 27%, transparent 74%, rgba(32, 45, 65, 0.05) 75%, rgba(32, 45, 65, 0.05) 76%, transparent 77%, transparent);
+            background-size: 50px 50px;
+            background-color: #0a0f1c;
+        }
+        
+        /* 模拟道路 */
+        .road {
             position: absolute;
-            background: linear-gradient(135deg, #2d3748, #4a5568);
-            border-radius: 4px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
-            transition: all 0.3s ease;
-        }
-
-        .building:hover {
+            background: #1e3a5f;
             opacity: 0.6;
-            transform: translateZ(10px);
         }
-
-        /* POI侧边栏 */
-        .poi-sidebar {
+        
+        .road-h {
+            height: 8px;
+            width: 100%;
+            top: 50%;
+        }
+        
+        .road-v {
+            width: 8px;
+            height: 100%;
+            left: 40%;
+        }
+        
+        /* 主角 - 雪纳瑞 3D效果 */
+        .player-dog {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 100;
+        }
+        
+        .schnauzer-3d {
+            width: 70px;
+            height: 70px;
+            position: relative;
+            transform-style: preserve-3d;
+            animation: dogWalk 0.8s infinite;
+        }
+        
+        @keyframes dogWalk {
+            0%, 100% { transform: rotateZ(-5deg) translateY(0); }
+            25% { transform: rotateZ(0deg) translateY(-2px); }
+            50% { transform: rotateZ(5deg) translateY(0); }
+            75% { transform: rotateZ(0deg) translateY(-2px); }
+        }
+        
+        .schnauzer-body {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #9ca3af 0%, #6b7280 50%, #4b5563 100%);
+            border-radius: 50% 50% 45% 45%;
+            position: relative;
+            box-shadow: 
+                0 10px 20px rgba(0,0,0,0.4),
+                inset -5px -5px 10px rgba(255,255,255,0.1),
+                inset 5px 5px 10px rgba(0,0,0,0.2);
+        }
+        
+        .schnauzer-beard {
+            position: absolute;
+            bottom: 8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 45px;
+            height: 20px;
+            background: linear-gradient(to bottom, #e5e7eb, #d1d5db);
+            border-radius: 0 0 50% 50%;
+            box-shadow: 0 3px 5px rgba(0,0,0,0.2);
+        }
+        
+        .schnauzer-ears {
+            position: absolute;
+            top: -5px;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            padding: 0 8px;
+        }
+        
+        .ear {
+            width: 15px;
+            height: 20px;
+            background: linear-gradient(135deg, #6b7280, #4b5563);
+            border-radius: 50% 50% 0 0;
+            box-shadow: inset 2px 2px 3px rgba(0,0,0,0.2);
+        }
+        
+        .schnauzer-eyes {
+            position: absolute;
+            top: 15px;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+        
+        .eye {
+            width: 8px;
+            height: 8px;
+            background: #1f2937;
+            border-radius: 50%;
+            position: relative;
+            animation: blink 3s infinite;
+        }
+        
+        @keyframes blink {
+            0%, 90%, 100% { transform: scaleY(1); }
+            95% { transform: scaleY(0.1); }
+        }
+        
+        .eye::after {
+            content: '';
+            position: absolute;
+            top: 1px;
+            left: 1px;
+            width: 3px;
+            height: 3px;
+            background: white;
+            border-radius: 50%;
+        }
+        
+        .schnauzer-nose {
+            position: absolute;
+            bottom: 25px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 8px;
+            height: 6px;
+            background: #1f2937;
+            border-radius: 50%;
+        }
+        
+        .player-shadow {
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 50px;
+            height: 10px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 50%;
+            filter: blur(5px);
+        }
+        
+        .player-name {
+            position: absolute;
+            bottom: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: white;
+            font-size: 12px;
+            white-space: nowrap;
+            background: rgba(0,0,0,0.6);
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-weight: 500;
+        }
+        
+        /* 导航面板 */
+        .nav-panel {
             position: absolute;
             top: 20px;
             left: 20px;
-            width: 280px;
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(20px);
-            border-radius: 20px;
-            padding: 20px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-            z-index: 100;
+            background: rgba(255,255,255,0.95);
+            border-radius: 15px;
+            padding: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+            z-index: 300;
+            max-width: 280px;
+            backdrop-filter: blur(10px);
         }
-
-        .poi-header {
+        
+        .nav-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 10px;
             display: flex;
             align-items: center;
-            margin-bottom: 20px;
-            color: #2d3748;
+            gap: 5px;
         }
-
-        .poi-header h2 {
-            font-size: 18px;
-            font-weight: 600;
-            margin-left: 8px;
+        
+        .poi-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
         }
-
+        
         .poi-item {
             display: flex;
             align-items: center;
-            padding: 15px;
-            margin-bottom: 12px;
-            background: white;
-            border-radius: 15px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-            cursor: pointer;
+            justify-content: space-between;
+            padding: 8px;
+            background: rgba(249,250,251,0.8);
+            border-radius: 10px;
             transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
+            cursor: pointer;
         }
-
-        .poi-item::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-            transition: left 0.6s;
-        }
-
-        .poi-item:hover::before {
-            left: 100%;
-        }
-
+        
         .poi-item:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            background: linear-gradient(135deg, #667eea20, #764ba220);
+            transform: translateX(3px);
         }
-
-        .poi-icon {
-            width: 45px;
-            height: 45px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 22px;
-            margin-right: 15px;
-        }
-
-        .poi-info {
-            flex: 1;
-        }
-
-        .poi-name {
-            font-size: 16px;
-            font-weight: 600;
-            color: #2d3748;
-            margin-bottom: 4px;
-        }
-
-        .poi-distance {
-            font-size: 13px;
-            color: #718096;
-            margin-bottom: 2px;
-        }
-
-        .poi-status {
-            font-size: 12px;
-            font-weight: 500;
-        }
-
-        .status-completed { color: #38a169; }
-        .status-points { color: #ed8936; }
-
-        .navigate-btn {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 12px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .navigate-btn:hover {
-            transform: scale(1.05);
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
-        }
-
-        /* 地图上的POI标记 */
-        .map-poi {
-            position: absolute;
-            cursor: pointer;
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            z-index: 10;
-        }
-
-        .poi-marker {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-            position: relative;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            animation: pulse 2s infinite;
-        }
-
-        .poi-marker::after {
-            content: '';
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            border-radius: 50%;
-            background: inherit;
-            opacity: 0.3;
-            animation: ripple 2s infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.1); }
-        }
-
-        @keyframes ripple {
-            0% { transform: scale(1); opacity: 0.3; }
-            100% { transform: scale(1.8); opacity: 0; }
-        }
-
-        .poi-label {
-            position: absolute;
-            top: -40px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(0, 0, 0, 0.8);
-            color: white;
-            padding: 6px 12px;
-            border-radius: 15px;
-            font-size: 12px;
-            white-space: nowrap;
-            opacity: 0;
-            transition: all 0.3s ease;
-        }
-
-        .map-poi:hover .poi-label {
-            opacity: 1;
-            transform: translateX(-50%) translateY(-5px);
-        }
-
-        /* 宠物角色 */
-        .pet-character {
-            position: absolute;
-            bottom: 45%;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 20;
-            transition: all 0.5s ease;
-        }
-
-        .pet-avatar {
-            width: 80px;
-            height: 80px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 35px;
-            box-shadow: 0 8px 30px rgba(102, 126, 234, 0.4);
-            animation: float 3s ease-in-out infinite;
-        }
-
-        @keyframes float {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-10px); }
-        }
-
-        .pet-name {
-            text-align: center;
-            color: white;
-            font-size: 16px;
-            font-weight: 600;
-            margin-top: 10px;
-            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-        }
-
-        /* 控制面板 */
-        .control-panel {
-            position: absolute;
-            bottom: 20px;
-            left: 20px;
-            z-index: 100;
-        }
-
-        .view-toggle {
-            background: rgba(255, 255, 255, 0.9);
-            backdrop-filter: blur(10px);
-            border: none;
-            padding: 12px 20px;
-            border-radius: 25px;
-            font-size: 14px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        
+        .poi-item-info {
             display: flex;
             align-items: center;
             gap: 8px;
         }
-
-        .view-toggle:hover {
+        
+        .poi-item-icon {
+            width: 30px;
+            height: 30px;
             background: white;
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
-
-        /* 探索提示 */
-        .exploration-hint {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            background: linear-gradient(135deg, #ffd89b 0%, #19547b 100%);
-            color: white;
-            padding: 15px 25px;
-            border-radius: 25px;
-            font-size: 14px;
-            font-weight: 500;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-            animation: glow 2s ease-in-out infinite alternate;
-            max-width: 300px;
+        
+        .poi-item-details {
+            display: flex;
+            flex-direction: column;
         }
-
-        @keyframes glow {
-            0% { box-shadow: 0 4px 20px rgba(255, 216, 155, 0.3); }
-            100% { box-shadow: 0 4px 30px rgba(255, 216, 155, 0.6); }
+        
+        .poi-item-name {
+            font-size: 12px;
+            font-weight: 600;
+            color: #1f2937;
         }
-
-        /* 开始按钮 */
-        .start-button {
-            position: absolute;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        
+        .poi-item-distance {
+            font-size: 11px;
+            color: #6b7280;
+        }
+        
+        .poi-item-points {
+            font-size: 11px;
+            color: #f59e0b;
+            font-weight: 600;
+        }
+        
+        .nav-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
             color: white;
             border: none;
-            padding: 18px 40px;
-            border-radius: 30px;
-            font-size: 16px;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 11px;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
-            box-shadow: 0 8px 30px rgba(102, 126, 234, 0.3);
-            display: flex;
-            align-items: center;
-            gap: 10px;
         }
-
-        .start-button:hover {
-            transform: translateX(-50%) translateY(-3px);
-            box-shadow: 0 12px 40px rgba(102, 126, 234, 0.5);
+        
+        .nav-btn:hover {
+            transform: scale(1.05);
         }
-
-        /* 距离指示器 */
-        .distance-indicator {
+        
+        .nav-btn:active {
+            transform: scale(0.95);
+        }
+        
+        /* 探索范围指示器 */
+        .explore-range {
             position: absolute;
             top: 50%;
-            right: 20px;
-            background: rgba(255, 255, 255, 0.9);
-            backdrop-filter: blur(10px);
-            padding: 10px 15px;
-            border-radius: 20px;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 300px;
+            height: 300px;
+            border: 2px dashed rgba(102, 126, 234, 0.3);
+            border-radius: 50%;
+            pointer-events: none;
+            animation: rangePulse 3s infinite;
+        }
+        
+        @keyframes rangePulse {
+            0%, 100% { opacity: 0.3; transform: translate(-50%, -50%) scale(1); }
+            50% { opacity: 0.6; transform: translate(-50%, -50%) scale(1.05); }
+        }
+        
+        /* POI点位 - 混合模式展示 */
+        .poi {
+            position: absolute;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .poi-icon {
+            width: 50px;
+            height: 50px;
+            background: white;
+            border-radius: 15px;
             display: flex;
             align-items: center;
-            gap: 8px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            justify-content: center;
+            font-size: 25px;
+            position: relative;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
         }
-
-        /* 响应式设计 */
-        @media (max-width: 768px) {
-            .poi-sidebar {
-                width: calc(100vw - 40px);
-                max-width: 300px;
+        
+        /* POI状态 - 混合模式 */
+        .poi.unexplored .poi-icon {
+            background: #2a2a2a;
+            opacity: 0.5;
+            filter: grayscale(100%);
+        }
+        
+        .poi.unexplored .poi-question {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: #fbbf24;
+            color: #000;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: bold;
+        }
+        
+        .poi.nearby {
+            animation: poiBounce 1s infinite;
+        }
+        
+        .poi.nearby .poi-icon {
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+            opacity: 0.9;
+        }
+        
+        @keyframes poiBounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+        
+        .poi.discovered .poi-icon {
+            background: #4ade80;
+            opacity: 0.7;
+        }
+        
+        .poi.discovered::after {
+            content: '✓';
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: #10b981;
+            color: white;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+        }
+        
+        /* 数据需求标识 */
+        .poi.data-needed .poi-icon {
+            animation: dataNeeded 2s infinite;
+            box-shadow: 0 0 20px rgba(251, 191, 36, 0.8);
+        }
+        
+        @keyframes dataNeeded {
+            0%, 100% { box-shadow: 0 0 10px rgba(251, 191, 36, 0.8); }
+            50% { box-shadow: 0 0 30px rgba(251, 191, 36, 1); }
+        }
+        
+        .poi-info {
+            position: absolute;
+            bottom: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 8px;
+            font-size: 11px;
+            white-space: nowrap;
+        }
+        
+        .poi-points {
+            color: #fbbf24;
+            font-weight: bold;
+        }
+        
+        /* 打卡特效 */
+        .checkin-effect {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+            z-index: 500;
+        }
+        
+        .checkin-circle {
+            width: 100px;
+            height: 100px;
+            border: 3px solid #fbbf24;
+            border-radius: 50%;
+            animation: checkinPulse 1s ease-out;
+        }
+        
+        @keyframes checkinPulse {
+            0% {
+                transform: scale(0);
+                opacity: 1;
             }
-            
-            .exploration-hint {
-                right: 20px;
-                left: 20px;
-                max-width: none;
-                text-align: center;
+            100% {
+                transform: scale(3);
+                opacity: 0;
+            }
+        }
+        
+        .checkin-star {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 50px;
+            animation: starBurst 1.5s ease-out;
+        }
+        
+        @keyframes starBurst {
+            0% {
+                transform: translate(-50%, -50%) scale(0) rotate(0deg);
+                opacity: 1;
+            }
+            50% {
+                transform: translate(-50%, -50%) scale(1.5) rotate(180deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translate(-50%, -50%) scale(0.5) rotate(360deg);
+                opacity: 0;
+            }
+        }
+        
+        .points-float {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 24px;
+            font-weight: bold;
+            color: #fbbf24;
+            animation: floatUp 2s ease-out;
+            text-shadow: 0 2px 10px rgba(251, 191, 36, 0.5);
+        }
+        
+        @keyframes floatUp {
+            0% {
+                transform: translate(-50%, -50%);
+                opacity: 1;
+            }
+            100% {
+                transform: translate(-50%, -150px);
+                opacity: 0;
+            }
+        }
+        
+        /* 地图外POI提示 */
+        .offmap-indicator {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            background: rgba(251, 191, 36, 0.2);
+            border: 2px solid #fbbf24;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: offmapPulse 2s infinite;
+            cursor: pointer;
+        }
+        
+        @keyframes offmapPulse {
+            0%, 100% { transform: scale(1); opacity: 0.7; }
+            50% { transform: scale(1.2); opacity: 1; }
+        }
+        
+        .offmap-indicator::after {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: #fbbf24;
+            clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+        }
+        
+        .offmap-indicator.top {
+            top: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        
+        .offmap-indicator.top::after {
+            transform: rotate(0deg);
+        }
+        
+        .offmap-indicator.right {
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+        
+        .offmap-indicator.right::after {
+            transform: rotate(90deg);
+        }
+        
+        .offmap-distance {
+            position: absolute;
+            bottom: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #fbbf24;
+            color: #000;
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-size: 10px;
+            font-weight: bold;
+            white-space: nowrap;
+        }
+        
+        /* 底部控制栏 */
+        .control-bar {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255,255,255,0.95);
+            border-radius: 30px;
+            padding: 10px 20px;
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            z-index: 200;
+        }
+        
+        .start-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .start-btn:hover {
+            transform: scale(1.05);
+        }
+        
+        .start-btn:active {
+            transform: scale(0.95);
+        }
+        
+        /* 提示文字 */
+        .hint-text {
+            position: absolute;
+            top: 80px;
+            right: 20px;
+            background: rgba(251, 191, 36, 0.9);
+            color: #000;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 500;
+            animation: slideDown 0.5s ease;
+            z-index: 150;
+        }
+        
+        @keyframes slideDown {
+            from { 
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
             }
         }
     </style>
 </head>
 <body>
-    <div class="map-container">
-        <div class="map-view" id="mapView">
-            <!-- 建筑物层 -->
-            <div class="buildings-layer">
-                <div class="building" style="top: 20%; left: 15%; width: 80px; height: 60px;"></div>
-                <div class="building" style="top: 35%; left: 25%; width: 100px; height: 80px;"></div>
-                <div class="building" style="top: 15%; right: 20%; width: 90px; height: 70px;"></div>
-                <div class="building" style="top: 45%; right: 15%; width: 120px; height: 90px;"></div>
-                <div class="building" style="bottom: 30%; left: 20%; width: 110px; height: 85px;"></div>
-                <div class="building" style="bottom: 25%; right: 25%; width: 95px; height: 75px;"></div>
-            </div>
-
-            <!-- POI侧边栏 -->
-            <div class="poi-sidebar">
-                <div class="poi-header">
-                    <span>📍</span>
-                    <h2>附近宝藏点</h2>
-                </div>
-
-                <div class="poi-item" onclick="navigateTo('central-park')">
-                    <div class="poi-icon" style="background: linear-gradient(135deg, #48bb78, #38a169);">🌳</div>
-                    <div class="poi-info">
-                        <div class="poi-name">中央公园</div>
-                        <div class="poi-distance">📏 120m</div>
-                        <div class="poi-status status-completed">✅ 已打卡</div>
+    <!-- 加载画面 -->
+    <div class="loading-screen" id="loadingScreen">
+        <div class="dog-intro">
+            <div class="dog-3d">
+                <div class="schnauzer-body">
+                    <div class="schnauzer-ears">
+                        <div class="ear"></div>
+                        <div class="ear"></div>
                     </div>
-                    <button class="navigate-btn">导航</button>
-                </div>
-
-                <div class="poi-item" onclick="navigateTo('coffee-shop')">
-                    <div class="poi-icon" style="background: linear-gradient(135deg, #8b4513, #a0522d);">☕</div>
-                    <div class="poi-info">
-                        <div class="poi-name">萌宠咖啡</div>
-                        <div class="poi-distance">📏 85m</div>
-                        <div class="poi-status status-completed">✅ 已打卡</div>
+                    <div class="schnauzer-eyes">
+                        <div class="eye"></div>
+                        <div class="eye"></div>
                     </div>
-                    <button class="navigate-btn">导航</button>
+                    <div class="schnauzer-nose"></div>
+                    <div class="schnauzer-beard"></div>
                 </div>
-
-                <div class="poi-item" onclick="navigateTo('pet-store')">
-                    <div class="poi-icon" style="background: linear-gradient(135deg, #4299e1, #2b6cb0);">🛒</div>
-                    <div class="poi-info">
-                        <div class="poi-name">汪汪宠物店</div>
-                        <div class="poi-distance">📏 156m</div>
-                        <div class="poi-status status-points">+80积分</div>
-                    </div>
-                    <button class="navigate-btn">导航</button>
-                </div>
-
-                <div class="poi-item" onclick="navigateTo('hospital')">
-                    <div class="poi-icon" style="background: linear-gradient(135deg, #f56565, #e53e3e);">🏥</div>
-                    <div class="poi-info">
-                        <div class="poi-name">爱心宠物医院</div>
-                        <div class="poi-distance">📏 210m</div>
-                        <div class="poi-status status-points">+100积分 (首次发现)</div>
-                    </div>
-                    <button class="navigate-btn">导航</button>
-                </div>
-
-                <div class="poi-item" onclick="navigateTo('treasure')">
-                    <div class="poi-icon" style="background: linear-gradient(135deg, #4fd1c7, #38b2ac);">💎</div>
-                    <div class="poi-info">
-                        <div class="poi-name">神秘宝箱</div>
-                        <div class="poi-distance">📏 68m</div>
-                        <div class="poi-status status-completed">✅ 已打卡</div>
-                    </div>
-                    <button class="navigate-btn">导航</button>
-                </div>
-            </div>
-
-            <!-- 地图POI标记 -->
-            <div class="map-poi" style="top: 25%; right: 35%;" data-poi="central-park">
-                <div class="poi-marker" style="background: linear-gradient(135deg, #48bb78, #38a169);">🌳</div>
-                <div class="poi-label">中央公园<br>✅ 已打卡</div>
-            </div>
-
-            <div class="map-poi" style="bottom: 35%; right: 25%;" data-poi="coffee-shop">
-                <div class="poi-marker" style="background: linear-gradient(135deg, #8b4513, #a0522d);">☕</div>
-                <div class="poi-label">萌宠咖啡<br>✅ 已打卡</div>
-            </div>
-
-            <div class="map-poi" style="bottom: 20%; left: 30%;" data-poi="pet-store">
-                <div class="poi-marker" style="background: linear-gradient(135deg, #4299e1, #2b6cb0);">🛒</div>
-                <div class="poi-label">汪汪宠物店<br>+80积分 (急需更新)</div>
-            </div>
-
-            <div class="map-poi" style="top: 30%; right: 20%;" data-poi="hospital">
-                <div class="poi-marker" style="background: linear-gradient(135deg, #f56565, #e53e3e);">🏥</div>
-                <div class="poi-label">爱心宠物医院<br>+100积分 (首次发现)</div>
-            </div>
-
-            <div class="map-poi" style="bottom: 40%; left: 45%;" data-poi="treasure">
-                <div class="poi-marker" style="background: linear-gradient(135deg, #4fd1c7, #38b2ac);">💎</div>
-                <div class="poi-label">神秘宝箱<br>✅ 已打卡</div>
-            </div>
-
-            <!-- 宠物角色 -->
-            <div class="pet-character">
-                <div class="pet-avatar">🐕</div>
-                <div class="pet-name">妞子</div>
-            </div>
-
-            <!-- 距离指示器 -->
-            <div class="distance-indicator">
-                <span>📍</span>
-                <span>280m</span>
-            </div>
-
-            <div class="distance-indicator" style="top: 60%; right: 20px;">
-                <span>📍</span>
-                <span>450m</span>
             </div>
         </div>
-
-        <!-- 探索提示 -->
-        <div class="exploration-hint">
-            📍 前方有更多宝藏点！继续探索解锁新区域
-        </div>
-
-        <!-- 控制面板 -->
-        <div class="control-panel">
-            <button class="view-toggle" onclick="toggleView()">
-                <span id="viewIcon">🌐</span>
-                <span id="viewText">3D视角</span>
-            </button>
-        </div>
-
-        <!-- 开始按钮 -->
-        <button class="start-button" onclick="startExploration()">
-            🐾 开始遛狗
-        </button>
+        <div class="loading-text">雪纳瑞瑞瑞准备出发...</div>
     </div>
-
+    
+    <!-- 游戏主界面 -->
+    <div class="game-container">
+        <!-- 地图容器 -->
+        <div class="map-container" id="mapContainer">
+            <!-- 模拟道路 -->
+            <div class="road road-h"></div>
+            <div class="road road-v"></div>
+            
+            <!-- 探索范围 -->
+            <div class="explore-range"></div>
+            
+            <!-- POI点位 -->
+            <!-- 已探索的公园 -->
+            <div class="poi discovered" style="top: 30%; left: 30%;" data-name="中央公园" data-distance="120m">
+                <div class="poi-icon">🌳</div>
+                <div class="poi-info">
+                    <div>中央公园</div>
+                    <div class="poi-points">已打卡</div>
+                </div>
+            </div>
+            
+            <!-- 附近可打卡的咖啡厅 -->
+            <div class="poi nearby" style="top: 45%; left: 60%;" data-name="萌宠咖啡" data-distance="85m" data-points="50">
+                <div class="poi-icon">☕</div>
+                <div class="poi-info">
+                    <div>萌宠咖啡</div>
+                    <div class="poi-points">+50积分</div>
+                </div>
+            </div>
+            
+            <!-- 需要数据更新的宠物店 -->
+            <div class="poi data-needed" style="top: 65%; left: 35%;" data-name="汪汪宠物店" data-distance="156m" data-points="80">
+                <div class="poi-icon">🏪</div>
+                <div class="poi-info">
+                    <div>汪汪宠物店</div>
+                    <div class="poi-points">+80积分 (急需更新)</div>
+                </div>
+            </div>
+            
+            <!-- 未探索的医院 -->
+            <div class="poi unexplored" style="top: 35%; left: 70%;" data-name="爱心宠物医院" data-distance="210m" data-points="100">
+                <div class="poi-icon">🏥</div>
+                <div class="poi-question">?</div>
+                <div class="poi-info">
+                    <div>爱心宠物医院</div>
+                    <div class="poi-points">+100积分 (首次发现)</div>
+                </div>
+            </div>
+            
+            <!-- 神秘宝箱 -->
+            <div class="poi nearby data-needed" style="top: 55%; left: 45%;" data-name="神秘宝箱" data-distance="68m" data-points="200">
+                <div class="poi-icon">💎</div>
+                <div class="poi-info">
+                    <div>神秘宝箱</div>
+                    <div class="poi-points">+200积分!</div>
+                </div>
+            </div>
+            
+            <!-- 地图外POI指示器 -->
+            <div class="offmap-indicator top" onclick="showOffmapHint()">
+                <div class="offmap-distance">280m</div>
+            </div>
+            
+            <div class="offmap-indicator right" onclick="showOffmapHint()">
+                <div class="offmap-distance">450m</div>
+            </div>
+            
+            <!-- 主角 -->
+            <div class="player-dog">
+                <div class="schnauzer-3d">
+                    <div class="schnauzer-body">
+                        <div class="schnauzer-ears">
+                            <div class="ear"></div>
+                            <div class="ear"></div>
+                        </div>
+                        <div class="schnauzer-eyes">
+                            <div class="eye"></div>
+                            <div class="eye"></div>
+                        </div>
+                        <div class="schnauzer-nose"></div>
+                        <div class="schnauzer-beard"></div>
+                    </div>
+                    <div class="player-shadow"></div>
+                </div>
+                <div class="player-name">雪纳瑞瑞瑞</div>
+            </div>
+        </div>
+        
+        <!-- 导航面板 -->
+        <div class="nav-panel">
+            <div class="nav-title">
+                <span>📍</span>
+                <span>附近宝藏点</span>
+            </div>
+            <div class="poi-list" id="poiList">
+                <!-- 动态生成POI列表 -->
+            </div>
+        </div>
+        
+        <!-- 提示文字 -->
+        <div class="hint-text" id="hintText">
+            💡 点击左侧列表可一键导航！
+        </div>
+        
+        <!-- 底部控制栏 -->
+        <div class="control-bar">
+            <button class="start-btn" onclick="startWalk()">🐾 开始遛狗</button>
+        </div>
+    </div>
+    
     <script>
-        let is3D = false;
-        let currentTarget = null;
-
-        function toggleView() {
-            const mapView = document.getElementById('mapView');
-            const viewIcon = document.getElementById('viewIcon');
-            const viewText = document.getElementById('viewText');
+        // 延迟隐藏加载画面
+        setTimeout(() => {
+            document.getElementById('loadingScreen').classList.add('hide');
+            initPoiList();
+        }, 2000);
+        
+        // 初始化POI列表
+        function initPoiList() {
+            const pois = document.querySelectorAll('.poi');
+            const poiList = document.getElementById('poiList');
             
-            is3D = !is3D;
-            
-            if (is3D) {
-                mapView.classList.add('view-3d');
-                viewIcon.textContent = '🗺️';
-                viewText.textContent = '俯视视角';
+            pois.forEach(poi => {
+                const name = poi.dataset.name;
+                const distance = poi.dataset.distance;
+                const points = poi.dataset.points;
+                const icon = poi.querySelector('.poi-icon').innerText;
                 
-                // 3D模式下增加建筑物高度效果
-                const buildings = document.querySelectorAll('.building');
-                buildings.forEach((building, index) => {
-                    building.style.transform = `translateZ(${20 + index * 10}px)`;
-                    building.style.opacity = '0.6';
+                const item = document.createElement('div');
+                item.className = 'poi-item';
+                item.innerHTML = `
+                    <div class="poi-item-info">
+                        <div class="poi-item-icon">${icon}</div>
+                        <div class="poi-item-details">
+                            <div class="poi-item-name">${name}</div>
+                            <div class="poi-item-distance">📏 ${distance}</div>
+                            ${points ? `<div class="poi-item-points">+${points}积分</div>` : '<div class="poi-item-points">已打卡</div>'}
+                        </div>
+                    </div>
+                    <button class="nav-btn" onclick="navigateTo('${name}')">导航</button>
+                `;
+                
+                item.addEventListener('click', function(e) {
+                    if (!e.target.classList.contains('nav-btn')) {
+                        highlightPoi(poi);
+                    }
                 });
                 
-                // POI标记也添加3D效果
-                const pois = document.querySelectorAll('.map-poi');
-                pois.forEach((poi, index) => {
-                    poi.style.transform = `translateZ(${30}px)`;
-                });
-                
-            } else {
-                mapView.classList.remove('view-3d');
-                viewIcon.textContent = '🌐';
-                viewText.textContent = '3D视角';
-                
-                // 重置建筑物效果
-                const buildings = document.querySelectorAll('.building');
-                buildings.forEach(building => {
-                    building.style.transform = '';
-                    building.style.opacity = '0.3';
-                });
-                
-                // 重置POI效果
-                const pois = document.querySelectorAll('.map-poi');
-                pois.forEach(poi => {
-                    poi.style.transform = '';
-                });
-            }
-        }
-
-        function navigateTo(poiId) {
-            // 移除之前的高亮
-            document.querySelectorAll('.map-poi').forEach(poi => {
-                poi.style.transform = poi.style.transform.replace('scale(1.3)', '');
+                poiList.appendChild(item);
             });
-            
-            // 高亮目标POI
-            const targetPoi = document.querySelector(`[data-poi="${poiId}"]`);
-            if (targetPoi) {
-                targetPoi.style.transform += ' scale(1.3)';
-                currentTarget = poiId;
-                
-                // 播放导航动画
-                animateNavigation(targetPoi);
-            }
         }
-
-        function animateNavigation(targetElement) {
-            // 创建导航路径动画
-            const pet = document.querySelector('.pet-character');
-            const petRect = pet.getBoundingClientRect();
-            const targetRect = targetElement.getBoundingClientRect();
-            
-            // 创建虚线路径
-            const path = document.createElement('div');
-            path.style.position = 'absolute';
-            path.style.left = '50%';
-            path.style.bottom = '45%';
-            path.style.width = '2px';
-            path.style.height = '100px';
-            path.style.background = 'linear-gradient(to top, #667eea 0%, transparent 100%)';
-            path.style.animation = 'pathGlow 2s infinite';
-            path.style.zIndex = '5';
-            
-            document.querySelector('.map-view').appendChild(path);
-            
-            // 2秒后移除路径
+        
+        // 导航功能
+        function navigateTo(poiName) {
+            showHint(`🗺️ 正在打开步行导航到 ${poiName}...`);
+            // 实际项目中这里调用高德地图导航API
             setTimeout(() => {
-                path.remove();
-            }, 2000);
+                showHint(`📍 导航已开启，请跟随路线指引`);
+            }, 1000);
         }
-
-        function startExploration() {
-            const pet = document.querySelector('.pet-avatar');
-            const petName = document.querySelector('.pet-name');
-            
-            // 开始探索动画
-            pet.style.animation = 'bounce 0.5s ease-in-out 3';
-            petName.style.color = '#ffd89b';
-            petName.textContent = '妞子正在探索...';
-            
+        
+        // 高亮POI
+        function highlightPoi(poi) {
+            // 移除其他高亮
+            document.querySelectorAll('.poi').forEach(p => {
+                p.style.transform = 'scale(1)';
+            });
+            // 高亮选中的POI
+            poi.style.transform = 'scale(1.2)';
             setTimeout(() => {
-                petName.style.color = 'white';
-                petName.textContent = '妞子';
-                pet.style.animation = 'float 3s ease-in-out infinite';
-            }, 2000);
+                poi.style.transform = 'scale(1)';
+            }, 500);
         }
-
-        // 添加CSS动画
-        const style = document.createElement('style');
-        style.textContent = `
-            @keyframes bounce {
-                0%, 100% { transform: translateY(0); }
-                50% { transform: translateY(-20px); }
-            }
-            
-            @keyframes pathGlow {
-                0%, 100% { opacity: 0; }
-                50% { opacity: 1; }
-            }
-        `;
-        document.head.appendChild(style);
-
-        // 添加交互效果
-        document.querySelectorAll('.map-poi').forEach(poi => {
-            poi.addEventListener('click', () => {
-                const poiId = poi.getAttribute('data-poi');
-                navigateTo(poiId);
-            });
-        });
-
-        // 鼠标移动视差效果
-        document.addEventListener('mousemove', (e) => {
-            if (is3D) {
-                const x = (e.clientX / window.innerWidth - 0.5) * 10;
-                const y = (e.clientY / window.innerHeight - 0.5) * 10;
+        
+        // POI交互
+        document.querySelectorAll('.poi').forEach(poi => {
+            poi.addEventListener('click', function() {
+                const poiName = this.dataset.name;
+                const points = this.dataset.points;
                 
-                const mapView = document.getElementById('mapView');
-                mapView.style.transform = `rotateX(${45 + y}deg) rotateY(${x}deg)`;
-            }
-        });
-
-        // 初始化动画
-        window.addEventListener('load', () => {
-            const pois = document.querySelectorAll('.map-poi');
-            pois.forEach((poi, index) => {
-                setTimeout(() => {
-                    poi.style.opacity = '1';
-                    poi.style.transform = 'scale(1)';
-                }, index * 200);
+                // 根据POI状态显示不同提示和特效
+                if (this.classList.contains('discovered')) {
+                    showHint('✅ 今天已经来过这里了');
+                } else if (this.classList.contains('nearby')) {
+                    // 触发打卡特效
+                    triggerCheckinEffect(this);
+                    showHint(`🎯 打卡成功！获得 ${points} 积分！`);
+                    
+                    // 更新状态
+                    this.classList.remove('nearby', 'data-needed', 'unexplored');
+                    this.classList.add('discovered');
+                    this.querySelector('.poi-points').innerText = '已打卡';
+                    
+                    // 更新导航列表
+                    updatePoiListItem(poiName);
+                } else if (this.classList.contains('unexplored')) {
+                    showHint('❓ 未探索的地点，靠近后可打卡！');
+                } else if (this.classList.contains('data-needed')) {
+                    showHint('🔥 这里需要更新数据，积分奖励更高！');
+                }
             });
         });
+        
+        // 触发打卡特效
+        function triggerCheckinEffect(poi) {
+            const rect = poi.getBoundingClientRect();
+            const mapRect = document.getElementById('mapContainer').getBoundingClientRect();
+            
+            // 创建特效容器
+            const effect = document.createElement('div');
+            effect.className = 'checkin-effect';
+            effect.style.left = (rect.left - mapRect.left + rect.width/2) + 'px';
+            effect.style.top = (rect.top - mapRect.top + rect.height/2) + 'px';
+            
+            // 添加圆圈扩散效果
+            const circle = document.createElement('div');
+            circle.className = 'checkin-circle';
+            effect.appendChild(circle);
+            
+            // 添加星星爆炸效果
+            const star = document.createElement('div');
+            star.className = 'checkin-star';
+            star.innerText = '⭐';
+            effect.appendChild(star);
+            
+            // 添加积分飘出效果
+            const points = document.createElement('div');
+            points.className = 'points-float';
+            points.innerText = '+' + poi.dataset.points;
+            effect.appendChild(points);
+            
+            // 添加到地图容器
+            document.getElementById('mapContainer').appendChild(effect);
+            
+            // 动画结束后移除
+            setTimeout(() => {
+                effect.remove();
+            }, 2000);
+            
+            // 震动反馈（如果支持）
+            if (navigator.vibrate) {
+                navigator.vibrate(100);
+            }
+        }
+        
+        // 更新导航列表项
+        function updatePoiListItem(poiName) {
+            const items = document.querySelectorAll('.poi-item');
+            items.forEach(item => {
+                if (item.querySelector('.poi-item-name').innerText === poiName) {
+                    const pointsEl = item.querySelector('.poi-item-points');
+                    if (pointsEl) {
+                        pointsEl.innerText = '已打卡';
+                        pointsEl.style.color = '#10b981';
+                    }
+                }
+            });
+        }
+        
+        // 开始遛狗
+        function startWalk() {
+            showHint('🚀 遛狗模式已开启！去探索附近的宝藏点吧～');
+            
+            // 模拟移动效果
+            const player = document.querySelector('.player-dog');
+            let position = { x: 50, y: 50 };
+            
+            // 简单的键盘控制（演示用）
+            document.addEventListener('keydown', (e) => {
+                const step = 2;
+                switch(e.key) {
+                    case 'ArrowUp':
+                        position.y = Math.max(10, position.y - step);
+                        break;
+                    case 'ArrowDown':
+                        position.y = Math.min(90, position.y + step);
+                        break;
+                    case 'ArrowLeft':
+                        position.x = Math.max(10, position.x - step);
+                        break;
+                    case 'ArrowRight':
+                        position.x = Math.min(90, position.x + step);
+                        break;
+                }
+                player.style.top = position.y + '%';
+                player.style.left = position.x + '%';
+                
+                // 检查是否靠近POI
+                checkNearbyPOI(position);
+            });
+        }
+        
+        // 检查附近POI
+        function checkNearbyPOI(position) {
+            document.querySelectorAll('.poi:not(.discovered)').forEach(poi => {
+                const poiRect = poi.getBoundingClientRect();
+                const mapRect = document.getElementById('mapContainer').getBoundingClientRect();
+                const poiX = ((poiRect.left - mapRect.left) / mapRect.width) * 100;
+                const poiY = ((poiRect.top - mapRect.top) / mapRect.height) * 100;
+                
+                const distance = Math.sqrt(Math.pow(position.x - poiX, 2) + Math.pow(position.y - poiY, 2));
+                
+                // 自动打卡
+                if (distance < 10) {
+                    poi.click();
+                }
+            });
+        }
+        
+        // 显示地图外POI提示
+        function showOffmapHint() {
+            showHint('📍 前方有更多宝藏点！继续探索解锁新区域');
+        }
+        
+        // 显示提示
+        function showHint(text) {
+            const hint = document.getElementById('hintText');
+            hint.innerText = text;
+            hint.style.animation = 'none';
+            setTimeout(() => {
+                hint.style.animation = 'slideDown 0.5s ease';
+            }, 10);
+        }
+        
+        // 初始化提示
+        setTimeout(() => {
+            showHint('🎮 点击POI可以打卡，点击导航按钮开启步行导航');
+        }, 3000);
+        
+        // POI动画循环
+        setInterval(() => {
+            // 模拟数据需求变化
+            const pois = document.querySelectorAll('.poi:not(.discovered)');
+            if (pois.length > 0) {
+                const randomPoi = pois[Math.floor(Math.random() * pois.length)];
+                randomPoi.classList.toggle('data-needed');
+            }
+        }, 5000);
     </script>
 </body>
 </html>
+                
+                // 根据POI状态显示不同提示和特效
+                if (this.classList.contains('discovered')) {
+                    showHint('✅ 今天已经来过这里了');
+                } else if (this.classList.contains('nearby')) {
+                    // 触发打卡特效
+                    triggerCheckinEffect(this);
+                    showHint(`🎯 打卡成功！获得 ${points} 积分！`);
+                    
+                    // 更新状态
+                    this.classList.remove('nearby', 'data-needed', 'unexplored');
+                    this.classList.add('discovered');
+                    this.querySelector('.poi-points').innerText = '已打卡';
+                    
+                    // 更新导航列表
+                    updatePoiListItem(poiName);
+                } else if (this.classList.contains('unexplored')) {
+                    showHint('❓ 未探索的地点，靠近后可打卡！');
+                } else if (this.classList.contains('data-needed')) {
+                    showHint('🔥 这里需要更新数据，积分奖励更高！');
+                }
+            });
+        });
+        
+        // 触发打卡特效
+        function triggerCheckinEffect(poi) {
+            const rect = poi.getBoundingClientRect();
+            const mapRect = document.getElementById('mapContainer').getBoundingClientRect();
+            
+            // 创建特效容器
+            const effect = document.createElement('div');
+            effect.className = 'checkin-effect';
+            effect.style.left = (rect.left - mapRect.left + rect.width/2) + 'px';
+            effect.style.top = (rect.top - mapRect.top + rect.height/2) + 'px';
+            
+            // 添加圆圈扩散效果
+            const circle = document.createElement('div');
+            circle.className = 'checkin-circle';
+            effect.appendChild(circle);
+            
+            // 添加星星爆炸效果
+            const star = document.createElement('div');
+            star.className = 'checkin-star';
+            star.innerText = '⭐';
+            effect.appendChild(star);
+            
+            // 添加积分飘出效果
+            const points = document.createElement('div');
+            points.className = 'points-float';
+            points.innerText = '+' + poi.dataset.points;
+            effect.appendChild(points);
+            
+            // 添加到地图容器
+            document.getElementById('mapContainer').appendChild(effect);
+            
+            // 动画结束后移除
+            setTimeout(() => {
+                effect.remove();
+            }, 2000);
+            
+            // 震动反馈（如果支持）
+            if (navigator.vibrate) {
+                navigator.vibrate(100);
+            }
+        }
+        
+        // 更新导航列表项
+        function updatePoiListItem(poiName) {
+            const items = document.querySelectorAll('.poi-item');
+            items.forEach(item => {
+                if (item.querySelector('.poi-item-name').innerText === poiName) {
+                    const pointsEl = item.querySelector('.poi-item-points');
+                    if (pointsEl) {
+                        pointsEl.innerText = '已打卡';
+                        pointsEl.style.color = '#10b981';
+                    }
+                }
+            });
+        }
