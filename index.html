@@ -23,21 +23,9 @@
         /* 移动端适配 */
         @media (max-width: 768px) {
             .nav-panel {
-                width: 280px;
+                width: 260px;
                 left: 15px;
                 top: calc(env(safe-area-inset-top, 20px) + 15px);
-            }
-            
-            .control-bar {
-                bottom: calc(env(safe-area-inset-bottom, 20px) + 15px);
-                left: 50%;
-                transform: translateX(-50%);
-                width: auto;
-            }
-            
-            .view-toggle {
-                bottom: calc(env(safe-area-inset-bottom, 20px) + 15px);
-                left: 15px;
             }
             
             .step-counter {
@@ -48,8 +36,18 @@
             .hint-text {
                 top: calc(env(safe-area-inset-top, 20px) + 70px);
                 right: 15px;
-                left: auto;
-                max-width: 200px;
+                max-width: 180px;
+            }
+            
+            .view-toggle {
+                bottom: calc(env(safe-area-inset-bottom, 20px) + 80px);
+                left: 15px;
+            }
+            
+            .control-bar {
+                bottom: calc(env(safe-area-inset-bottom, 20px) + 15px);
+                left: 50%;
+                transform: translateX(-50%);
             }
         }
         
@@ -260,679 +258,7 @@
             50% { opacity: 0.6; }
         }
         
-        /* POI设计 */
-        .poi {
-            position: absolute;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            transform-style: preserve-3d;
-        }
-        
-        .poi-container {
-            position: relative;
-            transform: translateZ(30px);
-        }
-        
-        .poi-base {
-            width: 50px;
-            height: 50px;
-            background: linear-gradient(135deg, rgba(255,255,255,0.9), rgba(255,255,255,0.95));
-            border-radius: 15px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-            box-shadow: 
-                0 8px 25px rgba(0,0,0,0.3),
-                inset 0 2px 5px rgba(255,255,255,0.5);
-            transform-style: preserve-3d;
-        }
-        
-        .poi-icon {
-            font-size: 24px;
-            z-index: 2;
-            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
-        }
-        
-        /* POI光环效果 */
-        .poi-glow {
-            position: absolute;
-            top: -8px;
-            left: -8px;
-            right: -8px;
-            bottom: -8px;
-            border-radius: 20px;
-            pointer-events: none;
-        }
-        
-        .poi.nearby .poi-glow {
-            background: radial-gradient(circle, rgba(251,191,36,0.4), transparent);
-            animation: glow 2s infinite;
-        }
-        
-        @keyframes glow {
-            0%, 100% { transform: scale(1); opacity: 0.5; }
-            50% { transform: scale(1.1); opacity: 0.8; }
-        }
-        
-        .poi.data-needed .poi-glow {
-            background: radial-gradient(circle, rgba(239,68,68,0.4), transparent);
-            animation: urgentGlow 1s infinite;
-        }
-        
-        @keyframes urgentGlow {
-            0%, 100% { transform: scale(1); opacity: 0.3; }
-            50% { transform: scale(1.2); opacity: 0.9; }
-        }
-        
-        /* POI悬浮标签 - 简化 */
-        .poi-label {
-            position: absolute;
-            bottom: -30px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(0,0,0,0.8);
-            color: white;
-            padding: 4px 8px;
-            border-radius: 15px;
-            font-size: 10px;
-            white-space: nowrap;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-        }
-        
-        /* POI类型样式 */
-        .poi.type-park .poi-base {
-            background: linear-gradient(135deg, #86efac, #4ade80);
-        }
-        
-        .poi.type-cafe .poi-base {
-            background: linear-gradient(135deg, #fed7aa, #fb923c);
-        }
-        
-        .poi.type-store .poi-base {
-            background: linear-gradient(135deg, #bfdbfe, #60a5fa);
-        }
-        
-        .poi.type-hospital .poi-base {
-            background: linear-gradient(135deg, #fecaca, #f87171);
-        }
-        
-        .poi.type-treasure .poi-base {
-            background: linear-gradient(135deg, #fde047, #facc15);
-            animation: treasurePulse 1.5s infinite;
-        }
-        
-        @keyframes treasurePulse {
-            0%, 100% { transform: scale(1) rotate(0deg); }
-            50% { transform: scale(1.1) rotate(5deg); }
-        }
-        
-        /* 主角雪纳瑞 */
-        .player-dog {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            z-index: 100;
-            transform-style: preserve-3d;
-            transition: all 0.8s ease;
-        }
-        
-        .player-dog.walking {
-            animation: dogWalkActive 0.6s infinite;
-        }
-        
-        .player-dog.walking .schnauzer-3d {
-            animation: dogBobbing 0.8s infinite;
-        }
-        
-        @keyframes dogWalkActive {
-            0%, 100% { transform: translate(-50%, -50%) rotateZ(-3deg); }
-            25% { transform: translate(-50%, -50%) rotateZ(0deg) translateY(-3px); }
-            50% { transform: translate(-50%, -50%) rotateZ(3deg); }
-            75% { transform: translate(-50%, -50%) rotateZ(0deg) translateY(-3px); }
-        }
-        
-        @keyframes dogBobbing {
-            0%, 100% { transform: translateZ(40px) rotateY(-5deg); }
-            50% { transform: translateZ(45px) rotateY(5deg); }
-        }
-        
-        .schnauzer-3d {
-            width: 60px;
-            height: 60px;
-            position: relative;
-            transform-style: preserve-3d;
-            transform: translateZ(40px);
-        }
-        
-        .schnauzer-body {
-            width: 50px;
-            height: 50px;
-            background: linear-gradient(135deg, #9ca3af 0%, #6b7280 50%, #4b5563 100%);
-            border-radius: 50% 50% 45% 45%;
-            position: relative;
-            box-shadow: 
-                0 8px 16px rgba(0,0,0,0.4),
-                inset -3px -3px 8px rgba(255,255,255,0.1),
-                inset 3px 3px 8px rgba(0,0,0,0.2);
-        }
-        
-        .schnauzer-beard {
-            position: absolute;
-            bottom: 6px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 35px;
-            height: 16px;
-            background: linear-gradient(to bottom, #e5e7eb, #d1d5db);
-            border-radius: 0 0 50% 50%;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-        }
-        
-        .schnauzer-ears {
-            position: absolute;
-            top: -4px;
-            width: 100%;
-            display: flex;
-            justify-content: space-between;
-            padding: 0 6px;
-        }
-        
-        .ear {
-            width: 12px;
-            height: 16px;
-            background: linear-gradient(135deg, #6b7280, #4b5563);
-            border-radius: 50% 50% 0 0;
-            box-shadow: inset 1px 1px 2px rgba(0,0,0,0.2);
-        }
-        
-        .player-dog.walking .ear {
-            animation: earFlop 0.8s infinite;
-        }
-        
-        @keyframes earFlop {
-            0%, 100% { transform: rotateX(0deg); }
-            50% { transform: rotateX(15deg); }
-        }
-        
-        .schnauzer-eyes {
-            position: absolute;
-            top: 12px;
-            width: 100%;
-            display: flex;
-            justify-content: center;
-            gap: 12px;
-        }
-        
-        .eye {
-            width: 6px;
-            height: 6px;
-            background: #1f2937;
-            border-radius: 50%;
-            position: relative;
-            animation: blink 3s infinite;
-        }
-        
-        @keyframes blink {
-            0%, 90%, 100% { transform: scaleY(1); }
-            95% { transform: scaleY(0.1); }
-        }
-        
-        .eye::after {
-            content: '';
-            position: absolute;
-            top: 1px;
-            left: 1px;
-            width: 2px;
-            height: 2px;
-            background: white;
-            border-radius: 50%;
-        }
-        
-        .schnauzer-nose {
-            position: absolute;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 6px;
-            height: 5px;
-            background: #1f2937;
-            border-radius: 50%;
-        }
-        
-        .player-shadow {
-            position: absolute;
-            bottom: -12px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 40px;
-            height: 8px;
-            background: rgba(0,0,0,0.4);
-            border-radius: 50%;
-            filter: blur(6px);
-        }
-        
-        .player-name {
-            position: absolute;
-            bottom: -28px;
-            left: 50%;
-            transform: translateX(-50%);
-            color: white;
-            font-size: 11px;
-            white-space: nowrap;
-            background: linear-gradient(135deg, rgba(102,126,234,0.9), rgba(118,75,162,0.9));
-            padding: 3px 10px;
-            border-radius: 12px;
-            font-weight: 600;
-            box-shadow: 0 3px 8px rgba(0,0,0,0.3);
-        }
-        
-        /* 可折叠导航面板 */
-        .nav-panel {
-            position: absolute;
-            top: 20px;
-            left: 15px;
-            background: rgba(255,255,255,0.95);
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-            z-index: 300;
-            width: 260px;
-            backdrop-filter: blur(10px);
-            transition: all 0.3s ease;
-        }
-        
-        .nav-panel.collapsed {
-            width: 44px;
-            height: 44px;
-            overflow: hidden;
-        }
-        
-        .nav-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 12px 15px;
-            border-bottom: 1px solid rgba(0,0,0,0.05);
-            cursor: pointer;
-        }
-        
-        .nav-panel.collapsed .nav-header {
-            border-bottom: none;
-            padding: 10px;
-        }
-        
-        .nav-title {
-            font-size: 13px;
-            font-weight: 600;
-            color: #1f2937;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-        
-        .nav-panel.collapsed .nav-title span:last-child {
-            display: none;
-        }
-        
-        .toggle-btn {
-            background: none;
-            border: none;
-            font-size: 14px;
-            cursor: pointer;
-            transition: transform 0.3s ease;
-        }
-        
-        .nav-panel.collapsed .toggle-btn {
-            transform: rotate(180deg);
-        }
-        
-        .nav-content {
-            padding: 10px;
-            max-height: 200px;
-            overflow-y: auto;
-        }
-        
-        .nav-panel.collapsed .nav-content {
-            display: none;
-        }
-        
-        .poi-list {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-        }
-        
-        .poi-item {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 8px;
-            background: rgba(249,250,251,0.8);
-            border-radius: 8px;
-            transition: all 0.3s ease;
-            cursor: pointer;
-        }
-        
-        .poi-item:hover {
-            background: linear-gradient(135deg, #667eea20, #764ba220);
-            transform: translateX(2px);
-        }
-        
-        .poi-item-info {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            flex: 1;
-        }
-        
-        .poi-item-icon {
-            width: 24px;
-            height: 24px;
-            background: white;
-            border-radius: 6px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 14px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        
-        .poi-item-details {
-            display: flex;
-            flex-direction: column;
-            flex: 1;
-        }
-        
-        .poi-item-name {
-            font-size: 11px;
-            font-weight: 600;
-            color: #1f2937;
-        }
-        
-        .poi-item-distance {
-            font-size: 10px;
-            color: #6b7280;
-        }
-        
-        .nav-btn {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
-            border: none;
-            padding: 4px 8px;
-            border-radius: 12px;
-            font-size: 10px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-        
-        /* 步数计数器 */
-        .step-counter {
-            position: absolute;
-            top: 20px;
-            right: 15px;
-            background: rgba(255,255,255,0.95);
-            padding: 8px 12px;
-            border-radius: 15px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-            z-index: 300;
-            display: none;
-            backdrop-filter: blur(10px);
-        }
-        
-        .step-counter.show {
-            display: block;
-            animation: slideDown 0.5s ease;
-        }
-        
-        .step-text {
-            font-size: 12px;
-            font-weight: 600;
-            color: #1f2937;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-        
-        /* 视角切换按钮 */
-        .view-toggle {
-            position: absolute;
-            bottom: 15px;
-            left: 15px;
-            background: rgba(255,255,255,0.95);
-            border-radius: 15px;
-            padding: 4px;
-            display: flex;
-            gap: 4px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-            z-index: 300;
-            backdrop-filter: blur(10px);
-        }
-        
-        .view-btn {
-            background: transparent;
-            border: none;
-            padding: 8px 12px;
-            border-radius: 12px;
-            font-size: 11px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-        
-        .view-btn.active {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
-        }
-        
-        .view-btn:not(.active) {
-            color: #6b7280;
-        }
-        
-        /* 底部控制栏 */
-        .control-bar {
-            position: absolute;
-            bottom: 15px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(255,255,255,0.95);
-            border-radius: 25px;
-            padding: 8px 16px;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
-            z-index: 200;
-            backdrop-filter: blur(10px);
-        }
-        
-        .start-btn {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
-            border: none;
-            padding: 10px 24px;
-            border-radius: 20px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-        
-        .start-btn.walking {
-            background: linear-gradient(135deg, #ef4444, #dc2626);
-            animation: walkingPulse 1s infinite;
-        }
-        
-        @keyframes walkingPulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-        }
-        
-        /* 提示文字 */
-        .hint-text {
-            position: absolute;
-            top: 75px;
-            right: 15px;
-            background: rgba(251, 191, 36, 0.9);
-            color: #000;
-            padding: 6px 12px;
-            border-radius: 15px;
-            font-size: 12px;
-            font-weight: 500;
-            animation: slideDown 0.5s ease;
-            z-index: 150;
-            max-width: 180px;
-            text-align: center;
-            backdrop-filter: blur(10px);
-        }
-        
-        @keyframes slideDown {
-            from { 
-                opacity: 0;
-                transform: translateY(-15px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        
-        /* POI详情弹窗 */
-        .poi-detail-modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.6);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 800;
-            backdrop-filter: blur(5px);
-        }
-        
-        .poi-detail-modal.show {
-            display: flex;
-            animation: fadeIn 0.3s ease;
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        
-        .poi-detail-content {
-            background: white;
-            border-radius: 20px;
-            padding: 20px;
-            max-width: 340px;
-            width: 90%;
-            max-height: 80vh;
-            overflow-y: auto;
-            animation: scaleIn 0.3s ease;
-        }
-        
-        @keyframes scaleIn {
-            from { transform: scale(0.8); opacity: 0; }
-            to { transform: scale(1); opacity: 1; }
-        }
-        
-        .poi-detail-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 15px;
-        }
-        
-        .poi-detail-title {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .poi-detail-icon {
-            width: 40px;
-            height: 40px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-        }
-        
-        .poi-detail-name {
-            font-size: 18px;
-            font-weight: 700;
-            color: #1f2937;
-        }
-        
-        .poi-close-btn {
-            background: none;
-            border: none;
-            font-size: 24px;
-            cursor: pointer;
-            color: #6b7280;
-            padding: 4px;
-        }
-        
-        .poi-detail-body {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-        
-        .poi-status-row {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 10px 0;
-            border-bottom: 1px solid #f3f4f6;
-        }
-        
-        .poi-status-row:last-child {
-            border-bottom: none;
-        }
-        
-        .poi-status-label {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 13px;
-            color: #6b7280;
-        }
-        
-        .poi-status-value {
-            font-size: 14px;
-            font-weight: 600;
-            color: #1f2937;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-        
-        .fungo-verified {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
-            padding: 2px 6px;
-            border-radius: 8px;
-            font-size: 10px;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 2px;
-        }
-        
-        .like-count {
-            color: #10b981;
-        }
-        
-        .dislike-count {
-            color: #ef4444;
-        }
-        
+        /* 精美的POI设计 */
         .poi-description {
             background: #f9fafb;
             padding: 12px;
@@ -972,6 +298,12 @@
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .poi-navigate-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
         }
         
         .poi-checkin-btn {
@@ -979,19 +311,29 @@
             color: white;
         }
         
-        .poi-navigate-btn {
-            background: rgba(102,126,234,0.1);
-            color: #667eea;
-            border: 1px solid #667eea;
-        }
-        
-        .poi-action-btn:disabled {
-            opacity: 0.5;
+        .poi-checkin-btn:disabled {
+            background: #d1d5db;
+            color: #6b7280;
             cursor: not-allowed;
         }
         
-        /* 距离检测弹窗 */
-        .distance-overlay {
+        .poi-checkin-btn.far {
+            background: #fbbf24;
+            color: #000;
+        }
+        
+        .btn-distance {
+            position: absolute;
+            bottom: -18px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 10px;
+            color: #6b7280;
+            font-weight: 500;
+        }
+        
+        /* 拍照认证弹窗 */
+        .photo-verification-modal {
             position: fixed;
             top: 0;
             left: 0;
@@ -1001,62 +343,146 @@
             display: none;
             align-items: center;
             justify-content: center;
-            z-index: 700;
+            z-index: 900;
             backdrop-filter: blur(5px);
         }
         
-        .distance-overlay.show {
+        .photo-verification-modal.show {
             display: flex;
             animation: fadeIn 0.3s ease;
         }
         
-        .distance-content {
+        .photo-verification-content {
             background: white;
             border-radius: 20px;
             padding: 20px;
-            max-width: 320px;
+            max-width: 350px;
             width: 90%;
             text-align: center;
             animation: scaleIn 0.3s ease;
         }
         
-        .distance-text {
-            font-size: 16px;
-            margin-bottom: 15px;
+        .verification-header {
+            margin-bottom: 20px;
+        }
+        
+        .verification-title {
+            font-size: 18px;
+            font-weight: 700;
             color: #1f2937;
+            margin-bottom: 8px;
         }
         
-        .upload-btn {
-            background: linear-gradient(135deg, #10b981, #059669);
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 15px;
+        .verification-subtitle {
             font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            margin: 8px;
-            transition: all 0.3s ease;
+            color: #6b7280;
+            line-height: 1.4;
         }
         
-        .close-btn {
-            background: transparent;
-            border: 2px solid #6b7280;
-            color: #6b7280;
-            padding: 8px 16px;
-            border-radius: 15px;
-            font-size: 12px;
-            cursor: pointer;
-            margin: 8px;
+        .photo-upload-area {
+            border: 2px dashed #d1d5db;
+            border-radius: 12px;
+            padding: 30px 20px;
+            margin: 15px 0;
             transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .photo-upload-area:hover {
+            border-color: #667eea;
+            background: rgba(102,126,234,0.05);
+        }
+        
+        .photo-upload-area.has-photo {
+            border-color: #10b981;
+            background: rgba(16,185,129,0.05);
+        }
+        
+        .upload-icon {
+            font-size: 48px;
+            color: #9ca3af;
+            margin-bottom: 12px;
+        }
+        
+        .upload-text {
+            font-size: 14px;
+            color: #6b7280;
+            margin-bottom: 8px;
+        }
+        
+        .upload-hint {
+            font-size: 12px;
+            color: #9ca3af;
         }
         
         .photo-preview {
-            max-width: 200px;
+            max-width: 100%;
             max-height: 200px;
-            border-radius: 10px;
+            border-radius: 8px;
             margin: 10px 0;
             box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        
+        .verification-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .verification-btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .submit-verification-btn {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+        }
+        
+        .submit-verification-btn:disabled {
+            background: #d1d5db;
+            color: #6b7280;
+            cursor: not-allowed;
+        }
+        
+        .cancel-verification-btn {
+            background: transparent;
+            border: 2px solid #d1d5db;
+            color: #6b7280;
+        }
+        
+        /* 认证结果显示 */
+        .verification-result {
+            margin-top: 15px;
+            padding: 12px;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 500;
+            display: none;
+        }
+        
+        .verification-result.success {
+            background: #d1fae5;
+            color: #065f46;
+            border: 1px solid #a7f3d0;
+        }
+        
+        .verification-result.failed {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+        }
+        
+        .verification-result.processing {
+            background: #fef3c7;
+            color: #92400e;
+            border: 1px solid #fde68a;
         }
         
         #photoInput {
@@ -1100,9 +526,9 @@
                 max-width: 300px;
             }
             
-            .distance-content {
+            .photo-verification-content {
                 padding: 15px;
-                max-width: 280px;
+                max-width: 320px;
             }
         }
     </style>
@@ -1403,24 +829,43 @@
                         <span class="poi-tag">🚗 停车方便</span>
                     </div>
                     <div class="poi-actions">
-                        <button class="poi-action-btn poi-checkin-btn" id="detailCheckinBtn" onclick="startCheckinProcess()">
-                            📸 拍照打卡
-                        </button>
                         <button class="poi-action-btn poi-navigate-btn" onclick="navigateToDetail()">
-                            🧭 导航
+                            🧭 开始导航
+                            <div class="btn-distance" id="navigateDistance">120m</div>
+                        </button>
+                        <button class="poi-action-btn poi-checkin-btn" id="detailCheckinBtn" onclick="startPhotoVerification()">
+                            📸 拍照认证
                         </button>
                     </div>
                 </div>
             </div>
         </div>
         
-        <!-- 距离检测弹窗 -->
-        <div class="distance-overlay" id="distanceOverlay">
-            <div class="distance-content">
-                <div class="distance-text" id="distanceText"></div>
-                <div id="photoPreviewContainer"></div>
-                <button class="upload-btn" onclick="triggerPhotoUpload()">📸 拍照打卡</button>
-                <button class="close-btn" onclick="closeDistanceOverlay()">关闭</button>
+        <!-- 拍照认证弹窗 -->
+        <div class="photo-verification-modal" id="photoVerificationModal">
+            <div class="photo-verification-content">
+                <div class="verification-header">
+                    <div class="verification-title" id="verificationTitle">拍照认证打卡</div>
+                    <div class="verification-subtitle">请拍摄您和狗狗在此地点的合影，系统将自动验证照片的真实性</div>
+                </div>
+                
+                <div class="photo-upload-area" onclick="triggerPhotoUpload()" id="photoUploadArea">
+                    <div class="upload-icon" id="uploadIcon">📸</div>
+                    <div class="upload-text" id="uploadText">点击拍照</div>
+                    <div class="upload-hint" id="uploadHint">确保您和狗狗都在照片中</div>
+                    <div id="photoPreviewContainer"></div>
+                </div>
+                
+                <div class="verification-result" id="verificationResult"></div>
+                
+                <div class="verification-actions">
+                    <button class="verification-btn cancel-verification-btn" onclick="closePhotoVerification()">
+                        取消
+                    </button>
+                    <button class="verification-btn submit-verification-btn" id="submitVerificationBtn" onclick="submitVerification()" disabled>
+                        提交认证
+                    </button>
+                </div>
             </div>
         </div>
         
@@ -1435,6 +880,7 @@
         let currentPosition = { lat: 31.2305, lng: 121.4738 };
         let selectedPOI = null;
         let navPanelCollapsed = false;
+        let uploadedPhoto = null;
         
         // 延迟隐藏加载画面
         setTimeout(() => {
@@ -1546,7 +992,10 @@
                         <div class="poi-item-icon">${icon}</div>
                         <div class="poi-item-details">
                             <div class="poi-item-name">${name}</div>
-                            <div class="poi-item-distance">📍 ${distance}m</div>
+                            <div class="poi-item-stats">
+                                <span>📍 ${distance}m</span>
+                                <span>💰 +${points}分</span>
+                            </div>
                         </div>
                     </div>
                     <button class="nav-btn" onclick="navigateTo('${name}')">导航</button>
@@ -1573,6 +1022,7 @@
             const lastCheckin = document.getElementById('detailLastCheckin');
             const description = document.getElementById('detailDescription');
             const checkinBtn = document.getElementById('detailCheckinBtn');
+            const navigateDistance = document.getElementById('navigateDistance');
             
             // 设置POI图标背景色
             icon.className = 'poi-detail-icon';
@@ -1595,19 +1045,23 @@
             distance.innerText = poi.dataset.distance + 'm';
             lastCheckin.innerText = poi.dataset.lastCheckin || '未知';
             description.innerText = poi.dataset.description || '暂无描述';
+            navigateDistance.innerText = poi.dataset.distance + 'm';
             
             // 设置打卡按钮状态
             selectedPOI = poi;
             const dist = parseInt(poi.dataset.distance);
             if (poi.classList.contains('discovered')) {
-                checkinBtn.innerHTML = '✅ 已打卡';
+                checkinBtn.innerHTML = '✅ 已认证打卡';
                 checkinBtn.disabled = true;
+                checkinBtn.className = 'poi-action-btn poi-checkin-btn';
             } else if (dist <= 50) {
-                checkinBtn.innerHTML = '📸 拍照打卡';
+                checkinBtn.innerHTML = '📸 拍照认证';
                 checkinBtn.disabled = false;
+                checkinBtn.className = 'poi-action-btn poi-checkin-btn';
             } else {
-                checkinBtn.innerHTML = `📍 需要靠近${50-dist}m`;
+                checkinBtn.innerHTML = `📍 需要靠近 ${50-dist}m`;
                 checkinBtn.disabled = true;
+                checkinBtn.className = 'poi-action-btn poi-checkin-btn far';
             }
             
             modal.classList.add('show');
@@ -1619,19 +1073,135 @@
             selectedPOI = null;
         }
         
-        // 从详情页开始打卡流程
-        function startCheckinProcess() {
-            if (selectedPOI && parseInt(selectedPOI.dataset.distance) <= 50) {
-                closePoiDetail();
-                showDistanceOverlay(selectedPOI.dataset.name, selectedPOI.dataset.distance, selectedPOI.dataset.points);
-            }
-        }
-        
         // 从详情页导航
         function navigateToDetail() {
             if (selectedPOI) {
                 navigateTo(selectedPOI.dataset.name);
                 closePoiDetail();
+            }
+        }
+        
+        // 开始拍照认证流程
+        function startPhotoVerification() {
+            if (selectedPOI && parseInt(selectedPOI.dataset.distance) <= 50) {
+                const modal = document.getElementById('photoVerificationModal');
+                const title = document.getElementById('verificationTitle');
+                title.innerText = `${selectedPOI.dataset.name} - 拍照认证`;
+                
+                // 重置状态
+                resetVerificationModal();
+                
+                closePoiDetail();
+                modal.classList.add('show');
+            }
+        }
+        
+        // 重置认证弹窗状态
+        function resetVerificationModal() {
+            uploadedPhoto = null;
+            document.getElementById('photoPreviewContainer').innerHTML = '';
+            document.getElementById('photoUploadArea').classList.remove('has-photo');
+            document.getElementById('uploadIcon').innerText = '📸';
+            document.getElementById('uploadText').innerText = '点击拍照';
+            document.getElementById('uploadHint').innerText = '确保您和狗狗都在照片中';
+            document.getElementById('submitVerificationBtn').disabled = true;
+            document.getElementById('verificationResult').style.display = 'none';
+        }
+        
+        // 关闭拍照认证弹窗
+        function closePhotoVerification() {
+            document.getElementById('photoVerificationModal').classList.remove('show');
+            selectedPOI = null;
+            uploadedPhoto = null;
+        }
+        
+        // 触发照片上传
+        function triggerPhotoUpload() {
+            document.getElementById('photoInput').click();
+        }
+        
+        // 处理照片上传
+        function handlePhotoUpload(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    uploadedPhoto = e.target.result;
+                    
+                    const previewContainer = document.getElementById('photoPreviewContainer');
+                    previewContainer.innerHTML = `
+                        <img src="${e.target.result}" class="photo-preview" alt="认证照片">
+                    `;
+                    
+                    const uploadArea = document.getElementById('photoUploadArea');
+                    uploadArea.classList.add('has-photo');
+                    document.getElementById('uploadIcon').innerText = '✅';
+                    document.getElementById('uploadText').innerText = '照片已选择';
+                    document.getElementById('uploadHint').innerText = '点击可重新拍照';
+                    document.getElementById('submitVerificationBtn').disabled = false;
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+        
+        // 提交认证
+        function submitVerification() {
+            if (!uploadedPhoto || !selectedPOI) return;
+            
+            const resultDiv = document.getElementById('verificationResult');
+            const submitBtn = document.getElementById('submitVerificationBtn');
+            
+            // 显示处理中状态
+            resultDiv.className = 'verification-result processing';
+            resultDiv.style.display = 'block';
+            resultDiv.innerText = '🔄 AI正在验证照片内容和位置信息...';
+            submitBtn.disabled = true;
+            
+            // 模拟AI验证过程
+            setTimeout(() => {
+                const isValid = Math.random() > 0.3; // 70%成功率
+                
+                if (isValid) {
+                    // 验证成功
+                    resultDiv.className = 'verification-result success';
+                    resultDiv.innerText = '✅ 验证成功！照片符合认证要求，已为您完成打卡！';
+                    
+                    setTimeout(() => {
+                        // 完成打卡
+                        confirmCheckin();
+                        closePhotoVerification();
+                    }, 1500);
+                } else {
+                    // 验证失败
+                    resultDiv.className = 'verification-result failed';
+                    resultDiv.innerText = '❌ 验证失败：未能识别到您和狗狗，或位置信息不匹配，请重新拍照。';
+                    submitBtn.disabled = false;
+                }
+            }, 2000);
+        }
+        
+        // 确认打卡
+        function confirmCheckin() {
+            if (selectedPOI) {
+                const poiName = selectedPOI.dataset.name;
+                const points = selectedPOI.dataset.points;
+                
+                triggerCheckinEffect(selectedPOI);
+                showHint(`🎉 认证成功！获得 ${points} 积分！`);
+                
+                selectedPOI.classList.remove('nearby', 'data-needed');
+                selectedPOI.classList.add('discovered');
+                
+                // 更新数据
+                const currentLikes = parseInt(selectedPOI.dataset.likes) + 1;
+                selectedPOI.dataset.likes = currentLikes;
+                selectedPOI.dataset.lastCheckin = '刚刚';
+                
+                initPoiList();
+                
+                if (navigator.vibrate) {
+                    navigator.vibrate([200, 100, 200]);
+                }
             }
         }
         
@@ -1691,7 +1261,7 @@
                 if (distance <= 50) {
                     if (!poi.classList.contains('nearby')) {
                         poi.classList.add('nearby');
-                        showHint(`🎯 已到达 ${poi.dataset.name}！可以拍照打卡了~`);
+                        showHint(`🎯 已到达 ${poi.dataset.name}！可以拍照认证了~`);
                     }
                 }
             });
@@ -1756,78 +1326,6 @@
                 this.style.transform = '';
             });
         });
-        
-        // 显示距离检测弹窗
-        function showDistanceOverlay(poiName, distance, points) {
-            const overlay = document.getElementById('distanceOverlay');
-            const distanceText = document.getElementById('distanceText');
-            
-            distanceText.innerHTML = `
-                📍 ${poiName}<br>
-                距离: ${distance}m<br>
-                奖励: +${points}积分<br><br>
-                📸 请拍摄您和狗狗在此地点的照片完成打卡
-            `;
-            
-            overlay.classList.add('show');
-        }
-        
-        // 关闭距离检测弹窗
-        function closeDistanceOverlay() {
-            const overlay = document.getElementById('distanceOverlay');
-            overlay.classList.remove('show');
-            selectedPOI = null;
-            
-            document.getElementById('photoPreviewContainer').innerHTML = '';
-        }
-        
-        // 触发照片上传
-        function triggerPhotoUpload() {
-            document.getElementById('photoInput').click();
-        }
-        
-        // 处理照片上传
-        function handlePhotoUpload(event) {
-            const file = event.target.files[0];
-            if (file && selectedPOI) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    const previewContainer = document.getElementById('photoPreviewContainer');
-                    previewContainer.innerHTML = `
-                        <img src="${e.target.result}" class="photo-preview" alt="打卡照片">
-                        <br>
-                        <button class="upload-btn" onclick="confirmCheckin()">✅ 确认打卡</button>
-                    `;
-                };
-                reader.readAsDataURL(file);
-            }
-        }
-        
-        // 确认打卡
-        function confirmCheckin() {
-            if (selectedPOI) {
-                const poiName = selectedPOI.dataset.name;
-                const points = selectedPOI.dataset.points;
-                
-                triggerCheckinEffect(selectedPOI);
-                showHint(`🎉 打卡成功！获得 ${points} 积分！`);
-                
-                selectedPOI.classList.remove('nearby', 'data-needed');
-                selectedPOI.classList.add('discovered');
-                
-                // 更新数据
-                const currentLikes = parseInt(selectedPOI.dataset.likes) + 1;
-                selectedPOI.dataset.likes = currentLikes;
-                selectedPOI.dataset.lastCheckin = '刚刚';
-                
-                initPoiList();
-                closeDistanceOverlay();
-                
-                if (navigator.vibrate) {
-                    navigator.vibrate([200, 100, 200]);
-                }
-            }
-        }
         
         // 触发打卡特效
         function triggerCheckinEffect(poi) {
@@ -1916,15 +1414,15 @@
             }
         });
         
-        document.getElementById('distanceOverlay').addEventListener('click', function(e) {
+        document.getElementById('photoVerificationModal').addEventListener('click', function(e) {
             if (e.target === this) {
-                closeDistanceOverlay();
+                closePhotoVerification();
             }
         });
         
         // 初始化提示
         setTimeout(() => {
-            showHint('🎮 点击POI查看详情，开始遛狗后可以打卡获得积分！');
+            showHint('🎮 点击POI查看详情，开始遛狗后可以拍照认证获得积分！');
         }, 3000);
         
         // 建筑窗户灯光随机闪烁
@@ -1947,4 +1445,687 @@
         }
     </script>
 </body>
-</html>
+</html> {
+            position: absolute;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            transform-style: preserve-3d;
+            z-index: 50;
+        }
+        
+        .poi-container {
+            position: relative;
+            transform: translateZ(30px);
+        }
+        
+        .poi-base {
+            width: 44px;
+            height: 44px;
+            background: linear-gradient(135deg, rgba(255,255,255,0.95), rgba(255,255,255,1));
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            box-shadow: 
+                0 6px 20px rgba(0,0,0,0.25),
+                inset 0 1px 3px rgba(255,255,255,0.6);
+            transform-style: preserve-3d;
+            border: 2px solid rgba(255,255,255,0.8);
+        }
+        
+        .poi-icon {
+            font-size: 22px;
+            z-index: 2;
+            filter: drop-shadow(0 1px 2px rgba(0,0,0,0.1));
+        }
+        
+        /* POI光环效果 - 更精致 */
+        .poi-glow {
+            position: absolute;
+            top: -6px;
+            left: -6px;
+            right: -6px;
+            bottom: -6px;
+            border-radius: 16px;
+            pointer-events: none;
+        }
+        
+        .poi.nearby .poi-glow {
+            background: radial-gradient(circle, rgba(251,191,36,0.3), transparent);
+            animation: glow 2s infinite;
+        }
+        
+        @keyframes glow {
+            0%, 100% { transform: scale(1); opacity: 0.4; }
+            50% { transform: scale(1.05); opacity: 0.7; }
+        }
+        
+        .poi.data-needed .poi-glow {
+            background: radial-gradient(circle, rgba(239,68,68,0.3), transparent);
+            animation: urgentGlow 1s infinite;
+        }
+        
+        @keyframes urgentGlow {
+            0%, 100% { transform: scale(1); opacity: 0.3; }
+            50% { transform: scale(1.1); opacity: 0.8; }
+        }
+        
+        /* POI悬浮标签 - 更简洁 */
+        .poi-label {
+            position: absolute;
+            bottom: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.75);
+            color: white;
+            padding: 3px 6px;
+            border-radius: 10px;
+            font-size: 9px;
+            white-space: nowrap;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+            backdrop-filter: blur(5px);
+        }
+        
+        /* POI类型样式 */
+        .poi.type-park .poi-base {
+            background: linear-gradient(135deg, #86efac, #4ade80);
+            border-color: #22c55e;
+        }
+        
+        .poi.type-cafe .poi-base {
+            background: linear-gradient(135deg, #fed7aa, #fb923c);
+            border-color: #ea580c;
+        }
+        
+        .poi.type-store .poi-base {
+            background: linear-gradient(135deg, #bfdbfe, #60a5fa);
+            border-color: #3b82f6;
+        }
+        
+        .poi.type-hospital .poi-base {
+            background: linear-gradient(135deg, #fecaca, #f87171);
+            border-color: #ef4444;
+        }
+        
+        .poi.type-treasure .poi-base {
+            background: linear-gradient(135deg, #fde047, #facc15);
+            border-color: #eab308;
+            animation: treasurePulse 1.5s infinite;
+        }
+        
+        @keyframes treasurePulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.08); }
+        }
+        
+        /* 主角雪纳瑞 - 调整层级 */
+        .player-dog {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 80;
+            transform-style: preserve-3d;
+            transition: all 0.8s ease;
+        }
+        
+        .player-dog.walking {
+            animation: dogWalkActive 0.6s infinite;
+        }
+        
+        .player-dog.walking .schnauzer-3d {
+            animation: dogBobbing 0.8s infinite;
+        }
+        
+        @keyframes dogWalkActive {
+            0%, 100% { transform: translate(-50%, -50%) rotateZ(-3deg); }
+            25% { transform: translate(-50%, -50%) rotateZ(0deg) translateY(-3px); }
+            50% { transform: translate(-50%, -50%) rotateZ(3deg); }
+            75% { transform: translate(-50%, -50%) rotateZ(0deg) translateY(-3px); }
+        }
+        
+        @keyframes dogBobbing {
+            0%, 100% { transform: translateZ(40px) rotateY(-5deg); }
+            50% { transform: translateZ(45px) rotateY(5deg); }
+        }
+        
+        .schnauzer-3d {
+            width: 60px;
+            height: 60px;
+            position: relative;
+            transform-style: preserve-3d;
+            transform: translateZ(40px);
+        }
+        
+        .schnauzer-body {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #9ca3af 0%, #6b7280 50%, #4b5563 100%);
+            border-radius: 50% 50% 45% 45%;
+            position: relative;
+            box-shadow: 
+                0 8px 16px rgba(0,0,0,0.4),
+                inset -3px -3px 8px rgba(255,255,255,0.1),
+                inset 3px 3px 8px rgba(0,0,0,0.2);
+        }
+        
+        .schnauzer-beard {
+            position: absolute;
+            bottom: 6px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 35px;
+            height: 16px;
+            background: linear-gradient(to bottom, #e5e7eb, #d1d5db);
+            border-radius: 0 0 50% 50%;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .schnauzer-ears {
+            position: absolute;
+            top: -4px;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            padding: 0 6px;
+        }
+        
+        .ear {
+            width: 12px;
+            height: 16px;
+            background: linear-gradient(135deg, #6b7280, #4b5563);
+            border-radius: 50% 50% 0 0;
+            box-shadow: inset 1px 1px 2px rgba(0,0,0,0.2);
+        }
+        
+        .player-dog.walking .ear {
+            animation: earFlop 0.8s infinite;
+        }
+        
+        @keyframes earFlop {
+            0%, 100% { transform: rotateX(0deg); }
+            50% { transform: rotateX(15deg); }
+        }
+        
+        .schnauzer-eyes {
+            position: absolute;
+            top: 12px;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+        }
+        
+        .eye {
+            width: 6px;
+            height: 6px;
+            background: #1f2937;
+            border-radius: 50%;
+            position: relative;
+            animation: blink 3s infinite;
+        }
+        
+        @keyframes blink {
+            0%, 90%, 100% { transform: scaleY(1); }
+            95% { transform: scaleY(0.1); }
+        }
+        
+        .eye::after {
+            content: '';
+            position: absolute;
+            top: 1px;
+            left: 1px;
+            width: 2px;
+            height: 2px;
+            background: white;
+            border-radius: 50%;
+        }
+        
+        .schnauzer-nose {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 6px;
+            height: 5px;
+            background: #1f2937;
+            border-radius: 50%;
+        }
+        
+        .player-shadow {
+            position: absolute;
+            bottom: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 40px;
+            height: 8px;
+            background: rgba(0,0,0,0.4);
+            border-radius: 50%;
+            filter: blur(6px);
+        }
+        
+        .player-name {
+            position: absolute;
+            bottom: -40px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: white;
+            font-size: 11px;
+            white-space: nowrap;
+            background: linear-gradient(135deg, rgba(102,126,234,0.9), rgba(118,75,162,0.9));
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-weight: 600;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.3);
+            z-index: 90;
+        }
+        
+        /* 可折叠导航面板 */
+        .nav-panel {
+            position: absolute;
+            top: 20px;
+            left: 15px;
+            background: rgba(255,255,255,0.95);
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            z-index: 300;
+            width: 260px;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+        
+        .nav-panel.collapsed {
+            width: 44px;
+            height: 44px;
+            overflow: hidden;
+        }
+        
+        .nav-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 15px;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+            cursor: pointer;
+        }
+        
+        .nav-panel.collapsed .nav-header {
+            border-bottom: none;
+            padding: 10px;
+        }
+        
+        .nav-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: #1f2937;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .nav-panel.collapsed .nav-title span:last-child {
+            display: none;
+        }
+        
+        .toggle-btn {
+            background: none;
+            border: none;
+            font-size: 14px;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+        
+        .nav-panel.collapsed .toggle-btn {
+            transform: rotate(180deg);
+        }
+        
+        .nav-content {
+            padding: 10px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        .nav-panel.collapsed .nav-content {
+            display: none;
+        }
+        
+        .poi-list {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        
+        .poi-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px;
+            background: rgba(249,250,251,0.8);
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .poi-item:hover {
+            background: linear-gradient(135deg, #667eea20, #764ba220);
+            transform: translateX(2px);
+        }
+        
+        .poi-item-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex: 1;
+        }
+        
+        .poi-item-icon {
+            width: 24px;
+            height: 24px;
+            background: white;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .poi-item-details {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+        }
+        
+        .poi-item-name {
+            font-size: 11px;
+            font-weight: 600;
+            color: #1f2937;
+        }
+        
+        .poi-item-stats {
+            font-size: 10px;
+            color: #6b7280;
+            display: flex;
+            gap: 8px;
+        }
+        
+        .nav-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        /* 步数计数器 */
+        .step-counter {
+            position: absolute;
+            top: 20px;
+            right: 15px;
+            background: rgba(255,255,255,0.95);
+            padding: 8px 12px;
+            border-radius: 15px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            z-index: 300;
+            display: none;
+            backdrop-filter: blur(10px);
+        }
+        
+        .step-counter.show {
+            display: block;
+            animation: slideDown 0.5s ease;
+        }
+        
+        .step-text {
+            font-size: 12px;
+            font-weight: 600;
+            color: #1f2937;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        /* 视角切换按钮 - 重新定位 */
+        .view-toggle {
+            position: absolute;
+            bottom: 80px;
+            left: 15px;
+            background: rgba(255,255,255,0.95);
+            border-radius: 15px;
+            padding: 4px;
+            display: flex;
+            gap: 4px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            z-index: 300;
+            backdrop-filter: blur(10px);
+        }
+        
+        .view-btn {
+            background: transparent;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .view-btn.active {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+        
+        .view-btn:not(.active) {
+            color: #6b7280;
+        }
+        
+        /* 底部控制栏 */
+        .control-bar {
+            position: absolute;
+            bottom: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255,255,255,0.95);
+            border-radius: 25px;
+            padding: 8px 16px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+            z-index: 200;
+            backdrop-filter: blur(10px);
+        }
+        
+        .start-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 10px 24px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .start-btn.walking {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            animation: walkingPulse 1s infinite;
+        }
+        
+        @keyframes walkingPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        /* 提示文字 */
+        .hint-text {
+            position: absolute;
+            top: 75px;
+            right: 15px;
+            background: rgba(251, 191, 36, 0.9);
+            color: #000;
+            padding: 6px 12px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: 500;
+            animation: slideDown 0.5s ease;
+            z-index: 150;
+            max-width: 180px;
+            text-align: center;
+            backdrop-filter: blur(10px);
+        }
+        
+        @keyframes slideDown {
+            from { 
+                opacity: 0;
+                transform: translateY(-15px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        /* POI详情弹窗 */
+        .poi-detail-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.6);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 800;
+            backdrop-filter: blur(5px);
+        }
+        
+        .poi-detail-modal.show {
+            display: flex;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .poi-detail-content {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            max-width: 340px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            animation: scaleIn 0.3s ease;
+        }
+        
+        @keyframes scaleIn {
+            from { transform: scale(0.8); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+        
+        .poi-detail-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 15px;
+        }
+        
+        .poi-detail-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .poi-detail-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        
+        .poi-detail-name {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1f2937;
+        }
+        
+        .poi-close-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #6b7280;
+            padding: 4px;
+        }
+        
+        .poi-detail-body {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .poi-status-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #f3f4f6;
+        }
+        
+        .poi-status-row:last-child {
+            border-bottom: none;
+        }
+        
+        .poi-status-label {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 13px;
+            color: #6b7280;
+        }
+        
+        .poi-status-value {
+            font-size: 14px;
+            font-weight: 600;
+            color: #1f2937;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .fungo-verified {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 2px 6px;
+            border-radius: 8px;
+            font-size: 10px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 2px;
+        }
+        
+        .like-count {
+            color: #10b981;
+        }
+        
+        .dislike-count {
+            color: #ef4444;
+        }
+        
+        .poi
