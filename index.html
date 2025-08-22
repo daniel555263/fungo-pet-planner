@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>狗狗城市 - 游戏化地图Demo</title>
+    <title>狗狗城市 - 沉浸式3D地图</title>
     <style>
         * {
             margin: 0;
@@ -14,1187 +14,1187 @@
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', sans-serif;
             overflow: hidden;
-            background: #0a0f1c;
+            background: linear-gradient(180deg, #0a0f1c 0%, #1a2332 50%, #2a3441 100%);
             position: relative;
             height: 100vh;
             width: 100vw;
         }
         
-        /* 游戏主界面 */
-        .game-container {
+        /* 3D场景容器 */
+        .scene-container {
             width: 100%;
             height: 100vh;
+            perspective: 1200px;
+            perspective-origin: 50% 40%;
             position: relative;
-            background: #0a0f1c;
+            overflow: hidden;
         }
         
-        /* 地图容器 */
-        .map-container {
-            width: 100%;
-            height: 100%;
-            position: relative;
-            background: #0a0f1c;
+        /* 主3D世界 */
+        .world-3d {
+            position: absolute;
+            width: 200%;
+            height: 200%;
+            top: -50%;
+            left: -50%;
+            transform-style: preserve-3d;
+            transform: rotateX(60deg) rotateY(0deg) scale(0.8);
+            transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
         }
         
-        /* 地图网格 */
-        .map-grid {
+        /* 地面网格 */
+        .ground {
             position: absolute;
             width: 100%;
             height: 100%;
-            background-image: 
-                linear-gradient(0deg, transparent 24%, rgba(32, 45, 65, 0.1) 25%, rgba(32, 45, 65, 0.1) 26%, transparent 27%, transparent 74%, rgba(32, 45, 65, 0.1) 75%, rgba(32, 45, 65, 0.1) 76%, transparent 77%, transparent),
-                linear-gradient(90deg, transparent 24%, rgba(32, 45, 65, 0.1) 25%, rgba(32, 45, 65, 0.1) 26%, transparent 27%, transparent 74%, rgba(32, 45, 65, 0.1) 75%, rgba(32, 45, 65, 0.1) 76%, transparent 77%, transparent);
-            background-size: 50px 50px;
+            background: 
+                radial-gradient(circle at 50% 50%, rgba(74, 144, 226, 0.15) 0%, transparent 70%),
+                linear-gradient(0deg, 
+                    transparent 48%, 
+                    rgba(74, 144, 226, 0.3) 49%, 
+                    rgba(74, 144, 226, 0.3) 51%, 
+                    transparent 52%),
+                linear-gradient(90deg, 
+                    transparent 48%, 
+                    rgba(74, 144, 226, 0.3) 49%, 
+                    rgba(74, 144, 226, 0.3) 51%, 
+                    transparent 52%),
+                linear-gradient(135deg, #1a2332 25%, #2a3441 25%, #2a3441 50%, #1a2332 50%, #1a2332 75%, #2a3441 75%);
+            background-size: 200px 200px, 100px 100px, 100px 100px, 60px 60px;
+            transform: translateZ(-20px);
+            border-radius: 20px;
         }
         
-        /* 道路系统 */
-        .roads {
+        /* 真实3D建筑 */
+        .building-3d {
             position: absolute;
-            width: 100%;
-            height: 100%;
-        }
-        
-        .road {
-            position: absolute;
-            background: linear-gradient(90deg, #1e3a5f, #2a4a6f, #1e3a5f);
-            opacity: 0.8;
-        }
-        
-        .road-main {
-            height: 12px;
-            width: 100%;
-            top: 50%;
-            transform: translateY(-50%);
-            box-shadow: 0 2px 10px rgba(30, 58, 95, 0.5);
-        }
-        
-        .road-cross {
-            width: 10px;
-            height: 100%;
-            left: 40%;
-            box-shadow: 0 2px 10px rgba(30, 58, 95, 0.5);
-        }
-        
-        /* 建筑物 */
-        .building {
-            position: absolute;
-            background: linear-gradient(135deg, #1a2332, #0f1823);
-            border: 1px solid rgba(255,255,255,0.05);
-        }
-        
-        .building-tall {
-            width: 60px;
-            height: 80px;
-        }
-        
-        .building-wide {
-            width: 100px;
-            height: 50px;
-        }
-        
-        .building-small {
-            width: 40px;
-            height: 40px;
-        }
-        
-        /* POI设计 */
-        .poi {
-            position: absolute;
+            transform-style: preserve-3d;
             cursor: pointer;
-            z-index: 100;
-            transition: all 0.3s ease;
+            transition: transform 0.3s ease;
         }
         
-        .poi-base {
-            width: 50px;
-            height: 50px;
-            border-radius: 15px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
-            border: 2px solid rgba(255,255,255,0.8);
+        .building-3d:hover {
+            transform: translateZ(10px) scale(1.02);
         }
         
-        .poi-icon {
-            font-size: 24px;
-            z-index: 2;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 100%;
-            height: 100%;
-        }
-        
-        .poi-label {
+        /* 建筑面 */
+        .building-face {
             position: absolute;
-            bottom: -25px;
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .building-front {
+            transform: translateZ(25px);
+            background: linear-gradient(180deg, #3b82f6, #1e40af);
+        }
+        
+        .building-back {
+            transform: translateZ(-25px) rotateY(180deg);
+            background: linear-gradient(180deg, #1e40af, #1e3a8a);
+        }
+        
+        .building-left {
+            transform: rotateY(-90deg) translateZ(25px);
+            background: linear-gradient(180deg, #2563eb, #1d4ed8);
+        }
+        
+        .building-right {
+            transform: rotateY(90deg) translateZ(25px);
+            background: linear-gradient(180deg, #2563eb, #1d4ed8);
+        }
+        
+        .building-top {
+            transform: rotateX(90deg) translateZ(25px);
+            background: linear-gradient(45deg, #60a5fa, #3b82f6);
+        }
+        
+        /* 建筑窗户 */
+        .building-windows {
+            position: absolute;
+            top: 10%;
+            left: 10%;
+            right: 10%;
+            bottom: 10%;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(auto-fit, 20px);
+            gap: 8px;
+            z-index: 2;
+        }
+        
+        .window-3d {
+            background: linear-gradient(45deg, #fbbf24, #f59e0b);
+            border-radius: 2px;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.3);
+            animation: windowGlow 4s infinite alternate;
+        }
+        
+        @keyframes windowGlow {
+            0% { 
+                opacity: 0.6;
+                box-shadow: inset 0 1px 3px rgba(0,0,0,0.3), 0 0 10px rgba(251, 191, 36, 0.3);
+            }
+            100% { 
+                opacity: 1;
+                box-shadow: inset 0 1px 3px rgba(0,0,0,0.3), 0 0 20px rgba(251, 191, 36, 0.6);
+            }
+        }
+        
+        /* 3D POI设计 */
+        .poi-3d {
+            position: absolute;
+            transform-style: preserve-3d;
+            cursor: pointer;
+            z-index: 300;
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        
+        .poi-3d:hover {
+            transform: translateZ(20px) scale(1.1);
+        }
+        
+        .poi-pillar {
+            width: 8px;
+            height: 60px;
+            background: linear-gradient(180deg, transparent, rgba(74, 144, 226, 0.8));
+            position: absolute;
             left: 50%;
+            top: 100%;
             transform: translateX(-50%);
-            background: rgba(0,0,0,0.8);
-            color: white;
-            padding: 3px 6px;
-            border-radius: 10px;
-            font-size: 10px;
-            white-space: nowrap;
-            text-align: center;
+            border-radius: 4px;
+            animation: pillarPulse 2s infinite;
         }
         
-        /* POI类型样式 */
-        .poi.type-park .poi-base {
-            background: linear-gradient(135deg, #86efac, #4ade80);
+        @keyframes pillarPulse {
+            0%, 100% { 
+                height: 60px;
+                opacity: 0.6;
+            }
+            50% { 
+                height: 80px;
+                opacity: 1;
+            }
         }
         
-        .poi.type-cafe .poi-base {
-            background: linear-gradient(135deg, #fed7aa, #fb923c);
+        .poi-sphere {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            position: relative;
+            transform: translateZ(30px);
+            box-shadow: 
+                0 10px 30px rgba(0,0,0,0.4),
+                inset 0 -20px 30px rgba(0,0,0,0.2),
+                0 0 40px rgba(74, 144, 226, 0.3);
+            animation: poiFloat 3s infinite ease-in-out;
         }
         
-        .poi.type-store .poi-base {
-            background: linear-gradient(135deg, #bfdbfe, #60a5fa);
+        @keyframes poiFloat {
+            0%, 100% { transform: translateZ(30px) translateY(0px); }
+            50% { transform: translateZ(30px) translateY(-8px); }
         }
         
-        .poi.type-hospital .poi-base {
-            background: linear-gradient(135deg, #fecaca, #f87171);
-        }
-        
-        .poi.type-treasure .poi-base {
-            background: linear-gradient(135deg, #fde047, #facc15);
-            animation: treasurePulse 1.5s infinite;
-        }
-        
-        @keyframes treasurePulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-        }
-        
-        .poi.nearby .poi-base {
-            box-shadow: 0 0 20px rgba(251,191,36,0.6), 0 6px 20px rgba(0,0,0,0.3);
-        }
-        
-        /* 主角雪纳瑞 */
-        .player-dog {
+        .poi-icon-3d {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            z-index: 200;
+            font-size: 32px;
+            z-index: 2;
+            text-shadow: 0 2px 8px rgba(0,0,0,0.5);
+            animation: iconSpin 6s infinite linear;
         }
         
-        .schnauzer-body {
-            width: 50px;
-            height: 50px;
-            background: linear-gradient(135deg, #9ca3af 0%, #6b7280 50%, #4b5563 100%);
+        @keyframes iconSpin {
+            from { transform: translate(-50%, -50%) rotateY(0deg); }
+            to { transform: translate(-50%, -50%) rotateY(360deg); }
+        }
+        
+        /* POI光环效果 */
+        .poi-ring {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 100px;
+            height: 100px;
+            border: 3px solid rgba(74, 144, 226, 0.6);
+            border-radius: 50%;
+            transform: translate(-50%, -50%) rotateX(90deg);
+            animation: ringExpand 2s infinite;
+        }
+        
+        @keyframes ringExpand {
+            0% {
+                width: 70px;
+                height: 70px;
+                opacity: 1;
+                border-width: 3px;
+            }
+            100% {
+                width: 120px;
+                height: 120px;
+                opacity: 0;
+                border-width: 1px;
+            }
+        }
+        
+        /* 主角3D设计 */
+        .player-3d {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 400;
+            transform-style: preserve-3d;
+        }
+        
+        .dog-3d {
+            transform-style: preserve-3d;
+            animation: dogBreath 2s infinite ease-in-out;
+        }
+        
+        @keyframes dogBreath {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+        }
+        
+        .dog-body-3d {
+            width: 60px;
+            height: 60px;
+            background: radial-gradient(circle at 30% 30%, #9ca3af, #6b7280);
             border-radius: 50% 50% 45% 45%;
             position: relative;
-            box-shadow: 0 8px 16px rgba(0,0,0,0.4);
+            transform: translateZ(10px);
+            box-shadow: 
+                0 15px 30px rgba(0,0,0,0.4),
+                0 0 20px rgba(156, 163, 175, 0.3);
         }
         
-        .schnauzer-beard {
+        .dog-shadow {
             position: absolute;
-            bottom: 6px;
+            bottom: -40px;
             left: 50%;
             transform: translateX(-50%);
-            width: 35px;
-            height: 16px;
-            background: linear-gradient(to bottom, #e5e7eb, #d1d5db);
-            border-radius: 0 0 50% 50%;
-        }
-        
-        .schnauzer-ears {
-            position: absolute;
-            top: -4px;
-            width: 100%;
-            display: flex;
-            justify-content: space-between;
-            padding: 0 6px;
-        }
-        
-        .ear {
-            width: 12px;
-            height: 16px;
-            background: linear-gradient(135deg, #6b7280, #4b5563);
-            border-radius: 50% 50% 0 0;
-        }
-        
-        .schnauzer-eyes {
-            position: absolute;
-            top: 12px;
-            width: 100%;
-            display: flex;
-            justify-content: center;
-            gap: 12px;
-        }
-        
-        .eye {
-            width: 6px;
-            height: 6px;
-            background: #1f2937;
+            width: 80px;
+            height: 20px;
+            background: radial-gradient(ellipse, rgba(0,0,0,0.3), transparent);
             border-radius: 50%;
-            position: relative;
+            animation: shadowPulse 2s infinite ease-in-out;
         }
         
-        .eye::after {
-            content: '';
-            position: absolute;
-            top: 1px;
-            left: 1px;
-            width: 2px;
-            height: 2px;
-            background: white;
-            border-radius: 50%;
+        @keyframes shadowPulse {
+            0%, 100% { 
+                width: 80px;
+                opacity: 0.3;
+            }
+            50% { 
+                width: 85px;
+                opacity: 0.5;
+            }
         }
         
-        .schnauzer-nose {
+        /* 玩家名字3D效果 */
+        .player-name-3d {
             position: absolute;
-            bottom: 20px;
+            bottom: -50px;
             left: 50%;
-            transform: translateX(-50%);
-            width: 6px;
-            height: 5px;
-            background: #1f2937;
-            border-radius: 50%;
-        }
-        
-        .player-name {
-            position: absolute;
-            bottom: -30px;
-            left: 50%;
-            transform: translateX(-50%);
-            color: white;
-            font-size: 12px;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            padding: 4px 10px;
-            border-radius: 12px;
-            font-weight: 600;
-            white-space: nowrap;
-            text-align: center;
-            min-width: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        /* 遛狗动画 */
-        .player-dog.walking {
-            animation: dogWalk 0.8s infinite;
-        }
-        
-        @keyframes dogWalk {
-            0%, 100% { transform: translate(-50%, -50%) rotateZ(-2deg); }
-            25% { transform: translate(-50%, -50%) rotateZ(0deg) translateY(-2px); }
-            50% { transform: translate(-50%, -50%) rotateZ(2deg); }
-            75% { transform: translate(-50%, -50%) rotateZ(0deg) translateY(-2px); }
-        }
-        
-        .player-dog.walking .ear {
-            animation: earFlop 0.8s infinite;
-        }
-        
-        @keyframes earFlop {
-            0%, 100% { transform: rotateX(0deg); }
-            50% { transform: rotateX(10deg); }
-        }
-        
-        /* 导航面板 */
-        .nav-panel {
-            position: fixed;
-            top: 20px;
-            left: 15px;
-            background: rgba(255,255,255,0.95);
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-            z-index: 500;
-            width: 250px;
-            backdrop-filter: blur(10px);
-            transition: all 0.3s ease;
-        }
-        
-        .nav-panel.collapsed {
-            width: 250px;
-            height: auto;
-            overflow: visible;
-        }
-        
-        .nav-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 12px 15px;
-            border-bottom: 1px solid rgba(0,0,0,0.05);
-            cursor: pointer;
-        }
-        
-        .nav-title {
-            font-size: 13px;
-            font-weight: 600;
-            color: #1f2937;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-        
-        .toggle-btn {
-            background: none;
-            border: none;
-            font-size: 14px;
-            cursor: pointer;
-            transition: transform 0.3s ease;
-            color: #6b7280;
-            padding: 4px;
-            border-radius: 4px;
-        }
-        
-        .toggle-btn:hover {
-            background: rgba(0,0,0,0.05);
-        }
-        
-        .nav-panel.collapsed .toggle-btn {
-            transform: rotate(180deg);
-        }
-        
-        .nav-content {
-            transition: all 0.3s ease;
-            overflow: hidden;
-        }
-        
-        .nav-panel.collapsed .nav-content {
-            max-height: 0;
-            padding: 0 15px;
-        }
-        
-        .nav-panel:not(.collapsed) .nav-content {
-            max-height: 300px;
-            padding: 10px 15px;
-        }
-        
-        /* 最近POI显示 */
-        .nearest-poi {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 8px 0;
-            border-bottom: 1px solid rgba(0,0,0,0.05);
-        }
-        
-        .nearest-poi-icon {
-            width: 32px;
-            height: 32px;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 18px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-        }
-        
-        .nearest-poi-info {
-            flex: 1;
-        }
-        
-        .nearest-poi-name {
-            font-size: 12px;
-            font-weight: 600;
-            color: #1f2937;
-            margin-bottom: 2px;
-        }
-        
-        .nearest-poi-stats {
-            font-size: 10px;
-            color: #6b7280;
-            display: flex;
-            gap: 8px;
-        }
-        
-        .poi-list {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-        }
-        
-        .poi-item {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 8px;
-            background: rgba(249,250,251,0.8);
-            border-radius: 8px;
-            transition: all 0.3s ease;
-            cursor: pointer;
-        }
-        
-        .poi-item:hover {
-            background: linear-gradient(135deg, #667eea20, #764ba220);
-            transform: translateX(2px);
-        }
-        
-        .poi-item-info {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            flex: 1;
-        }
-        
-        .poi-item-icon {
-            width: 24px;
-            height: 24px;
-            background: white;
-            border-radius: 6px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 14px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            flex-shrink: 0;
-        }
-        
-        .poi-item-details {
-            display: flex;
-            flex-direction: column;
-            flex: 1;
-        }
-        
-        .poi-item-name {
-            font-size: 11px;
-            font-weight: 600;
-            color: #1f2937;
-        }
-        
-        .poi-item-stats {
-            font-size: 10px;
-            color: #6b7280;
-            display: flex;
-            gap: 8px;
-        }
-        
-        .nav-btn {
+            transform: translateX(-50%) translateZ(20px);
             background: linear-gradient(135deg, #667eea, #764ba2);
             color: white;
-            border: none;
-            padding: 4px 8px;
-            border-radius: 12px;
-            font-size: 10px;
-            font-weight: 600;
-            cursor: pointer;
-        }
-        
-        /* 步数计数器 */
-        .step-counter {
-            position: fixed;
-            top: 20px;
-            right: 15px;
-            background: rgba(255,255,255,0.95);
-            padding: 8px 12px;
-            border-radius: 15px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-            z-index: 500;
-            display: none;
-        }
-        
-        .step-counter.show {
-            display: block;
-        }
-        
-        .step-text {
-            font-size: 12px;
-            font-weight: 600;
-            color: #1f2937;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-        
-        /* 视角切换按钮 */
-        .view-toggle {
-            position: fixed;
-            bottom: 80px;
-            left: 15px;
-            background: rgba(255,255,255,0.95);
-            border-radius: 15px;
-            padding: 4px;
-            display: flex;
-            gap: 4px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-            z-index: 500;
-        }
-        
-        .view-btn {
-            background: transparent;
-            border: none;
-            padding: 8px 12px;
-            border-radius: 12px;
-            font-size: 11px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-        
-        .view-btn.active {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
-        }
-        
-        .view-btn:not(.active) {
-            color: #6b7280;
-        }
-        
-        /* 底部控制栏 */
-        .control-bar {
-            position: fixed;
-            bottom: 15px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(255,255,255,0.95);
-            border-radius: 25px;
             padding: 8px 16px;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
-            z-index: 500;
-        }
-        
-        .start-btn {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
-            border: none;
-            padding: 10px 24px;
             border-radius: 20px;
+            font-weight: 700;
             font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-        
-        .start-btn.walking {
-            background: linear-gradient(135deg, #ef4444, #dc2626);
-            animation: walkingPulse 1s infinite;
-        }
-        
-        @keyframes walkingPulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-        }
-        
-        /* 提示文字 */
-        .hint-text {
-            position: fixed;
-            top: 20px;
-            right: 15px;
-            background: rgba(251, 191, 36, 0.9);
-            color: #000;
-            padding: 6px 12px;
-            border-radius: 15px;
-            font-size: 12px;
-            font-weight: 500;
-            z-index: 400;
-            max-width: 180px;
-            text-align: center;
+            box-shadow: 
+                0 8px 20px rgba(0,0,0,0.3),
+                0 0 30px rgba(102, 126, 234, 0.4);
             backdrop-filter: blur(10px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
         }
         
-        /* POI详情弹窗 */
-        .poi-detail-modal {
+        /* 遛狗时的动画增强 */
+        .player-3d.walking .dog-3d {
+            animation: dogWalk3D 0.6s infinite, dogBreath 2s infinite ease-in-out;
+        }
+        
+        @keyframes dogWalk3D {
+            0%, 100% { 
+                transform: rotateZ(-3deg) translateY(0px);
+            }
+            25% { 
+                transform: rotateZ(1deg) translateY(-5px);
+            }
+            50% { 
+                transform: rotateZ(3deg) translateY(0px);
+            }
+            75% { 
+                transform: rotateZ(-1deg) translateY(-3px);
+            }
+        }
+        
+        /* 天空盒 */
+        .skybox {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0,0,0,0.6);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
+            background: linear-gradient(180deg, 
+                #1e3a8a 0%, 
+                #3730a3 20%, 
+                #1e40af 40%, 
+                #1e3a8a 100%);
+            z-index: -1;
         }
         
-        .poi-detail-modal.show {
-            display: flex;
+        .skybox::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 20%, rgba(255,255,255,0.1) 1px, transparent 1px),
+                radial-gradient(circle at 80% 30%, rgba(255,255,255,0.08) 1px, transparent 1px),
+                radial-gradient(circle at 40% 60%, rgba(255,255,255,0.12) 1px, transparent 1px),
+                radial-gradient(circle at 90% 80%, rgba(255,255,255,0.06) 1px, transparent 1px);
+            background-size: 200px 200px, 300px 300px, 250px 250px, 180px 180px;
+            animation: starTwinkle 8s infinite;
         }
         
-        .poi-detail-content {
-            background: white;
+        @keyframes starTwinkle {
+            0%, 100% { opacity: 0.6; }
+            50% { opacity: 1; }
+        }
+        
+        /* 粒子效果 */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 10;
+        }
+        
+        .particle {
+            position: absolute;
+            width: 3px;
+            height: 3px;
+            background: rgba(74, 144, 226, 0.6);
+            border-radius: 50%;
+            animation: particleFloat 6s infinite linear;
+        }
+        
+        @keyframes particleFloat {
+            from {
+                transform: translateY(100vh) translateX(0px);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            to {
+                transform: translateY(-100px) translateX(100px);
+                opacity: 0;
+            }
+        }
+        
+        /* UI界面优化 */
+        .ui-panel {
+            position: fixed;
+            background: rgba(255,255,255,0.15);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.2);
             border-radius: 20px;
+            z-index: 500;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+        }
+        
+        .nav-panel-3d {
+            top: 20px;
+            left: 20px;
+            width: 280px;
+            max-height: 400px;
             padding: 20px;
-            max-width: 340px;
-            width: 90%;
-            max-height: 80vh;
-            overflow-y: auto;
         }
         
-        .poi-detail-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 15px;
+        .control-panel-3d {
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 15px 25px;
         }
         
-        .poi-detail-title {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .poi-detail-icon {
-            width: 40px;
-            height: 40px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-        }
-        
-        .poi-detail-name {
-            font-size: 18px;
-            font-weight: 700;
-            color: #1f2937;
-        }
-        
-        .poi-close-btn {
-            background: none;
-            border: none;
-            font-size: 24px;
-            cursor: pointer;
-            color: #6b7280;
-        }
-        
-        .poi-actions {
+        .view-controls-3d {
+            bottom: 20px;
+            right: 20px;
+            padding: 10px;
             display: flex;
             gap: 10px;
-            margin-top: 15px;
         }
         
-        .poi-action-btn {
-            flex: 1;
-            padding: 12px;
-            border: none;
-            border-radius: 12px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-        }
-        
-        .poi-navigate-btn {
+        .control-btn-3d {
             background: linear-gradient(135deg, #667eea, #764ba2);
             color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
         }
         
-        .poi-checkin-btn {
+        .control-btn-3d:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        .control-btn-3d.active {
             background: linear-gradient(135deg, #10b981, #059669);
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+        }
+        
+        /* POI类型特定样式 */
+        .poi-3d.type-park .poi-sphere {
+            background: radial-gradient(circle at 30% 30%, #86efac, #22c55e);
+        }
+        
+        .poi-3d.type-cafe .poi-sphere {
+            background: radial-gradient(circle at 30% 30%, #fed7aa, #f97316);
+        }
+        
+        .poi-3d.type-store .poi-sphere {
+            background: radial-gradient(circle at 30% 30%, #bfdbfe, #3b82f6);
+        }
+        
+        .poi-3d.type-hospital .poi-sphere {
+            background: radial-gradient(circle at 30% 30%, #fecaca, #ef4444);
+        }
+        
+        .poi-3d.type-treasure .poi-sphere {
+            background: radial-gradient(circle at 30% 30%, #fde047, #eab308);
+            animation: poiFloat 3s infinite ease-in-out, treasureGlow 1.5s infinite;
+        }
+        
+        @keyframes treasureGlow {
+            0%, 100% {
+                box-shadow: 
+                    0 10px 30px rgba(0,0,0,0.4),
+                    inset 0 -20px 30px rgba(0,0,0,0.2),
+                    0 0 40px rgba(234, 179, 8, 0.6);
+            }
+            50% {
+                box-shadow: 
+                    0 10px 30px rgba(0,0,0,0.4),
+                    inset 0 -20px 30px rgba(0,0,0,0.2),
+                    0 0 60px rgba(234, 179, 8, 0.9);
+            }
+        }
+        
+        /* 移动端优化 */
+        @media (max-width: 768px) {
+            .scene-container {
+                perspective: 800px;
+            }
+            
+            .world-3d {
+                transform: rotateX(50deg) rotateY(0deg) scale(0.9);
+            }
+            
+            .nav-panel-3d {
+                width: 250px;
+                left: 10px;
+                top: 10px;
+            }
+            
+            .control-panel-3d {
+                bottom: 10px;
+                padding: 10px 20px;
+            }
+            
+            .view-controls-3d {
+                bottom: 10px;
+                right: 10px;
+            }
+        }
+        
+        /* 加载动画 */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.5s ease;
+        }
+        
+        .loading-content {
+            text-align: center;
             color: white;
         }
         
-        .poi-checkin-btn:disabled {
-            background: #d1d5db;
-            color: #6b7280;
-            cursor: not-allowed;
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-top: 3px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
         }
         
-        /* 移动端适配 */
-        @media (max-width: 768px) {
-            .nav-panel {
-                top: calc(env(safe-area-inset-top, 20px) + 15px);
-            }
-            
-            .step-counter {
-                top: calc(env(safe-area-inset-top, 20px) + 15px);
-            }
-            
-            .hint-text {
-                top: calc(env(safe-area-inset-top, 20px) + 15px);
-                right: calc(15px + 250px + 15px);
-                max-width: calc(100vw - 250px - 45px);
-            }
-            
-            .view-toggle {
-                bottom: calc(env(safe-area-inset-bottom, 20px) + 80px);
-            }
-            
-            .control-bar {
-                bottom: calc(env(safe-area-inset-bottom, 20px) + 15px);
-            }
-            
-            .nav-panel.collapsed .hint-text {
-                right: 15px;
-                max-width: 180px;
-            }
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
         }
     </style>
 </head>
 <body>
-    <!-- 游戏主界面 -->
-    <div class="game-container">
-        <!-- 地图容器 -->
-        <div class="map-container" id="mapContainer">
-            <!-- 地图网格 -->
-            <div class="map-grid"></div>
-            
-            <!-- 道路系统 -->
-            <div class="roads">
-                <div class="road road-main"></div>
-                <div class="road road-cross"></div>
-            </div>
-            
-            <!-- 建筑物 -->
-            <div class="building building-tall" style="top: 15%; left: 15%;"></div>
-            <div class="building building-wide" style="top: 70%; left: 60%;"></div>
-            <div class="building building-small" style="top: 35%; left: 80%;"></div>
-            <div class="building building-small" style="top: 60%; left: 10%;"></div>
-            <div class="building building-tall" style="top: 10%; left: 55%;"></div>
-            
-            <!-- POI点位 -->
-            <div class="poi type-park" style="top: 30%; left: 30%;" 
-                 data-name="中央公园" 
-                 data-distance="120" 
-                 data-points="50">
-                <div class="poi-base">
-                    <div class="poi-icon">🌳</div>
-                </div>
-                <div class="poi-label">中央公园</div>
-            </div>
-            
-            <div class="poi type-cafe nearby" style="top: 45%; left: 60%;" 
-                 data-name="萌宠咖啡" 
-                 data-distance="45" 
-                 data-points="50">
-                <div class="poi-base">
-                    <div class="poi-icon">☕</div>
-                </div>
-                <div class="poi-label">萌宠咖啡</div>
-            </div>
-            
-            <div class="poi type-store" style="top: 65%; left: 35%;" 
-                 data-name="汪汪宠物店" 
-                 data-distance="156" 
-                 data-points="80">
-                <div class="poi-base">
-                    <div class="poi-icon">🏪</div>
-                </div>
-                <div class="poi-label">汪汪宠物店</div>
-            </div>
-            
-            <div class="poi type-hospital" style="top: 35%; left: 70%;" 
-                 data-name="爱心宠物医院" 
-                 data-distance="210" 
-                 data-points="100">
-                <div class="poi-base">
-                    <div class="poi-icon">🏥</div>
-                </div>
-                <div class="poi-label">爱心宠物医院</div>
-            </div>
-            
-            <div class="poi type-treasure nearby" style="top: 55%; left: 45%;" 
-                 data-name="神秘宝箱" 
-                 data-distance="38" 
-                 data-points="200">
-                <div class="poi-base">
-                    <div class="poi-icon">💎</div>
-                </div>
-                <div class="poi-label">神秘宝箱</div>
-            </div>
-            
-            <!-- 主角 -->
-            <div class="player-dog" id="playerDog">
-                <div class="schnauzer-body">
-                    <div class="schnauzer-ears">
-                        <div class="ear"></div>
-                        <div class="ear"></div>
-                    </div>
-                    <div class="schnauzer-eyes">
-                        <div class="eye"></div>
-                        <div class="eye"></div>
-                    </div>
-                    <div class="schnauzer-nose"></div>
-                    <div class="schnauzer-beard"></div>
-                </div>
-                <div class="player-name">妞子</div>
-            </div>
+    <!-- 加载界面 -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-content">
+            <div class="loading-spinner"></div>
+            <h2>构建3D世界中...</h2>
+            <p>正在加载沉浸式体验</p>
         </div>
-        
-        <!-- 导航面板 -->
-        <div class="nav-panel" id="navPanel">
-            <div class="nav-header" onclick="toggleNavPanel()">
-                <div class="nav-title">
-                    <span>📍</span>
-                    <span>附近宝藏点</span>
-                </div>
-                <button class="toggle-btn">▼</button>
-            </div>
-            <div class="nav-content" id="navContent">
-                <!-- 最近POI -->
-                <div class="nearest-poi" id="nearestPoi">
-                    <div class="nearest-poi-icon" id="nearestPoiIcon">☕</div>
-                    <div class="nearest-poi-info">
-                        <div class="nearest-poi-name" id="nearestPoiName">萌宠咖啡</div>
-                        <div class="nearest-poi-stats">
-                            <span id="nearestPoiDistance">📍 45m</span>
-                            <span id="nearestPoiPoints">💰 +50分</span>
-                        </div>
+    </div>
+    
+    <!-- 天空盒 -->
+    <div class="skybox"></div>
+    
+    <!-- 粒子效果 -->
+    <div class="particles" id="particles"></div>
+    
+    <!-- 3D场景 -->
+    <div class="scene-container">
+        <div class="world-3d" id="world3d">
+            <!-- 地面 -->
+            <div class="ground"></div>
+            
+            <!-- 3D建筑群 -->
+            <div class="building-3d" style="top: 20%; left: 20%; transform: translateZ(0px);">
+                <div class="building-face building-front" style="width: 80px; height: 120px;">
+                    <div class="building-windows">
+                        <div class="window-3d"></div>
+                        <div class="window-3d"></div>
+                        <div class="window-3d"></div>
+                        <div class="window-3d"></div>
+                        <div class="window-3d"></div>
+                        <div class="window-3d"></div>
                     </div>
                 </div>
-                <!-- 完整POI列表 -->
-                <div class="poi-list" id="poiList" style="display: none;">
-                    <!-- 动态生成POI列表 -->
-                </div>
+                <div class="building-face building-back" style="width: 80px; height: 120px;"></div>
+                <div class="building-face building-left" style="width: 50px; height: 120px;"></div>
+                <div class="building-face building-right" style="width: 50px; height: 120px;"></div>
+                <div class="building-face building-top" style="width: 80px; height: 50px;"></div>
             </div>
-        </div>
-        
-        <!-- 步数计数器 -->
-        <div class="step-counter" id="stepCounter">
-            <div class="step-text">
-                <span>👣</span>
-                <span id="stepCount">0</span>
-                <span>步</span>
-            </div>
-        </div>
-        
-        <!-- 视角切换按钮 -->
-        <div class="view-toggle">
-            <button class="view-btn active" onclick="switchView('2d')">
-                <span>🗺️</span>
-                <span>2D</span>
-            </button>
-            <button class="view-btn" onclick="switchView('3d')">
-                <span>🎮</span>
-                <span>3D</span>
-            </button>
-        </div>
-        
-        <!-- 提示文字 -->
-        <div class="hint-text" id="hintText">
-            💡 点击POI查看详情
-        </div>
-        
-        <!-- 底部控制栏 -->
-        <div class="control-bar">
-            <button class="start-btn" id="startBtn" onclick="toggleWalk()">🐾 开始遛狗</button>
-        </div>
-        
-        <!-- POI详情弹窗 -->
-        <div class="poi-detail-modal" id="poiDetailModal">
-            <div class="poi-detail-content">
-                <div class="poi-detail-header">
-                    <div class="poi-detail-title">
-                        <div class="poi-detail-icon" id="detailIcon">🌳</div>
-                        <div class="poi-detail-name" id="detailName">中央公园</div>
+            
+            <div class="building-3d" style="top: 60%; left: 70%; transform: translateZ(0px);">
+                <div class="building-face building-front" style="width: 100px; height: 80px;">
+                    <div class="building-windows">
+                        <div class="window-3d"></div>
+                        <div class="window-3d"></div>
+                        <div class="window-3d"></div>
+                        <div class="window-3d"></div>
                     </div>
-                    <button class="poi-close-btn" onclick="closePoiDetail()">×</button>
                 </div>
-                <div class="poi-actions">
-                    <button class="poi-action-btn poi-navigate-btn" onclick="navigateToDetail()">
-                        🧭 开始导航
-                    </button>
-                    <button class="poi-action-btn poi-checkin-btn" id="detailCheckinBtn" onclick="startCheckin()">
-                        📸 拍照认证
-                    </button>
+                <div class="building-face building-back" style="width: 100px; height: 80px;"></div>
+                <div class="building-face building-left" style="width: 60px; height: 80px;"></div>
+                <div class="building-face building-right" style="width: 60px; height: 80px;"></div>
+                <div class="building-face building-top" style="width: 100px; height: 60px;"></div>
+            </div>
+            
+            <div class="building-3d" style="top: 30%; left: 75%; transform: translateZ(0px);">
+                <div class="building-face building-front" style="width: 60px; height: 60px;">
+                    <div class="building-windows">
+                        <div class="window-3d"></div>
+                        <div class="window-3d"></div>
+                        <div class="window-3d"></div>
+                        <div class="window-3d"></div>
+                    </div>
                 </div>
+                <div class="building-face building-back" style="width: 60px; height: 60px;"></div>
+                <div class="building-face building-left" style="width: 40px; height: 60px;"></div>
+                <div class="building-face building-right" style="width: 40px; height: 60px;"></div>
+                <div class="building-face building-top" style="width: 60px; height: 40px;"></div>
+            </div>
+            
+            <div class="building-3d" style="top: 65%; left: 15%; transform: translateZ(0px);">
+                <div class="building-face building-front" style="width: 70px; height: 100px;">
+                    <div class="building-windows">
+                        <div class="window-3d"></div>
+                        <div class="window-3d"></div>
+                        <div class="window-3d"></div>
+                        <div class="window-3d"></div>
+                        <div class="window-3d"></div>
+                        <div class="window-3d"></div>
+                    </div>
+                </div>
+                <div class="building-face building-back" style="width: 70px; height: 100px;"></div>
+                <div class="building-face building-left" style="width: 50px; height: 100px;"></div>
+                <div class="building-face building-right" style="width: 50px; height: 100px;"></div>
+                <div class="building-face building-top" style="width: 70px; height: 50px;"></div>
+            </div>
+            
+            <!-- 3D POI点位 -->
+            <div class="poi-3d type-park" style="top: 35%; left: 35%;" data-name="中央公园" data-distance="120">
+                <div class="poi-pillar"></div>
+                <div class="poi-sphere">
+                    <div class="poi-icon-3d">🌳</div>
+                </div>
+                <div class="poi-ring"></div>
+            </div>
+            
+            <div class="poi-3d type-cafe" style="top: 50%; left: 60%;" data-name="萌宠咖啡" data-distance="45">
+                <div class="poi-pillar"></div>
+                <div class="poi-sphere">
+                    <div class="poi-icon-3d">☕</div>
+                </div>
+                <div class="poi-ring"></div>
+            </div>
+            
+            <div class="poi-3d type-store" style="top: 70%; left: 40%;" data-name="汪汪宠物店" data-distance="156">
+                <div class="poi-pillar"></div>
+                <div class="poi-sphere">
+                    <div class="poi-icon-3d">🏪</div>
+                </div>
+                <div class="poi-ring"></div>
+            </div>
+            
+            <div class="poi-3d type-hospital" style="top: 40%; left: 75%;" data-name="爱心宠物医院" data-distance="210">
+                <div class="poi-pillar"></div>
+                <div class="poi-sphere">
+                    <div class="poi-icon-3d">🏥</div>
+                </div>
+                <div class="poi-ring"></div>
+            </div>
+            
+            <div class="poi-3d type-treasure" style="top: 55%; left: 50%;" data-name="神秘宝箱" data-distance="38">
+                <div class="poi-pillar"></div>
+                <div class="poi-sphere">
+                    <div class="poi-icon-3d">💎</div>
+                </div>
+                <div class="poi-ring"></div>
+            </div>
+            
+            <!-- 3D主角 -->
+            <div class="player-3d" id="player3d">
+                <div class="dog-shadow"></div>
+                <div class="dog-3d">
+                    <div class="dog-body-3d">
+                        <!-- 简化的狗狗特征，保持3D效果 -->
+                    </div>
+                </div>
+                <div class="player-name-3d">妞子</div>
             </div>
         </div>
     </div>
     
+    <!-- UI界面 -->
+    <div class="ui-panel nav-panel-3d">
+        <h3 style="color: white; margin-bottom: 15px; font-size: 16px;">🗺️ 附近地点</h3>
+        <div id="poiList3d" style="color: white; font-size: 14px;">
+            <div style="margin-bottom: 10px; padding: 10px; background: rgba(255,255,255,0.1); border-radius: 10px;">
+                <div style="font-weight: 600;">☕ 萌宠咖啡</div>
+                <div style="font-size: 12px; opacity: 0.8;">📍 45m · 💰 +50分</div>
+            </div>
+            <div style="margin-bottom: 10px; padding: 10px; background: rgba(255,255,255,0.1); border-radius: 10px;">
+                <div style="font-weight: 600;">💎 神秘宝箱</div>
+                <div style="font-size: 12px; opacity: 0.8;">📍 38m · 💰 +200分</div>
+            </div>
+            <div style="margin-bottom: 10px; padding: 10px; background: rgba(255,255,255,0.1); border-radius: 10px;">
+                <div style="font-weight: 600;">🌳 中央公园</div>
+                <div style="font-size: 12px; opacity: 0.8;">📍 120m · 💰 +50分</div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="ui-panel control-panel-3d">
+        <button class="control-btn-3d" id="walkBtn3d" onclick="toggleWalk3D()">
+            🐾 开始遛狗
+        </button>
+    </div>
+    
+    <div class="ui-panel view-controls-3d">
+        <button class="control-btn-3d" onclick="rotateView('left')">↺</button>
+        <button class="control-btn-3d" onclick="rotateView('right')">↻</button>
+        <button class="control-btn-3d" onclick="tiltView()">📐</button>
+    </div>
+    
     <script>
-        // 全局变量
+        // 全局状态
         let isWalking = false;
-        let stepCount = 0;
-        let selectedPOI = null;
-        let navPanelCollapsed = false;
+        let worldRotationY = 0;
+        let worldRotationX = 60;
+        let cameraDistance = 0.8;
         
-        // 页面加载完成后初始化
+        // 初始化
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('页面加载完成，开始初始化');
-            initPoiList();
-            showHint('🎮 点击POI查看详情，开始遛狗后可以获得积分！');
+            initParticles();
+            initPoiInteractions();
+            hideLoadingScreen();
         });
         
-        // 切换导航面板折叠状态
-        function toggleNavPanel() {
-            const panel = document.getElementById('navPanel');
-            const poiList = document.getElementById('poiList');
-            const nearestPoi = document.getElementById('nearestPoi');
+        // 隐藏加载屏幕
+        function hideLoadingScreen() {
+            setTimeout(() => {
+                const loading = document.getElementById('loadingOverlay');
+                loading.style.opacity = '0';
+                setTimeout(() => {
+                    loading.style.display = 'none';
+                }, 500);
+            }, 2000);
+        }
+        
+        // 初始化粒子效果
+        function initParticles() {
+            const particlesContainer = document.getElementById('particles');
             
-            navPanelCollapsed = !navPanelCollapsed;
+            function createParticle() {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                
+                // 随机位置和动画延迟
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 6 + 's';
+                particle.style.animationDuration = (Math.random() * 4 + 4) + 's';
+                
+                // 随机颜色变化
+                const colors = [
+                    'rgba(74, 144, 226, 0.6)',
+                    'rgba(99, 102, 241, 0.4)',
+                    'rgba(139, 92, 246, 0.5)',
+                    'rgba(59, 130, 246, 0.3)'
+                ];
+                particle.style.background = colors[Math.floor(Math.random() * colors.length)];
+                
+                particlesContainer.appendChild(particle);
+                
+                // 移除粒子
+                setTimeout(() => {
+                    if (particle.parentNode) {
+                        particle.parentNode.removeChild(particle);
+                    }
+                }, 10000);
+            }
             
-            if (navPanelCollapsed) {
-                panel.classList.add('collapsed');
-                poiList.style.display = 'none';
-                nearestPoi.style.display = 'flex';
-            } else {
-                panel.classList.remove('collapsed');
-                poiList.style.display = 'block';
-                nearestPoi.style.display = 'none';
+            // 持续创建粒子
+            setInterval(createParticle, 500);
+            
+            // 初始粒子
+            for (let i = 0; i < 20; i++) {
+                setTimeout(createParticle, i * 100);
             }
         }
         
-        // 初始化POI列表
-        function initPoiList() {
-            console.log('初始化POI列表');
-            const pois = document.querySelectorAll('.poi');
-            const poiList = document.getElementById('poiList');
+        // 初始化POI交互
+        function initPoiInteractions() {
+            const pois = document.querySelectorAll('.poi-3d');
             
-            if (!poiList) {
-                console.error('找不到poiList元素');
-                return;
-            }
-            
-            // 按距离排序
-            const sortedPois = Array.from(pois).sort((a, b) => {
-                return parseInt(a.dataset.distance) - parseInt(b.dataset.distance);
-            });
-            
-            // 更新最近POI显示
-            if (sortedPois.length > 0) {
-                updateNearestPoi(sortedPois[0]);
-            }
-            
-            // 清空并重新生成列表
-            poiList.innerHTML = '';
-            
-            sortedPois.forEach(poi => {
-                const name = poi.dataset.name;
-                const distance = poi.dataset.distance;
-                const points = poi.dataset.points;
-                const icon = poi.querySelector('.poi-icon').innerText;
-                
-                const item = document.createElement('div');
-                item.className = 'poi-item';
-                item.innerHTML = `
-                    <div class="poi-item-info">
-                        <div class="poi-item-icon">${icon}</div>
-                        <div class="poi-item-details">
-                            <div class="poi-item-name">${name}</div>
-                            <div class="poi-item-stats">
-                                <span>📍 ${distance}m</span>
-                                <span>💰 +${points}分</span>
-                            </div>
-                        </div>
-                    </div>
-                    <button class="nav-btn" onclick="navigateTo('${name}')">导航</button>
-                `;
-                
-                item.addEventListener('click', function(e) {
-                    if (!e.target.classList.contains('nav-btn')) {
-                        showPoiDetail(poi);
-                    }
+            pois.forEach(poi => {
+                poi.addEventListener('click', function() {
+                    showPoi3DDetail(this);
                 });
                 
-                poiList.appendChild(item);
+                // 鼠标悬停效果增强
+                poi.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateZ(25px) scale(1.15)';
+                    
+                    // 添加额外的光环效果
+                    const extraRing = document.createElement('div');
+                    extraRing.className = 'poi-ring';
+                    extraRing.style.animationDelay = '0.5s';
+                    extraRing.style.borderColor = 'rgba(251, 191, 36, 0.8)';
+                    this.appendChild(extraRing);
+                    
+                    setTimeout(() => {
+                        if (extraRing.parentNode) {
+                            extraRing.parentNode.removeChild(extraRing);
+                        }
+                    }, 2000);
+                });
+                
+                poi.addEventListener('mouseleave', function() {
+                    this.style.transform = '';
+                });
+            });
+        }
+        
+        // 显示POI详情（3D版本）
+        function showPoi3DDetail(poi) {
+            const name = poi.dataset.name;
+            const distance = poi.dataset.distance;
+            
+            // 创建3D弹窗效果
+            const modal = document.createElement('div');
+            modal.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0,0,0,0.7);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 2000;
+                backdrop-filter: blur(10px);
+            `;
+            
+            modal.innerHTML = `
+                <div style="
+                    background: linear-gradient(135deg, rgba(255,255,255,0.2), rgba(255,255,255,0.1));
+                    border: 1px solid rgba(255,255,255,0.3);
+                    border-radius: 25px;
+                    padding: 30px;
+                    max-width: 350px;
+                    width: 90%;
+                    text-align: center;
+                    color: white;
+                    backdrop-filter: blur(20px);
+                    box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+                    transform: scale(0.8);
+                    transition: transform 0.3s ease;
+                ">
+                    <div style="font-size: 48px; margin-bottom: 15px;">
+                        ${poi.querySelector('.poi-icon-3d').innerText}
+                    </div>
+                    <h2 style="margin-bottom: 10px; font-size: 24px;">${name}</h2>
+                    <p style="margin-bottom: 20px; opacity: 0.8;">距离: ${distance}m</p>
+                    <div style="display: flex; gap: 15px; justify-content: center;">
+                        <button onclick="navigateTo3D('${name}')" style="
+                            background: linear-gradient(135deg, #667eea, #764ba2);
+                            color: white;
+                            border: none;
+                            padding: 12px 20px;
+                            border-radius: 15px;
+                            font-weight: 600;
+                            cursor: pointer;
+                        ">🧭 导航</button>
+                        <button onclick="this.closest('[style*=fixed]').remove()" style="
+                            background: linear-gradient(135deg, #ef4444, #dc2626);
+                            color: white;
+                            border: none;
+                            padding: 12px 20px;
+                            border-radius: 15px;
+                            font-weight: 600;
+                            cursor: pointer;
+                        ">关闭</button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+            
+            // 动画进入
+            setTimeout(() => {
+                modal.querySelector('div').style.transform = 'scale(1)';
+            }, 50);
+            
+            // 点击外部关闭
+            modal.addEventListener('click', function(e) {
+                if (e.target === this) {
+                    this.remove();
+                }
             });
             
-            console.log(`POI列表初始化完成，共${pois.length}个POI`);
+            // 震动反馈
+            if (navigator.vibrate) {
+                navigator.vibrate([50, 30, 50]);
+            }
         }
         
-        // 更新最近POI显示
-        function updateNearestPoi(poi) {
-            const icon = document.getElementById('nearestPoiIcon');
-            const name = document.getElementById('nearestPoiName');
-            const distance = document.getElementById('nearestPoiDistance');
-            const points = document.getElementById('nearestPoiPoints');
+        // 导航功能
+        function navigateTo3D(poiName) {
+            showNotification(`🗺️ 正在导航到 ${poiName}...`, 'info');
             
-            if (icon && name && distance && points) {
-                icon.innerText = poi.querySelector('.poi-icon').innerText;
-                name.innerText = poi.dataset.name;
-                distance.innerText = `📍 ${poi.dataset.distance}m`;
-                points.innerText = `💰 +${poi.dataset.points}分`;
+            // 关闭弹窗
+            const modal = document.querySelector('[style*="position: fixed"]');
+            if (modal) modal.remove();
+            
+            // 模拟导航路径动画
+            animateNavigation();
+        }
+        
+        // 导航路径动画
+        function animateNavigation() {
+            const player = document.getElementById('player3d');
+            const originalTransform = player.style.transform;
+            
+            let step = 0;
+            const navAnimation = setInterval(() => {
+                step++;
+                const offset = Math.sin(step * 0.3) * 10;
+                player.style.transform = `translate(calc(-50% + ${offset}px), calc(-50% + ${step * 2}px))`;
                 
-                // 设置图标背景色
-                if (poi.classList.contains('type-park')) {
-                    icon.style.background = 'linear-gradient(135deg, #86efac, #4ade80)';
-                } else if (poi.classList.contains('type-cafe')) {
-                    icon.style.background = 'linear-gradient(135deg, #fed7aa, #fb923c)';
-                } else if (poi.classList.contains('type-store')) {
-                    icon.style.background = 'linear-gradient(135deg, #bfdbfe, #60a5fa)';
-                } else if (poi.classList.contains('type-hospital')) {
-                    icon.style.background = 'linear-gradient(135deg, #fecaca, #f87171)';
-                } else if (poi.classList.contains('type-treasure')) {
-                    icon.style.background = 'linear-gradient(135deg, #fde047, #facc15)';
+                if (step >= 50) {
+                    clearInterval(navAnimation);
+                    player.style.transform = originalTransform;
+                    showNotification('🎯 已到达目的地！', 'success');
                 }
-                
-                // 添加点击事件
-                document.getElementById('nearestPoi').onclick = function() {
-                    showPoiDetail(poi);
-                };
-            }
+            }, 100);
         }
         
-        // 显示POI详情
-        function showPoiDetail(poi) {
-            console.log('显示POI详情:', poi.dataset.name);
-            const modal = document.getElementById('poiDetailModal');
-            const icon = document.getElementById('detailIcon');
-            const name = document.getElementById('detailName');
-            const checkinBtn = document.getElementById('detailCheckinBtn');
-            
-            // 设置POI图标背景色
-            if (poi.classList.contains('type-park')) {
-                icon.style.background = 'linear-gradient(135deg, #86efac, #4ade80)';
-            } else if (poi.classList.contains('type-cafe')) {
-                icon.style.background = 'linear-gradient(135deg, #fed7aa, #fb923c)';
-            } else if (poi.classList.contains('type-store')) {
-                icon.style.background = 'linear-gradient(135deg, #bfdbfe, #60a5fa)';
-            } else if (poi.classList.contains('type-hospital')) {
-                icon.style.background = 'linear-gradient(135deg, #fecaca, #f87171)';
-            } else if (poi.classList.contains('type-treasure')) {
-                icon.style.background = 'linear-gradient(135deg, #fde047, #facc15)';
-            }
-            
-            icon.innerText = poi.querySelector('.poi-icon').innerText;
-            name.innerText = poi.dataset.name;
-            
-            // 设置打卡按钮状态
-            selectedPOI = poi;
-            const distance = parseInt(poi.dataset.distance);
-            
-            if (distance <= 50) {
-                checkinBtn.innerHTML = '📸 拍照认证';
-                checkinBtn.disabled = false;
-            } else {
-                checkinBtn.innerHTML = `📍 需要靠近 ${50 - distance}m`;
-                checkinBtn.disabled = true;
-            }
-            
-            modal.classList.add('show');
-        }
-        
-        // 关闭POI详情
-        function closePoiDetail() {
-            document.getElementById('poiDetailModal').classList.remove('show');
-            selectedPOI = null;
-        }
-        
-        // 从详情页导航
-        function navigateToDetail() {
-            if (selectedPOI) {
-                navigateTo(selectedPOI.dataset.name);
-                closePoiDetail();
-            }
-        }
-        
-        // 开始打卡
-        function startCheckin() {
-            if (selectedPOI && parseInt(selectedPOI.dataset.distance) <= 50) {
-                // 模拟打卡成功
-                const points = selectedPOI.dataset.points;
-                showHint(`🎉 打卡成功！获得 ${points} 积分！`);
-                
-                // 更新POI状态
-                selectedPOI.classList.remove('nearby');
-                selectedPOI.classList.add('discovered');
-                
-                closePoiDetail();
-                
-                // 震动反馈
-                if (navigator.vibrate) {
-                    navigator.vibrate([200, 100, 200]);
-                }
-            }
-        }
-        
-        // 切换遛狗模式
-        function toggleWalk() {
-            const btn = document.getElementById('startBtn');
-            const player = document.getElementById('playerDog');
-            const stepCounter = document.getElementById('stepCounter');
+        // 切换遛狗模式（3D版本）
+        function toggleWalk3D() {
+            const btn = document.getElementById('walkBtn3d');
+            const player = document.getElementById('player3d');
             
             isWalking = !isWalking;
             
             if (isWalking) {
                 btn.textContent = '🛑 停止遛狗';
-                btn.classList.add('walking');
+                btn.classList.add('active');
                 player.classList.add('walking');
-                stepCounter.classList.add('show');
-                showHint('🚶‍♀️ 遛狗模式已开启！妞子兴奋地摇着尾巴~');
-                startStepCounting();
+                showNotification('🐕 遛狗模式开启！妞子很兴奋~', 'success');
+                startAdvancedWalkingEffects();
             } else {
                 btn.textContent = '🐾 开始遛狗';
-                btn.classList.remove('walking');
+                btn.classList.remove('active');
                 player.classList.remove('walking');
-                stepCounter.classList.remove('show');
-                showHint('😴 遛狗结束，妞子累了，回家休息~');
-                stopStepCounting();
+                showNotification('😴 遛狗结束，妞子累了~', 'info');
+                stopAdvancedWalkingEffects();
             }
         }
         
-        // 模拟计步功能
-        let stepInterval;
-        function startStepCounting() {
-            stepInterval = setInterval(() => {
-                if (isWalking) {
-                    stepCount += Math.floor(Math.random() * 3) + 1;
-                    document.getElementById('stepCount').textContent = stepCount;
+        // 高级遛狗效果
+        let walkingEffectsInterval;
+        function startAdvancedWalkingEffects() {
+            const player = document.getElementById('player3d');
+            
+            walkingEffectsInterval = setInterval(() => {
+                // 创建脚印效果
+                createFootprint();
+                
+                // 随机轻微移动
+                const randomX = (Math.random() - 0.5) * 20;
+                const randomY = (Math.random() - 0.5) * 20;
+                player.style.transform = `translate(calc(-50% + ${randomX}px), calc(-50% + ${randomY}px))`;
+                
+                // 恢复位置
+                setTimeout(() => {
+                    player.style.transform = 'translate(-50%, -50%)';
+                }, 300);
+            }, 2000);
+        }
+        
+        function stopAdvancedWalkingEffects() {
+            if (walkingEffectsInterval) {
+                clearInterval(walkingEffectsInterval);
+            }
+        }
+        
+        // 创建脚印效果
+        function createFootprint() {
+            const footprint = document.createElement('div');
+            footprint.style.cssText = `
+                position: absolute;
+                width: 20px;
+                height: 25px;
+                background: rgba(255,255,255,0.3);
+                border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%) translateZ(5px);
+                pointer-events: none;
+                animation: footprintFade 3s ease-out forwards;
+            `;
+            
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes footprintFade {
+                    0% { opacity: 0.6; transform: translate(-50%, -50%) translateZ(5px) scale(1); }
+                    100% { opacity: 0; transform: translate(-50%, -50%) translateZ(5px) scale(0.5); }
                 }
-            }, 1000);
+            `;
+            document.head.appendChild(style);
+            
+            document.getElementById('world3d').appendChild(footprint);
+            
+            setTimeout(() => {
+                if (footprint.parentNode) {
+                    footprint.parentNode.removeChild(footprint);
+                }
+                if (style.parentNode) {
+                    style.parentNode.removeChild(style);
+                }
+            }, 3000);
         }
         
-        function stopStepCounting() {
-            if (stepInterval) {
-                clearInterval(stepInterval);
+        // 视角控制
+        function rotateView(direction) {
+            const world = document.getElementById('world3d');
+            
+            if (direction === 'left') {
+                worldRotationY -= 15;
+            } else if (direction === 'right') {
+                worldRotationY += 15;
             }
+            
+            updateWorldTransform();
+            showNotification(`🔄 视角旋转${direction === 'left' ? '左' : '右'} 15°`, 'info');
         }
         
-        // 视角切换
-        function switchView(view) {
-            const mapContainer = document.getElementById('mapContainer');
-            const viewBtns = document.querySelectorAll('.view-btn');
+        function tiltView() {
+            const world = document.getElementById('world3d');
             
-            viewBtns.forEach(btn => btn.classList.remove('active'));
-            event.target.closest('.view-btn').classList.add('active');
-            
-            if (view === '3d') {
-                mapContainer.style.transform = 'perspective(1000px) rotateX(45deg) scale(1.2) translateY(-50px)';
-                showHint('🎮 已切换到3D视角！');
+            if (worldRotationX === 60) {
+                worldRotationX = 30;
+                showNotification('📐 切换到低角度视角', 'info');
+            } else if (worldRotationX === 30) {
+                worldRotationX = 75;
+                showNotification('📐 切换到高角度视角', 'info');
             } else {
-                mapContainer.style.transform = 'none';
-                showHint('🗺️ 已切换到2D视角');
+                worldRotationX = 60;
+                showNotification('📐 切换到标准视角', 'info');
             }
+            
+            updateWorldTransform();
         }
         
-        // 导航功能
-        function navigateTo(poiName) {
-            showHint(`🗺️ 正在打开步行导航到 ${poiName}...`);
+        function updateWorldTransform() {
+            const world = document.getElementById('world3d');
+            world.style.transform = `rotateX(${worldRotationX}deg) rotateY(${worldRotationY}deg) scale(${cameraDistance})`;
+        }
+        
+        // 通知系统
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            const colors = {
+                info: 'linear-gradient(135deg, #3b82f6, #1d4ed8)',
+                success: 'linear-gradient(135deg, #10b981, #059669)',
+                warning: 'linear-gradient(135deg, #f59e0b, #d97706)',
+                error: 'linear-gradient(135deg, #ef4444, #dc2626)'
+            };
+            
+            notification.style.cssText = `
+                position: fixed;
+                top: 80px;
+                left: 50%;
+                transform: translateX(-50%) translateY(-100px);
+                background: ${colors[type]};
+                color: white;
+                padding: 15px 25px;
+                border-radius: 20px;
+                font-weight: 600;
+                z-index: 3000;
+                box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+                backdrop-filter: blur(20px);
+                transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+                max-width: 300px;
+                text-align: center;
+            `;
+            
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            // 动画进入
             setTimeout(() => {
-                showHint(`🧭 导航已开启，预计步行需要3分钟`);
-            }, 1000);
+                notification.style.transform = 'translateX(-50%) translateY(0px)';
+            }, 100);
+            
+            // 自动消失
+            setTimeout(() => {
+                notification.style.transform = 'translateX(-50%) translateY(-100px)';
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        notification.parentNode.removeChild(notification);
+                    }
+                }, 500);
+            }, 3000);
         }
         
-        // POI交互
-        document.querySelectorAll('.poi').forEach(poi => {
-            poi.addEventListener('click', function() {
-                showPoiDetail(this);
-            });
-            
-            poi.addEventListener('mouseenter', function() {
-                this.style.transform = 'translateY(-3px) scale(1.05)';
-            });
-            
-            poi.addEventListener('mouseleave', function() {
-                this.style.transform = '';
-            });
+        // 触摸手势支持（移动端）
+        let touchStartX = 0;
+        let touchStartY = 0;
+        
+        document.addEventListener('touchstart', function(e) {
+            touchStartX = e.touches[0].clientX;
+            touchStartY = e.touches[0].clientY;
         });
         
-        // 显示提示
-        function showHint(text) {
-            const hint = document.getElementById('hintText');
-            if (hint) {
-                hint.innerText = text;
-            }
-        }
+        document.addEventListener('touchmove', function(e) {
+            e.preventDefault(); // 防止页面滚动
+        }, { passive: false });
         
-        // 点击空白区域关闭弹窗
-        document.getElementById('poiDetailModal').addEventListener('click', function(e) {
-            if (e.target === this) {
-                closePoiDetail();
+        document.addEventListener('touchend', function(e) {
+            const touchEndX = e.changedTouches[0].clientX;
+            const touchEndY = e.changedTouches[0].clientY;
+            
+            const deltaX = touchEndX - touchStartX;
+            const deltaY = touchEndY - touchStartY;
+            
+            // 判断手势方向
+            if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 50) {
+                if (deltaX > 0) {
+                    rotateView('right');
+                } else {
+                    rotateView('left');
+                }
+            } else if (Math.abs(deltaY) > 50) {
+                if (deltaY < 0) {
+                    tiltView();
+                }
             }
         });
         
-        // 自动折叠导航面板（移动端优化）
-        if (window.innerWidth <= 768) {
-            setTimeout(() => {
-                toggleNavPanel();
-            }, 5000);
+        // 键盘控制
+        document.addEventListener('keydown', function(e) {
+            switch(e.key) {
+                case 'ArrowLeft':
+                    rotateView('left');
+                    break;
+                case 'ArrowRight':
+                    rotateView('right');
+                    break;
+                case 'ArrowUp':
+                case 'ArrowDown':
+                    tiltView();
+                    break;
+                case ' ':
+                    e.preventDefault();
+                    toggleWalk3D();
+                    break;
+            }
+        });
+        
+        // 性能优化：减少不必要的重绘
+        let animationFrame;
+        function optimizeAnimations() {
+            if (animationFrame) {
+                cancelAnimationFrame(animationFrame);
+            }
+            
+            animationFrame = requestAnimationFrame(() => {
+                // 批量更新DOM操作
+                const windows = document.querySelectorAll('.window-3d');
+                windows.forEach((window, index) => {
+                    window.style.animationDelay = (index * 0.2) + 's';
+                });
+            });
         }
         
-        console.log('所有脚本加载完成');
+        // 初始化性能优化
+        setTimeout(optimizeAnimations, 1000);
+        
+        // 欢迎信息
+        setTimeout(() => {
+            showNotification('🎮 欢迎来到3D狗狗城市！使用箭头键或手势控制视角', 'success');
+        }, 3000);
+        
+        console.log('🎮 沉浸式3D狗狗城市已加载完成！');
     </script>
 </body>
 </html>
