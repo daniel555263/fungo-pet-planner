@@ -49,6 +49,18 @@
                 left: 50%;
                 transform: translateX(-50%);
             }
+            
+            .player-dog {
+                display: block !important;
+                visibility: visible !important;
+                opacity: 1 !important;
+            }
+            
+            .poi {
+                display: block !important;
+                visibility: visible !important;
+                opacity: 1 !important;
+            }
         }
         
         /* 加载画面 */
@@ -885,8 +897,43 @@
         // 延迟隐藏加载画面
         setTimeout(() => {
             document.getElementById('loadingScreen').classList.add('hide');
-            initPoiList();
-            requestLocationPermission();
+            
+            // 确保所有元素都显示
+            setTimeout(() => {
+                // 强制显示主角
+                const player = document.getElementById('playerDog');
+                if (player) {
+                    player.style.display = 'block';
+                    player.style.visibility = 'visible';
+                    player.style.opacity = '1';
+                }
+                
+                // 强制显示所有POI
+                document.querySelectorAll('.poi').forEach(poi => {
+                    poi.style.display = 'block';
+                    poi.style.visibility = 'visible';
+                    poi.style.opacity = '1';
+                });
+                
+                // 强制显示控制栏
+                const controlBar = document.querySelector('.control-bar');
+                if (controlBar) {
+                    controlBar.style.display = 'flex';
+                    controlBar.style.visibility = 'visible';
+                    controlBar.style.opacity = '1';
+                }
+                
+                // 强制显示视角切换
+                const viewToggle = document.querySelector('.view-toggle');
+                if (viewToggle) {
+                    viewToggle.style.display = 'flex';
+                    viewToggle.style.visibility = 'visible';
+                    viewToggle.style.opacity = '1';
+                }
+                
+                initPoiList();
+                requestLocationPermission();
+            }, 100);
         }, 2000);
         
         // 请求位置权限
@@ -1568,6 +1615,7 @@
             z-index: 80;
             transform-style: preserve-3d;
             transition: all 0.8s ease;
+            pointer-events: none;
         }
         
         .player-dog.walking {
@@ -1892,7 +1940,7 @@
         
         /* 视角切换按钮 - 重新定位 */
         .view-toggle {
-            position: absolute;
+            position: fixed;
             bottom: 80px;
             left: 15px;
             background: rgba(255,255,255,0.95);
@@ -1901,7 +1949,7 @@
             display: flex;
             gap: 4px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-            z-index: 300;
+            z-index: 400;
             backdrop-filter: blur(10px);
         }
         
@@ -1930,7 +1978,7 @@
         
         /* 底部控制栏 */
         .control-bar {
-            position: absolute;
+            position: fixed;
             bottom: 15px;
             left: 50%;
             transform: translateX(-50%);
@@ -1938,7 +1986,7 @@
             border-radius: 25px;
             padding: 8px 16px;
             box-shadow: 0 8px 25px rgba(0,0,0,0.3);
-            z-index: 200;
+            z-index: 400;
             backdrop-filter: blur(10px);
         }
         
