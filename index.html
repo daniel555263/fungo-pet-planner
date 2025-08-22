@@ -17,6 +17,35 @@
             background: #0a0f1c;
             position: relative;
             height: 100vh;
+            width: 100vw;
+        }
+        
+        /* 移动端适配 */
+        @media (max-width: 768px) {
+            .nav-panel {
+                width: calc(100vw - 40px);
+                max-width: none;
+                left: 20px;
+                top: env(safe-area-inset-top, 20px);
+            }
+            
+            .control-bar {
+                bottom: calc(env(safe-area-inset-bottom, 20px) + 20px);
+                width: calc(100vw - 40px);
+                left: 20px;
+                transform: none;
+            }
+            
+            .view-toggle {
+                bottom: calc(env(safe-area-inset-bottom, 20px) + 80px);
+            }
+            
+            .hint-text {
+                top: calc(env(safe-area-inset-top, 20px) + 180px);
+                right: 20px;
+                left: 20px;
+                text-align: center;
+            }
         }
         
         /* 加载画面 */
@@ -352,6 +381,28 @@
             transform: translate(-50%, -50%);
             z-index: 100;
             transform-style: preserve-3d;
+            transition: all 0.8s ease;
+        }
+        
+        /* 遛狗模式动画 */
+        .player-dog.walking {
+            animation: dogWalkActive 0.6s infinite;
+        }
+        
+        .player-dog.walking .schnauzer-3d {
+            animation: dogBobbing 0.8s infinite;
+        }
+        
+        @keyframes dogWalkActive {
+            0%, 100% { transform: translate(-50%, -50%) rotateZ(-3deg); }
+            25% { transform: translate(-50%, -50%) rotateZ(0deg) translateY(-3px); }
+            50% { transform: translate(-50%, -50%) rotateZ(3deg); }
+            75% { transform: translate(-50%, -50%) rotateZ(0deg) translateY(-3px); }
+        }
+        
+        @keyframes dogBobbing {
+            0%, 100% { transform: translateZ(40px) rotateY(-5deg); }
+            50% { transform: translateZ(45px) rotateY(5deg); }
         }
         
         .schnauzer-3d {
@@ -359,15 +410,7 @@
             height: 70px;
             position: relative;
             transform-style: preserve-3d;
-            animation: dogWalk 0.8s infinite;
             transform: translateZ(40px);
-        }
-        
-        @keyframes dogWalk {
-            0%, 100% { transform: translateZ(40px) rotateZ(-5deg) translateY(0); }
-            25% { transform: translateZ(40px) rotateZ(0deg) translateY(-2px); }
-            50% { transform: translateZ(40px) rotateZ(5deg) translateY(0); }
-            75% { transform: translateZ(40px) rotateZ(0deg) translateY(-2px); }
         }
         
         .schnauzer-body {
@@ -409,6 +452,15 @@
             background: linear-gradient(135deg, #6b7280, #4b5563);
             border-radius: 50% 50% 0 0;
             box-shadow: inset 2px 2px 3px rgba(0,0,0,0.2);
+        }
+        
+        .player-dog.walking .ear {
+            animation: earFlop 0.8s infinite;
+        }
+        
+        @keyframes earFlop {
+            0%, 100% { transform: rotateX(0deg); }
+            50% { transform: rotateX(15deg); }
         }
         
         .schnauzer-eyes {
@@ -680,6 +732,16 @@
             transition: all 0.3s ease;
         }
         
+        .start-btn.walking {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            animation: walkingPulse 1s infinite;
+        }
+        
+        @keyframes walkingPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
         .start-btn:hover {
             transform: scale(1.05);
         }
@@ -708,6 +770,98 @@
                 opacity: 1;
                 transform: translateY(0);
             }
+        }
+        
+        /* 距离检测UI */
+        .distance-overlay {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 20px;
+            border-radius: 20px;
+            text-align: center;
+            z-index: 600;
+            display: none;
+        }
+        
+        .distance-overlay.show {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+            to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+        }
+        
+        .distance-text {
+            font-size: 18px;
+            margin-bottom: 15px;
+        }
+        
+        .upload-btn {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 15px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin: 10px;
+        }
+        
+        .close-btn {
+            background: transparent;
+            border: 2px solid white;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 15px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        
+        /* 照片上传预览 */
+        .photo-preview {
+            max-width: 200px;
+            max-height: 200px;
+            border-radius: 10px;
+            margin: 10px 0;
+        }
+        
+        /* 隐藏的文件输入 */
+        #photoInput {
+            display: none;
+        }
+        
+        /* 步数计数器 */
+        .step-counter {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255,255,255,0.95);
+            padding: 10px 15px;
+            border-radius: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            z-index: 300;
+            display: none;
+        }
+        
+        .step-counter.show {
+            display: block;
+            animation: slideDown 0.5s ease;
+        }
+        
+        .step-text {
+            font-size: 14px;
+            font-weight: 600;
+            color: #1f2937;
+            display: flex;
+            align-items: center;
+            gap: 5px;
         }
     </style>
 </head>
@@ -782,7 +936,7 @@
             
             <!-- POI点位 -->
             <!-- 公园 -->
-            <div class="poi type-park discovered" style="top: 30%; left: 30%;" data-name="中央公园" data-distance="120m">
+            <div class="poi type-park discovered" style="top: 30%; left: 30%;" data-name="中央公园" data-distance="120" data-lat="31.2304" data-lng="121.4737">
                 <div class="poi-container">
                     <div class="poi-glow"></div>
                     <div class="poi-base">
@@ -796,7 +950,7 @@
             </div>
             
             <!-- 咖啡厅 -->
-            <div class="poi type-cafe nearby" style="top: 45%; left: 60%;" data-name="萌宠咖啡" data-distance="85m" data-points="50">
+            <div class="poi type-cafe nearby" style="top: 45%; left: 60%;" data-name="萌宠咖啡" data-distance="85" data-points="50" data-lat="31.2308" data-lng="121.4740">
                 <div class="poi-container">
                     <div class="poi-glow"></div>
                     <div class="poi-base">
@@ -810,7 +964,7 @@
             </div>
             
             <!-- 宠物店 -->
-            <div class="poi type-store data-needed" style="top: 65%; left: 35%;" data-name="汪汪宠物店" data-distance="156m" data-points="80">
+            <div class="poi type-store data-needed" style="top: 65%; left: 35%;" data-name="汪汪宠物店" data-distance="156" data-points="80" data-lat="31.2301" data-lng="121.4735">
                 <div class="poi-container">
                     <div class="poi-glow"></div>
                     <div class="poi-base">
@@ -824,7 +978,7 @@
             </div>
             
             <!-- 医院 -->
-            <div class="poi type-hospital" style="top: 35%; left: 70%;" data-name="爱心宠物医院" data-distance="210m" data-points="100">
+            <div class="poi type-hospital" style="top: 35%; left: 70%;" data-name="爱心宠物医院" data-distance="210" data-points="100" data-lat="31.2310" data-lng="121.4742">
                 <div class="poi-container">
                     <div class="poi-glow"></div>
                     <div class="poi-base">
@@ -838,7 +992,7 @@
             </div>
             
             <!-- 神秘宝箱 -->
-            <div class="poi type-treasure nearby" style="top: 55%; left: 45%;" data-name="神秘宝箱" data-distance="68m" data-points="200">
+            <div class="poi type-treasure nearby" style="top: 55%; left: 45%;" data-name="神秘宝箱" data-distance="68" data-points="200" data-lat="31.2306" data-lng="121.4738">
                 <div class="poi-container">
                     <div class="poi-glow"></div>
                     <div class="poi-base">
@@ -852,7 +1006,7 @@
             </div>
             
             <!-- 主角 -->
-            <div class="player-dog">
+            <div class="player-dog" id="playerDog">
                 <div class="schnauzer-3d">
                     <div class="schnauzer-body">
                         <div class="schnauzer-ears">
@@ -883,6 +1037,15 @@
             </div>
         </div>
         
+        <!-- 步数计数器 -->
+        <div class="step-counter" id="stepCounter">
+            <div class="step-text">
+                <span>👣</span>
+                <span id="stepCount">0</span>
+                <span>步</span>
+            </div>
+        </div>
+        
         <!-- 视角切换按钮 -->
         <div class="view-toggle">
             <button class="view-btn active" onclick="switchView('2d')">
@@ -902,23 +1065,115 @@
         
         <!-- 底部控制栏 -->
         <div class="control-bar">
-            <button class="start-btn" onclick="startWalk()">🐾 开始遛狗</button>
+            <button class="start-btn" id="startBtn" onclick="toggleWalk()">🐾 开始遛狗</button>
         </div>
+        
+        <!-- 距离检测弹窗 -->
+        <div class="distance-overlay" id="distanceOverlay">
+            <div class="distance-text" id="distanceText"></div>
+            <div id="photoPreviewContainer"></div>
+            <button class="upload-btn" onclick="triggerPhotoUpload()">📸 拍照打卡</button>
+            <button class="close-btn" onclick="closeDistanceOverlay()">关闭</button>
+        </div>
+        
+        <!-- 隐藏的文件输入 -->
+        <input type="file" id="photoInput" accept="image/*" capture="environment" onchange="handlePhotoUpload(event)">
     </div>
     
     <script>
+        // 全局变量
+        let isWalking = false;
+        let stepCount = 0;
+        let currentPosition = { lat: 31.2305, lng: 121.4738 }; // 模拟用户位置
+        let selectedPOI = null;
+        
         // 延迟隐藏加载画面
         setTimeout(() => {
             document.getElementById('loadingScreen').classList.add('hide');
             initPoiList();
+            requestLocationPermission();
         }, 2000);
+        
+        // 请求位置权限
+        function requestLocationPermission() {
+            if ("geolocation" in navigator) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        currentPosition = {
+                            lat: position.coords.latitude,
+                            lng: position.coords.longitude
+                        };
+                        updateDistances();
+                        showHint('📍 位置获取成功，开始你的遛狗之旅吧！');
+                    },
+                    (error) => {
+                        showHint('⚠️ 无法获取位置信息，使用模拟位置');
+                        updateDistances();
+                    }
+                );
+            } else {
+                showHint('⚠️ 设备不支持定位，使用模拟位置');
+                updateDistances();
+            }
+        }
+        
+        // 计算两点间距离（米）
+        function calculateDistance(lat1, lng1, lat2, lng2) {
+            const R = 6371e3; // 地球半径（米）
+            const φ1 = lat1 * Math.PI/180;
+            const φ2 = lat2 * Math.PI/180;
+            const Δφ = (lat2-lat1) * Math.PI/180;
+            const Δλ = (lng2-lng1) * Math.PI/180;
+            
+            const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) +
+                    Math.cos(φ1) * Math.cos(φ2) *
+                    Math.sin(Δλ/2) * Math.sin(Δλ/2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            
+            return R * c;
+        }
+        
+        // 更新所有POI的距离
+        function updateDistances() {
+            const pois = document.querySelectorAll('.poi');
+            pois.forEach(poi => {
+                const poiLat = parseFloat(poi.dataset.lat);
+                const poiLng = parseFloat(poi.dataset.lng);
+                const distance = calculateDistance(
+                    currentPosition.lat, 
+                    currentPosition.lng, 
+                    poiLat, 
+                    poiLng
+                );
+                
+                poi.dataset.distance = Math.round(distance);
+                
+                // 更新POI状态
+                if (distance <= 50 && !poi.classList.contains('discovered')) {
+                    poi.classList.add('nearby');
+                    poi.classList.remove('data-needed');
+                } else if (distance > 50 && !poi.classList.contains('discovered')) {
+                    poi.classList.remove('nearby');
+                    poi.classList.add('data-needed');
+                }
+            });
+            
+            // 重新生成POI列表
+            initPoiList();
+        }
         
         // 初始化POI列表
         function initPoiList() {
             const pois = document.querySelectorAll('.poi');
             const poiList = document.getElementById('poiList');
+            poiList.innerHTML = '';
             
-            pois.forEach(poi => {
+            // 按距离排序
+            const sortedPois = Array.from(pois).sort((a, b) => {
+                return parseInt(a.dataset.distance) - parseInt(b.dataset.distance);
+            });
+            
+            sortedPois.forEach(poi => {
                 const name = poi.dataset.name;
                 const distance = poi.dataset.distance;
                 const points = poi.dataset.points;
@@ -931,7 +1186,7 @@
                         <div class="poi-item-icon">${icon}</div>
                         <div class="poi-item-details">
                             <div class="poi-item-name">${name}</div>
-                            <div class="poi-item-distance">📏 ${distance}</div>
+                            <div class="poi-item-distance">📍 ${distance}m</div>
                             ${points ? `<div class="poi-item-points">+${points}积分</div>` : '<div class="poi-item-points">已打卡</div>'}
                         </div>
                     </div>
@@ -945,6 +1200,70 @@
                 });
                 
                 poiList.appendChild(item);
+            });
+        }
+        
+        // 切换遛狗模式
+        function toggleWalk() {
+            const btn = document.getElementById('startBtn');
+            const player = document.getElementById('playerDog');
+            const stepCounter = document.getElementById('stepCounter');
+            
+            isWalking = !isWalking;
+            
+            if (isWalking) {
+                btn.textContent = '🛑 停止遛狗';
+                btn.classList.add('walking');
+                player.classList.add('walking');
+                stepCounter.classList.add('show');
+                showHint('🚶‍♀️ 遛狗模式已开启！妞子兴奋地摇着尾巴~');
+                startStepCounting();
+            } else {
+                btn.textContent = '🐾 开始遛狗';
+                btn.classList.remove('walking');
+                player.classList.remove('walking');
+                stepCounter.classList.remove('show');
+                showHint('😴 遛狗结束，妞子累了，回家休息~');
+                stopStepCounting();
+            }
+        }
+        
+        // 模拟计步功能
+        let stepInterval;
+        function startStepCounting() {
+            stepInterval = setInterval(() => {
+                if (isWalking) {
+                    stepCount += Math.floor(Math.random() * 3) + 1; // 随机增加1-3步
+                    document.getElementById('stepCount').textContent = stepCount;
+                    
+                    // 模拟位置微调
+                    currentPosition.lat += (Math.random() - 0.5) * 0.0001;
+                    currentPosition.lng += (Math.random() - 0.5) * 0.0001;
+                    updateDistances();
+                    
+                    // 检查是否接近POI
+                    checkNearbyPOI();
+                }
+            }, 1000);
+        }
+        
+        function stopStepCounting() {
+            if (stepInterval) {
+                clearInterval(stepInterval);
+            }
+        }
+        
+        // 检查附近POI
+        function checkNearbyPOI() {
+            document.querySelectorAll('.poi:not(.discovered)').forEach(poi => {
+                const distance = parseInt(poi.dataset.distance);
+                if (distance <= 50) {
+                    // 自动弹出打卡提示
+                    if (!poi.classList.contains('nearby')) {
+                        poi.classList.add('nearby');
+                        showHint(`🎯 已到达 ${poi.dataset.name}！可以拍照打卡了~`);
+                    }
+                }
             });
         }
         
@@ -994,7 +1313,7 @@
             showHint(`🗺️ 正在打开步行导航到 ${poiName}...`);
             // 实际项目中这里调用高德地图导航API
             setTimeout(() => {
-                showHint(`📍 导航已开启，预计步行需要3分钟`);
+                showHint(`🧭 导航已开启，预计步行需要3分钟`);
             }, 1000);
         }
         
@@ -1016,24 +1335,17 @@
             poi.addEventListener('click', function() {
                 const poiName = this.dataset.name;
                 const points = this.dataset.points;
+                const distance = parseInt(this.dataset.distance);
                 
                 // 根据POI状态显示不同提示和特效
                 if (this.classList.contains('discovered')) {
                     showHint('✅ 今天已经在这里打过卡了');
-                } else if (this.classList.contains('nearby') || this.classList.contains('data-needed')) {
-                    // 触发打卡特效
-                    triggerCheckinEffect(this);
-                    showHint(`🎉 打卡成功！获得 ${points} 积分！`);
-                    
-                    // 更新状态
-                    this.classList.remove('nearby', 'data-needed');
-                    this.classList.add('discovered');
-                    this.querySelector('.poi-points').innerText = '已打卡';
-                    
-                    // 更新导航列表
-                    updatePoiListItem(poiName);
+                } else if (distance <= 50) {
+                    // 显示距离检测弹窗
+                    selectedPOI = this;
+                    showDistanceOverlay(poiName, distance, points);
                 } else {
-                    showHint('📍 靠近后即可打卡获得积分！');
+                    showHint(`📍 还需要走 ${distance}m 才能打卡哦！`);
                 }
             });
             
@@ -1046,6 +1358,82 @@
                 this.style.transform = '';
             });
         });
+        
+        // 显示距离检测弹窗
+        function showDistanceOverlay(poiName, distance, points) {
+            const overlay = document.getElementById('distanceOverlay');
+            const distanceText = document.getElementById('distanceText');
+            
+            distanceText.innerHTML = `
+                📍 ${poiName}<br>
+                距离: ${distance}m<br>
+                奖励: +${points}积分<br><br>
+                📸 请拍摄您和狗狗在此地点的照片完成打卡
+            `;
+            
+            overlay.classList.add('show');
+        }
+        
+        // 关闭距离检测弹窗
+        function closeDistanceOverlay() {
+            const overlay = document.getElementById('distanceOverlay');
+            overlay.classList.remove('show');
+            selectedPOI = null;
+            
+            // 清空照片预览
+            document.getElementById('photoPreviewContainer').innerHTML = '';
+        }
+        
+        // 触发照片上传
+        function triggerPhotoUpload() {
+            document.getElementById('photoInput').click();
+        }
+        
+        // 处理照片上传
+        function handlePhotoUpload(event) {
+            const file = event.target.files[0];
+            if (file && selectedPOI) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    // 显示照片预览
+                    const previewContainer = document.getElementById('photoPreviewContainer');
+                    previewContainer.innerHTML = `
+                        <img src="${e.target.result}" class="photo-preview" alt="打卡照片">
+                        <br>
+                        <button class="upload-btn" onclick="confirmCheckin()">✅ 确认打卡</button>
+                    `;
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+        
+        // 确认打卡
+        function confirmCheckin() {
+            if (selectedPOI) {
+                const poiName = selectedPOI.dataset.name;
+                const points = selectedPOI.dataset.points;
+                
+                // 触发打卡特效
+                triggerCheckinEffect(selectedPOI);
+                showHint(`🎉 打卡成功！获得 ${points} 积分！`);
+                
+                // 更新状态
+                selectedPOI.classList.remove('nearby', 'data-needed');
+                selectedPOI.classList.add('discovered');
+                selectedPOI.querySelector('.poi-points').innerText = '已打卡';
+                
+                // 更新导航列表
+                updatePoiListItem(poiName);
+                
+                // 关闭弹窗
+                closeDistanceOverlay();
+                
+                // 震动反馈（如果支持）
+                if (navigator.vibrate) {
+                    navigator.vibrate([200, 100, 200]);
+                }
+            }
+        }
         
         // 触发打卡特效
         function triggerCheckinEffect(poi) {
@@ -1122,11 +1510,6 @@
             setTimeout(() => {
                 effect.remove();
             }, 2000);
-            
-            // 震动反馈（如果支持）
-            if (navigator.vibrate) {
-                navigator.vibrate([100, 50, 100]);
-            }
         }
         
         // 更新导航列表项
@@ -1143,56 +1526,6 @@
             });
         }
         
-        // 开始遛狗
-        function startWalk() {
-            showHint('🚀 遛狗模式已开启！带着妞子去探索吧～');
-            
-            // 模拟移动效果
-            const player = document.querySelector('.player-dog');
-            let position = { x: 50, y: 50 };
-            
-            // 简单的键盘控制（演示用）
-            document.addEventListener('keydown', (e) => {
-                const step = 2;
-                switch(e.key) {
-                    case 'ArrowUp':
-                        position.y = Math.max(10, position.y - step);
-                        break;
-                    case 'ArrowDown':
-                        position.y = Math.min(90, position.y + step);
-                        break;
-                    case 'ArrowLeft':
-                        position.x = Math.max(10, position.x - step);
-                        break;
-                    case 'ArrowRight':
-                        position.x = Math.min(90, position.x + step);
-                        break;
-                }
-                player.style.top = position.y + '%';
-                player.style.left = position.x + '%';
-                
-                // 检查是否靠近POI
-                checkNearbyPOI(position);
-            });
-        }
-        
-        // 检查附近POI
-        function checkNearbyPOI(position) {
-            document.querySelectorAll('.poi:not(.discovered)').forEach(poi => {
-                const poiRect = poi.getBoundingClientRect();
-                const mapRect = document.getElementById('mapContainer').getBoundingClientRect();
-                const poiX = ((poiRect.left - mapRect.left) / mapRect.width) * 100;
-                const poiY = ((poiRect.top - mapRect.top) / mapRect.height) * 100;
-                
-                const distance = Math.sqrt(Math.pow(position.x - poiX, 2) + Math.pow(position.y - poiY, 2));
-                
-                // 自动打卡
-                if (distance < 10) {
-                    poi.click();
-                }
-            });
-        }
-        
         // 显示提示
         function showHint(text) {
             const hint = document.getElementById('hintText');
@@ -1205,7 +1538,7 @@
         
         // 初始化提示
         setTimeout(() => {
-            showHint('🎮 点击左下角可切换3D视角，点击POI可以打卡！');
+            showHint('🎮 点击左下角可切换3D视角，靠近POI可以拍照打卡！');
         }, 3000);
         
         // 建筑窗户灯光随机闪烁
